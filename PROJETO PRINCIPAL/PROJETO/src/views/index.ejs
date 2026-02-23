@@ -1,0 +1,55 @@
+<main class="dashboard-container">
+    <header class="dashboard-header">
+        <div class="titulo-sessao">
+            <h1>Painel de Controle</h1>
+            <p>Monitoramento de Competências e Desempenho Acadêmico</p>
+        </div>
+        <div class="filtros">
+            <button class="botao-acessar" style="font-size: 0.9rem;">Exportar Relatório</button>
+        </div>
+    </header>
+
+    <section class="stats-grid">
+        <div class="stat-box">
+            <h3>Total de Alunos</h3>
+            <p class="numero"><%= alunos.length %></p>
+        </div>
+        <div class="stat-box">
+            <h3>Média de Frequência</h3>
+            <p class="numero">92%</p>
+        </div>
+    </section>
+
+    <section class="tabela-container">
+        <table class="tabela-avancos">
+            <thead>
+                <tr>
+                    <th>Nome do Estudante</th>
+                    <th>Turma</th>
+                    <th>Competência Analisada</th>
+                    <th>Nível de Desempenho</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (alunos.length > 0) { %>
+                    <% alunos.forEach(aluno => { %>
+                        <tr>
+                            <td><strong><%= aluno.nome %></strong></td>
+                            <td><%= aluno.turma %></td>
+                            <td><%= aluno.competencia %></td>
+                            <td>
+                                <span class="badge status-<%= aluno.nivel_desempenho.toLowerCase().replace(' ', '-') %>">
+                                    <%= aluno.nivel_desempenho %>
+                                </span>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="4" style="text-align: center;">Nenhum dado encontrado no banco de dados.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </section>
+</main>
