@@ -23,32 +23,6 @@ O Sistema de Análise de Avanços é uma plataforma de gestão pedagógica desen
 
 ---
 
-## COMO INSTALAR
-
-### 1. Clonar repositório
-git clone https://github.com/seu-usuario/PROJETO-2026.git
-
-### 2. Instalar dependências
-npm install
-
-### 3. Configurar banco de dados
-Crie um banco chamado analisai e rode o arquivo schema.sql.
-
-### 4. Variáveis de Ambiente
-Crie um arquivo .env com as seguintes chaves:
-* DB_USER
-* DB_PASSWORD
-* DB_NAME
-* DB_PORT
-
----
-
-## SCRIPTS DISPONÍVEIS
-* npm start: Roda o servidor normalmente.
-* npm run dev: Roda com Nodemon (Reinicia ao salvar arquivos .js ou .ejs).
-
----
-
 ## IDENTIDADE VISUAL
 * Cor Primária: #FF0101 (Vermelho SENAI)
 * Cor Secundária: #131313 (Dark Mode)
