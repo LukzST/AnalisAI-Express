@@ -14,3 +14,9 @@ CREATE TABLE IF NOT EXISTS avaliacoes (
     observacoes TEXT,
     data_avaliacao DATE DEFAULT CURRENT_DATE
 );
+
+INSERT INTO alunos (nome, turma) 
+VALUES ('Lucas Silva', 'Técnico em TI - SENAI CIC');
+
+INSERT INTO avaliacoes (aluno_id, competencia, nivel_desempenho, media_competencia, frequencia, observacoes)
+VALUES (1, 'Lógica de Programação', 'Apto', 9.5, 100, 'Ótimo desempenho inicial');
