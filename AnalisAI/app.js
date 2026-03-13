@@ -93,8 +93,16 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.get('/dashboard', checkAuth, (req, res) => {
-  res.render('dashboard/main', { user: req.session.user });
+app.get('/dashboard', checkAuth, async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM alunos');
+        res.render('dashboard/main', { 
+            user: req.session.user, 
+            alunos: result.rows 
+        });
+    } catch (err) {
+        res.render('dashboard/main', { user: req.session.user, alunos: [] });
+    }
 });
 
 app.get('/dashboard/edit', checkAuth, async (req, res) => {
@@ -164,20 +172,26 @@ app.post('/dashboard/update-notas', checkAuth, async (req, res) => {
 app.post('/dashboard/add-aluno', checkAuth, async (req, res) => {
     const { nome, ano_escolar, idade, nota } = req.body;
     try {
-        const novoAluno = await db.query(
-            'INSERT INTO alunos (nome, ano_escolar, idade, nota, presenca) VALUES ($1, $2, $3, $4, 100) RETURNING id',
-            [nome, ano_escolar, idade, nota]
-        );
-        const alunoId = novoAluno.rows[0].id;
+        let n = parseFloat(nota) || 0;
+        let p = 100;
+        let nivel = (n >= 7 && p >= 75) ? 'APTO' : (n < 5 || p < 50 ? 'INAPTO' : 'EM DESENVOLVIMENTO');
 
-        if (nota && nota > 0) {
+        const result = await db.query(
+            'INSERT INTO alunos (nome, ano_escolar, idade, nota, presenca, nivel) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id', 
+            [nome, ano_escolar, idade, n, p, nivel]
+        );
+
+        if (n > 0) {
             await db.query(
-                'INSERT INTO notas_detalhadas (aluno_id, titulo, descricao, valor) VALUES ($1, $2, $3, $4)',
-                [alunoId, 'Nota Inicial', 'Valor atribuído no cadastro', nota]
+                'INSERT INTO notas_detalhadas (aluno_id, titulo, descricao, valor) VALUES ($1, $2, $3, $4)', 
+                [result.rows[0].id, 'Nota Inicial', 'Cadastro', n]
             );
         }
         res.redirect('/dashboard/edit');
-    } catch (err) { res.status(500).send("Erro"); }
+    } catch (err) { 
+        console.error(err);
+        res.status(500).send("Erro ao adicionar aluno"); 
+    }
 });
 
 app.get('/dashboard/delete-aluno/:id', checkAuth, async (req, res) => {
@@ -196,30 +210,27 @@ app.get('/dashboard/graficos', checkAuth, async (req, res) => {
     try {
         const query = await db.query(`
             SELECT 
-                COUNT(*) as total,
-                COUNT(*) FILTER (WHERE nivel = 'APTO') as apto,
-                COUNT(*) FILTER (WHERE nivel = 'INAPTO') as inapto,
-                COUNT(*) FILTER (WHERE nivel = 'EM DESENVOLVIMENTO') as desenv,
-                AVG(nota) FILTER (WHERE ano_escolar LIKE '%MÉDIO%') as media_medio,
-                AVG(nota) FILTER (WHERE ano_escolar LIKE '%FUNDAMENTAL%') as media_fundamental
+                COUNT(*)::int as total,
+                COUNT(*) FILTER (WHERE nivel = 'APTO')::int as apto,
+                COUNT(*) FILTER (WHERE nivel = 'INAPTO')::int as inapto,
+                COALESCE(AVG(nota) FILTER (WHERE ano_escolar LIKE '%MÉDIO%'), 0)::float as media_medio,
+                COALESCE(AVG(nota) FILTER (WHERE ano_escolar LIKE '%FUNDAMENTAL%'), 0)::float as media_fundamental
             FROM alunos
         `);
 
-        const stats = query.rows[0];
+        const row = query.rows[0];
+        const stats = {
+            total: row.total || 0,
+            apto: row.apto || 0,
+            inapto: row.inapto || 0,
+            mediaMedio: row.media_medio.toFixed(1),
+            mediaFundamental: row.media_fundamental.toFixed(1)
+        };
 
-        res.render('dashboard/graficos', {
-            stats: {
-                total: parseInt(stats.total) || 0,
-                apto: parseInt(stats.apto) || 0,
-                inapto: parseInt(stats.inapto) || 0,
-                desenv: parseInt(stats.desenv) || 0,
-                mediaMedio: parseFloat(stats.media_medio || 0).toFixed(1),
-                mediaFundamental: parseFloat(stats.media_fundamental || 0).toFixed(1)
-            }
-        });
+        res.render('dashboard/graficos', { stats });
     } catch (err) {
         console.error(err);
-        res.status(500).send("Erro ao processar médias.");
+        res.status(500).send("Erro ao processar dados dos gráficos.");
     }
 });
 

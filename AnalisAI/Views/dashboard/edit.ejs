@@ -13,7 +13,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="dash-body">
-
     <%- include('../partials/sidebar') %>
 
     <div class="main-layout">
@@ -150,7 +149,7 @@
                     </select>
                     <div style="display: flex; gap: 10px; margin-top: 25px;">
                         <button class="btn-action" onclick="applyFilter()" style="flex: 2; justify-content: center;">FILTRAR</button>
-                        <button class="btn-action-2" onclick="clearFilters()" style="flex: 1;">LIMPAR</button>
+                        <button class="btn-action" onclick="clearFilters()" style="flex: 1;">LIMPAR</button>
                     </div>
                 </div>
             </div>
@@ -172,7 +171,9 @@
                     </select>
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
                         <div style="flex: 1;"><label>IDADE:</label><input type="number" name="idade" class="filter-input" required></div>
-                        <div style="flex: 1;"><label>NOTA INICIAL:</label><input type="number" step="0.1" name="nota" class="filter-input"></div>
+                        <div style="flex: 1;">
+                            <label>NOTA INICIAL:</label>
+                            <input type="number" step="0.1" name="nota" class="filter-input" max="10"></div>
                     </div>
                     <button type="submit" class="btn-action" style="margin-top: 30px; width: 100%; justify-content: center;">FINALIZAR CADASTRO</button>
                 </form>
@@ -196,23 +197,33 @@
         <footer class="dash-footer">
             <a href="javascript:void(0)" onclick="exportarTabelaParaExcel()" class="export-link">EXPORTAR COM UMA PLANILHA</a>
             <div class="footer-credits">
-                <p>Powered by SENAI Duque de Caxias.</p>
+                <p>© 2026 AnalisAI — SENAI Duque de Caxias.</p>
                 <a href="/dashboard/equipe"><p>Time de desenvolvedores</p></a>
             </div>
         </footer>
     </div>
 
     <div id="exportSuccessModal" class="modal-overlay">
-    <div class="modal-content" style="text-align: center; max-width: 400px; border-color: #217346;">
-        <button class="close-btn" onclick="closeExportModal()"><i class="fas fa-times-circle" style="border-color: #217346;"></i></button>
-        <i class="fas fa-file-excel" style="font-size: 3rem; color: #217346; margin-bottom: 15px;"></i>
-        <h2 class="section-title" style="border: none; padding: 0;">SUCESSO!</h2>
-        <p style="color: #fff; margin-bottom: 20px;">A planilha foi gerada e o download começou.</p>
-        <button class="btn-action" onclick="closeExportModal()" style="width: 100%; justify-content: center; border-color: #217346; background-color: #217346;">
-            FECHAR
-        </button>
+        <div class="modal-content modal-success">
+            <button class="close-btn" onclick="closeExportModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="success-icon-wrapper">
+                <i class="fas fa-file-excel"></i>
+            </div>
+            
+            <h2 class="modal-title-success">Relatório Gerado</h2>
+            
+            <p class="modal-text-success">
+                A planilha foi processada com sucesso e o seu download já começou.
+            </p>
+            
+            <button class="btn-success-action" onclick="closeExportModal()">
+                CONCLUIR
+            </button>
+        </div>
     </div>
-</div>
 
     <script>
         document.getElementById('chartSearchInput').addEventListener('keyup', function() {
@@ -303,11 +314,30 @@
         function applyFilter() {
             const selAno = document.getElementById('filterAno').value;
             const selStatus = document.getElementById('filterStatus').value;
+            
             document.querySelectorAll("#alunosTableBody tr").forEach(row => {
                 const ano = row.cells[2].textContent.trim();
                 const status = row.cells[6].textContent.trim();
                 row.style.display = ((selAno==="" || ano===selAno) && (selStatus==="" || status===selStatus)) ? "" : "none";
             });
+            
+            document.querySelectorAll(".chart-card").forEach(card => {
+                const nomeAluno = card.querySelector("h3").textContent.replace('ALUNO:', '').trim();
+                let encontrou = false;
+                document.querySelectorAll("#alunosTableBody tr").forEach(row => {
+                    const nomeTabela = row.cells[1].textContent.trim();
+                    if (nomeTabela === nomeAluno) {
+                        const ano = row.cells[2].textContent.trim();
+                        const status = row.cells[6].textContent.trim();
+                        const matchesAno = (selAno === "" || ano === selAno);
+                        const matchesStatus = (selStatus === "" || status === selStatus);
+                        card.style.display = (matchesAno && matchesStatus) ? "" : "none";
+                        encontrou = true;
+                    }
+                });
+                if (!encontrou) card.style.display = "none";
+            });
+            
             closeFilter();
         }
 
@@ -315,6 +345,7 @@
             document.getElementById('filterAno').value = "";
             document.getElementById('filterStatus').value = "";
             document.querySelectorAll("#alunosTableBody tr").forEach(row => row.style.display = "");
+            document.querySelectorAll(".chart-card").forEach(card => card.style.display = "");
             closeFilter();
         }
 
@@ -328,9 +359,6 @@
         function confirmDelete(id, nome) {
             if (confirm(`Remover aluno ${nome}?`)) window.location.href = `/dashboard/delete-aluno/${id}`;
         }
-
-
-
 
         async function exportarTabelaParaExcel() {
             const workbook = new ExcelJS.Workbook();
@@ -430,7 +458,6 @@
 
             const buffer = await workbook.xlsx.writeBuffer();
             saveAs(new Blob([buffer]), `Relatorio_Completo_AnalisAI.xlsx`);
-
             openExportModal();
         }
 

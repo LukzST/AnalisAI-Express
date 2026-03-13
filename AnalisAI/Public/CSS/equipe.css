@@ -1,90 +1,83 @@
 :root {
     --primary-color: #ff0101;
-    --bg-color: #0e0e0e;
-    --text-color: #ffffff;
-    --font-family: 'Inter-Medium';
+    --bg-color: #080808;
+    --card-bg: #0c0c0c;
+    --text-white: #ffffff;
+    --font-family: 'Inter-Medium', sans-serif;
 }
 
 @font-face {
     font-family: 'Inter-Medium';
     src: url('../fonts/Inter-Medium.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
 }
 
 @keyframes fadeInPage {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-body {
-    animation: fadeInPage 0.5s ease-out;
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: var(--font-family), sans-serif;
+    font-family: var(--font-family) !important;
+    font-weight: normal !important;
 }
 
 body {
     background-color: var(--bg-color);
-    color: var(--text-color);
+    color: var(--text-white);
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
     padding: 20px;
+    animation: fadeInPage 0.5s ease-out;
 }
 
-.equipe-wrapper {
+.equipe-page-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 1000px;
+    max-width: 700px;
 }
 
 .logo-equipe {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
 }
 
 .logo-equipe img {
-    width: 250px;
+    width: 200px;
     height: auto;
+    margin-bottom: 10px;
 }
 
 .logo-equipe h3 {
-    font-size: 18px;
-    letter-spacing: 2px;
-    margin-top: 5px;
-    font-weight: normal;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    color: #555;
     text-transform: uppercase;
 }
 
 .equipe-container {
-    border: 3.5px solid var(--primary-color);
-    border-radius: 40px;
-    padding: 80px 180px;
-    background-color: var(--bg-color);
+    background-color: var(--card-bg);
+    border: 1px solid #1a1a1a;
+    border-radius: 20px;
+    padding: 50px;
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 50px;
+    gap: 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
 .equipe-grid {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
+    width: 100%;
 }
 
 .equipe-section {
@@ -92,20 +85,25 @@ body {
 }
 
 .equipe-section h4 {
-    font-size: 22px;
+    font-size: 0.65rem;
+    color: var(--primary-color);
     margin-bottom: 15px;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
 .equipe-section p {
-    font-size: 14px;
-    line-height: 1.8;
-    color: var(--text-color);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #aaa;
     text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .full-width {
     width: 100%;
+    padding-top: 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .button-area {
@@ -115,33 +113,31 @@ body {
 }
 
 .btn-voltar {
-    display: inline-block;
     text-decoration: none;
-    color: white;
-    border: 2px solid var(--primary-color);
-    border-radius: 50px;
+    color: #888;
+    border: 1px solid #222;
+    border-radius: 8px;
     padding: 12px 40px;
-    font-size: 14px;
-    transition: 0.3s;
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    transition: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
     background: transparent;
     text-transform: uppercase;
 }
 
 .btn-voltar:hover {
-    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    background: rgba(255, 1, 1, 0.05);
+    transform: translateY(-2px);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     .equipe-grid {
-        flex-direction: column;
-        gap: 40px;
+        grid-template-columns: 1fr;
+        gap: 30px;
     }
-    
     .equipe-container {
-        padding: 40px 20px;
-    }
-
-    .logo-equipe img {
-        width: 200px;
+        padding: 30px;
     }
 }

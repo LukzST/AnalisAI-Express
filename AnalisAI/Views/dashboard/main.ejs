@@ -17,50 +17,88 @@
             <div class="logo">
                 <img src="/img/logo3-white.png" alt="AnalisAI">
             </div>
-            <a href="/logout" class="side-link">
-                <i class="fas fa-sign-out-alt"></i>
-            </a>
+            <div class="header-user">
+                <span>Bem-vindo, <strong><%= user %></strong></span>
+                <a href="/logout" class="logout-icon" title="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
         </header>
 
         <main class="dash-content">
-            <div class="section-container">
-                <h2 class="section-title">ENSINO MÉDIO</h2>
-                <div class="dash-card"></div>
-            </div>
+            <section class="section-container">
+                <h2 class="section-title"><i class="fas fa-graduation-cap"></i> ENSINO MÉDIO</h2>
+                <div class="dash-grid">
+                    <div class="stats-card">
+                        <div class="stats-info">
+                            <h3>TOTAL ALUNOS</h3>
+                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('MÉDIO')).length %></p>
+                        </div>
+                        <i class="fas fa-users icon-bg"></i>
+                    </div>
+                    
+                    <div class="stats-card apto">
+                        <div class="stats-info">
+                            <h3>APTOS</h3>
+                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('MÉDIO') && a.nota >= 7 && a.presenca >= 75).length %></p>
+                        </div>
+                        <i class="fas fa-check-circle icon-bg"></i>
+                    </div>
 
-            <div class="section-container">
-                <h2 class="section-title">ENSINO FUNDAMENTAL</h2>
-                <div class="dash-card"></div>
-            </div>
+                    <div class="stats-card inapto">
+                        <div class="stats-info">
+                            <h3>INAPTOS</h3>
+                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('MÉDIO') && (a.nota < 5 || a.presenca < 50)).length %></p>
+                        </div>
+                        <i class="fas fa-times-circle icon-bg"></i>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section-container">
+                <h2 class="section-title"><i class="fas fa-book"></i> ENSINO FUNDAMENTAL</h2>
+                <div class="dash-grid">
+                    <div class="stats-card">
+                        <div class="stats-info">
+                            <h3>TOTAL ALUNOS</h3>
+                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL')).length %></p>
+                        </div>
+                        <i class="fas fa-users icon-bg"></i>
+                    </div>
+
+                    <div class="stats-card apto">
+                        <div class="stats-info">
+                            <h3>APTOS</h3>
+                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL') && a.nota >= 7 && a.presenca >= 75).length %></p>
+                        </div>
+                        <i class="fas fa-check-circle icon-bg"></i>
+                    </div>
+
+                    <div class="stats-card inapto">
+                        <div class="stats-info">
+                            <h3>INAPTOS</h3>
+                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL') && (a.nota < 5 || a.presenca < 50)).length %></p>
+                        </div>
+                        <i class="fas fa-times-circle icon-bg"></i>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <footer class="dash-footer">
-            <a href="/dashboard/edit" class="export-link">EDITAR NOTAS</a>
-            <div class="footer-credits">
-                <p>Powered by SENAI Duque de Caxias.</p>
-                <a href="/dashboard/equipe">
-                    <p>Time de desenvolvedores</p>
+            <div class="footer-actions">
+                <a href="/dashboard/edit" class="btn-secondary-dash">
+                    <i class="fas fa-pencil-alt"></i> GERENCIAR NOTAS
                 </a>
+                <a href="/dashboard/graficos" class="btn-secondary-dash">
+                    <i class="fas fa-chart-pie"></i> VER ESTATÍSTICAS
+                </a>
+            </div>
+            <div class="footer-credits">
+                <p>© 2026 AnalisAI — SENAI Duque de Caxias.</p>
+                <a href="/dashboard/equipe"><p>Time de desenvolvedores</p></a>
             </div>
         </footer>
     </div>
-
-
-    <script>
-        function openModal() {
-    document.getElementById('infoModal').style.display = 'flex';
-}
-
-function closeModal() {
-    document.getElementById('infoModal').style.display = 'none';
-}
-
-window.onclick = function(event) {
-    const modal = document.getElementById('infoModal');
-    if (event.target == modal) {
-        closeModal();
-    }
-}   
-    </script>
 </body>
 </html>

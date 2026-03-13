@@ -3,7 +3,14 @@
     --secondary-color: #0e0e0e;
     --card-bg: #151515;
     --text-color: #ffffff;
-    --font-family: 'Inter', sans-serif;
+    --font-family: 'Inter-Medium';
+}
+
+@font-face {
+    font-family: 'Inter-Medium';
+    src: url('../fonts/Inter-Medium.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
 }
 
 @keyframes fadeInPage {
@@ -15,6 +22,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: var(--font-family);
 }
 
 body {
@@ -24,6 +32,33 @@ body {
     overflow-x: hidden;
     animation: fadeInPage 0.6s ease-out;
 }
+
+.side-link {
+    color: #ff0101;
+    font-size: 20px;
+    text-decoration: none;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.side-link.active {
+    background-color: #ff0101;
+    color: #ffffff !important;
+}
+
+.side-link:hover:not(.active) {
+    background-color: rgba(255, 1, 1, 0.1);
+}
+
+.side-link i {
+    pointer-events: none;
+}
+
 
 .section-1-presentaion {
     display: flex;
@@ -54,11 +89,14 @@ body {
 }
 
 .titulo-s1 h1 {
-    font-size: 2.8rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 3.0rem;
     font-weight: 800;
     margin-bottom: 15px;
     max-width: 900px;
-    letter-spacing: -1px;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    text-transform: uppercase;
 }
 
 .titulo-s1 p {
@@ -133,9 +171,9 @@ body {
 .main-title {
     text-align: center;
     color: var(--primary-color);
+    font-family: var(--font-family);
     margin-bottom: 50px;
     font-size: 1.8rem;
-    letter-spacing: 2px;
 }
 
 .features-section {
@@ -182,7 +220,10 @@ details {
 
 details[open] { border-color: var(--primary-color); }
 
-summary { font-weight: bold; font-size: 1rem; }
+summary { 
+    font-family: var(--font-family); 
+    font-size: 1rem; 
+}
 
 details p {
     margin-top: 15px;
@@ -246,7 +287,6 @@ details p {
 
 .footer-sub a {
     color: #ff0101;
-    font-weight: bold;
     text-transform: uppercase;
     transition: 0.3s;
 }
@@ -272,28 +312,3 @@ details p {
     .section-1-presentaion { padding: 60px 20px; }
 }
 
-.side-link {
-    color: #ff0101;
-    font-size: 20px;
-    text-decoration: none;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    transition: 0.3s;
-}
-
-.side-link.active {
-    background-color: #ff0101;
-    color: #ffffff !important;
-}
-
-.side-link:hover:not(.active) {
-    background-color: rgba(255, 1, 1, 0.1);
-}
-
-.side-link i {
-    pointer-events: none;
-}

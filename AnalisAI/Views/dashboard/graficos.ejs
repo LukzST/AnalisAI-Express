@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AnalisAI - Gráficos de Evolução</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/css/sidebar.css">
@@ -15,62 +16,65 @@
 
     <div class="main-layout">
         <header class="dash-header">
-            <div class="logo"><img src="/img/logo3-white.png" alt="AnalisAI"></div>
-            <h2 class="page-title">GRÁFICOS DE EVOLUÇÃO</h2>
+            <div class="logo">
+                <img src="/img/logo3-white.png" alt="AnalisAI">
+            </div>
+            <h2 class="page-title">RELATÓRIOS ANALÍTICOS</h2>
         </header>
 
         <main class="dash-content graficos-grid">
             
-            <p class="section-label">ENSINO MÉDIO | ENSINO FUNDAMENTAL</p>
+            <p class="section-label">Panorama de Aptidão Geral</p>
             <div class="row-top">
                 <div class="dash-card card-grafico">
                     <% if (stats.total > 0) { %>
                         <canvas id="chartAptos"></canvas>
-                        <p class="chart-label label-verde">ENSINO APTO</p>
+                        <p class="chart-label label-verde">Alunos Aptos</p>
                     <% } else { %>
-                        <div class="empty-chart">SEM DADOS PARA EXIBIR</div>
+                        <div class="empty-chart">Sem dados para exibir</div>
                     <% } %>
                 </div>
                 <div class="dash-card card-grafico">
                     <% if (stats.total > 0) { %>
                         <canvas id="chartInaptos"></canvas>
-                        <p class="chart-label label-vermelho">ENSINO INAPTO</p>
+                        <p class="chart-label label-vermelho">Alunos Inaptos</p>
                     <% } else { %>
-                        <div class="empty-chart">SEM DADOS PARA EXIBIR</div>
+                        <div class="empty-chart">Sem dados para exibir</div>
                     <% } %>
                 </div>
             </div>
 
-            <p class="section-label">ENSINO MÉDIO - P/ ALUNO</p>
+            <p class="section-label">Média Ensino Médio</p>
             <div class="dash-card card-grafico-large">
                 <% if (stats.total > 0) { %>
                     <canvas id="chartMedio"></canvas>
                 <% } else { %>
-                    <div class="empty-chart">NENHUM DADO DISPONÍVEL</div>
+                    <div class="empty-chart">Nenhum dado disponível</div>
                 <% } %>
             </div>
 
-            <p class="section-label">ENSINO FUNDAMENTAL - P/ ALUNO</p>
+            <p class="section-label">Média Ensino Fundamental</p>
             <div class="dash-card card-grafico-small">
                 <% if (stats.total > 0) { %>
                     <canvas id="chartFundamental"></canvas>
                 <% } else { %>
-                    <div class="empty-chart">NENHUM DADO DISPONÍVEL</div>
+                    <div class="empty-chart">Nenhum dado disponível</div>
                 <% } %>
             </div>
         </main>
 
         <footer class="dash-footer">
-             <a href="/dashboard/edit" class="export-link">EDITAR NOTAS</a>
+            <div class="footer-actions">
+                <a href="/dashboard/edit" class="btn-secondary-dash">VOLTAR AO EDITOR</a>
+            </div>
             <div class="footer-credits">
-                <p>Powered by SENAI Duque de Caxias.</p>
+                <p>© 2026 AnalisAI — SENAI Duque de Caxias.</p>
                 <a href="/dashboard/equipe"><p>Time de desenvolvedores</p></a>
             </div>
         </footer>
     </div>
 
     <script>
-
         const stats = <%- JSON.stringify(stats) %>;
 
         if (stats.total > 0) {
@@ -80,14 +84,30 @@
                 plugins: { legend: { display: false } }
             };
 
+            const barOptions = {
+                ...commonOptions,
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        max: 10,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#444' }
+                    },
+                    x: { 
+                        grid: { display: false },
+                        ticks: { color: '#888' }
+                    }
+                }
+            };
+
             new Chart(document.getElementById('chartAptos'), {
                 type: 'doughnut',
                 data: {
                     datasets: [{
                         data: [stats.apto, stats.total - stats.apto],
-                        backgroundColor: ['#00ff00', '#1a1a1a'],
+                        backgroundColor: ['#217346', '#111'],
                         borderWidth: 0,
-                        cutout: '80%'
+                        cutout: '85%'
                     }]
                 },
                 options: commonOptions
@@ -98,9 +118,9 @@
                 data: {
                     datasets: [{
                         data: [stats.inapto, stats.total - stats.inapto],
-                        backgroundColor: ['#ff0101', '#1a1a1a'],
+                        backgroundColor: ['#ff0101', '#111'],
                         borderWidth: 0,
-                        cutout: '80%'
+                        cutout: '85%'
                     }]
                 },
                 options: commonOptions
@@ -109,45 +129,34 @@
             new Chart(document.getElementById('chartMedio'), {
                 type: 'bar',
                 data: {
-                    labels: ['Média Geral'],
+                    labels: ['Média da Turma'],
                     datasets: [{
                         data: [stats.mediaMedio],
-                        backgroundColor: '#ff0101'
+                        backgroundColor: 'rgba(255, 1, 1, 0.3)',
+                        borderColor: '#ff0101',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        barThickness: 40
                     }]
                 },
-                options: {
-                ...commonOptions,
-                scales: { y: { beginAtZero: true, max: 10 } }
-            }
+                options: barOptions
             });
 
             new Chart(document.getElementById('chartFundamental'), {
-    type: 'bar',
-    data: {
-        labels: ['Média Geral'],
-        datasets: [{
-            label: 'Média',
-            data: [stats.mediaFundamental],
-            backgroundColor: '#ff0101',
-            borderColor: '#ff0101',
-            borderWidth: 1,
-            borderRadius: 10
-        }]
-    },
-    options: {
-        ...commonOptions,
-        scales: {
-            y: {
-                beginAtZero: true,
-                max: 10,
-                grid: { color: 'rgba(255, 255, 255, 0.1)' }
-            },
-            x: {
-                grid: { display: false }
-            }
-        }
-    }
-});
+                type: 'bar',
+                data: {
+                    labels: ['Média da Turma'],
+                    datasets: [{
+                        data: [stats.mediaFundamental],
+                        backgroundColor: 'rgba(255, 1, 1, 0.3)',
+                        borderColor: '#ff0101',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        barThickness: 40
+                    }]
+                },
+                options: barOptions
+            });
         }
     </script>
 </body>
