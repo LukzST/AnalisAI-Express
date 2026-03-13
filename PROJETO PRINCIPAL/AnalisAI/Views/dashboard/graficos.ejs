@@ -122,18 +122,32 @@
             });
 
             new Chart(document.getElementById('chartFundamental'), {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Fev', 'Mar'],
-                    datasets: [{
-                        data: [stats.mediaFundamental],
-                        borderColor: '#ff0101',
-                        backgroundColor: 'transparent',
-                        tension: 0.4
-                    }]
-                },
-                options: commonOptions
-            });
+    type: 'bar',
+    data: {
+        labels: ['Média Geral'],
+        datasets: [{
+            label: 'Média',
+            data: [stats.mediaFundamental],
+            backgroundColor: '#ff0101',
+            borderColor: '#ff0101',
+            borderWidth: 1,
+            borderRadius: 10
+        }]
+    },
+    options: {
+        ...commonOptions,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 10,
+                grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            },
+            x: {
+                grid: { display: false }
+            }
+        }
+    }
+});
         }
     </script>
 </body>
