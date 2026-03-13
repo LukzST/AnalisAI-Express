@@ -180,3 +180,52 @@ button:hover {
     font-size: 24px;
     color: white;
 }
+
+@media (max-height: 800px) {
+    .page {
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .logo-analisai {
+        margin-bottom: 30px;
+    }
+
+    .logo-analisai img {
+        width: 260px;
+    }
+
+    .login-container {
+        padding: 30px;
+        border-width: 3px;
+        max-width: 400px;
+    }
+
+    .login-container form {
+        gap: 12px;
+    }
+
+    .input-group input {
+        height: 50px;
+        font-size: 14px;
+    }
+
+    button {
+        padding: 10px 40px;
+        font-size: 15px;
+    }
+
+    .back-button {
+        top: 20px;
+        left: 20px;
+    }
+
+    .footer-terms {
+        bottom: 20px;
+        gap: 5px;
+    }
+
+    .footer-terms i {
+        font-size: 20px;
+    }
+}

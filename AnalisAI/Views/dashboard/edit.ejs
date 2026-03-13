@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="/css/sidebar.css">
     <link rel="stylesheet" href="/css/dashboard.css">
     <link rel="stylesheet" href="/css/edit.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="dash-body">
 
@@ -23,7 +26,7 @@
 
         <div class="toolbar">
             <div class="action-buttons">
-                <button class="btn-icon btn-filter" onclick="openFilter()" title="Filtrar">
+                <button class="btn-icon btn-filter" id="btnFilter" onclick="openFilter()" title="Filtrar">
                     <i class="fas fa-filter"></i>
                 </button>
                 
@@ -45,14 +48,14 @@
         <main class="edit-content">
             <div class="table-container">
                 <form id="updateForm" action="/dashboard/update-notas" method="POST">
-                    <table class="alunos-table">
+                    <table class="alunos-table" id="alunosTable">
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>ALUNO</th>
                                 <th>ANO ESCOLAR</th>
                                 <th>IDADE</th>
-                                <th>NOTAS</th>
+                                <th>MÉDIA DE NOTAS</th>
                                 <th>PRESENÇA (%)</th>
                                 <th>NÍVEL</th>
                                 <th>AÇÕES</th>
@@ -60,8 +63,12 @@
                         </thead>
                         <tbody id="alunosTableBody">
                             <% if (alunos && alunos.length > 0) { %>
-                                <% alunos.forEach(aluno => { %>
-                                    <tr data-presenca="<%= aluno.presenca %>">
+                                <% alunos.forEach(aluno => { 
+                                    let nivelReal = 'EM DESENVOLVIMENTO';
+                                    if (aluno.nota >= 7 && aluno.presenca >= 75) nivelReal = 'APTO';
+                                    else if (aluno.nota < 5 || aluno.presenca < 50) nivelReal = 'INAPTO';
+                                %>
+                                    <tr data-presenca="<%= aluno.presenca %>" data-nota="<%= aluno.nota %>">
                                         <td>
                                             <%= aluno.id %>
                                             <input type="hidden" name="id" value="<%= aluno.id %>">
@@ -71,7 +78,7 @@
                                         <td><%= aluno.idade %></td>
                                         
                                         <td class="editable-cell">
-                                            <span class="view-mode"><%= aluno.nota %></span>
+                                            <span class="view-mode"><%= parseFloat(aluno.nota).toFixed(1) %></span>
                                             <input type="number" step="0.1" name="nota" value="<%= aluno.nota %>" class="edit-input">
                                         </td>
                                         
@@ -80,35 +87,66 @@
                                             <input type="number" name="presenca" value="<%= aluno.presenca %>" class="edit-input">
                                         </td>
                                         
-                                        <td class="status <%= aluno.nivel === 'APTO' ? 'apto' : (aluno.nivel === 'INAPTO' ? 'inapto' : 'desenvolvimento') %>">
-                                            <%= aluno.nivel %>
+                                        <td class="status <%= nivelReal.toLowerCase().replace(' ', '-') %>">
+                                            <%= nivelReal %>
                                         </td>
-                                        <td>
+                                        <td class="td-actions">
+                                            <button type="button" class="btn-table-add" onclick="openNotaModal('<%= aluno.id %>', '<%= aluno.nome %>')" title="Atribuir Nota">
+                                                <i class="fas fa-plus-circle"></i>
+                                            </button>
                                             <a href="javascript:void(0)" onclick="confirmDelete('<%= aluno.id %>', '<%= aluno.nome %>')" class="delete-link">
                                                 <i class="fas fa-trash-alt"></i>
                                             </a>
                                         </td>
                                     </tr>
                                 <% }); %>
-                            <% } else { %>
-                                <tr>
-                                    <td colspan="8" style="padding: 50px; color: #555;">Nenhum aluno cadastrado.</td>
-                                </tr>
                             <% } %>
                         </tbody>
                     </table>
                 </form>
+            </div>
+
+            <div class="evolution-container">
+                <h2 class="section-title">EVOLUÇÃO INDIVIDUAL POR ALUNO</h2>
+                <div class="charts-grid">
+                    <% if (alunos && alunos.length > 0) { %>
+                        <% alunos.forEach(aluno => { %>
+                            <div class="chart-card">
+                                <h3>ALUNO: <%= aluno.nome %></h3>
+                                <div class="chart-wrapper" style="position: relative; height: 300px; width: 100%;">
+                                    <canvas id="chart-<%= aluno.id %>"></canvas>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } %>
+                </div>
             </div>
         </main>
 
         <div id="filterModal" class="modal-overlay">
             <div class="modal-content">
                 <button class="close-btn" onclick="closeFilter()"><i class="fas fa-times-circle"></i></button>
-                <h2 class="section-title">FILTRAR POR...</h2>
+                <h2 class="section-title">FILTRAR LISTA</h2>
                 <div class="filter-options">
-                    <label>PRESENÇA MÍNIMA (%):</label>
-                    <input type="number" id="minPresenca" class="filter-input" placeholder="Ex: 75">
-                    <button class="btn-action" onclick="applyFilter()" style="margin-top: 20px; width: 100%; justify-content: center;">APLICAR</button>
+                    <label>ANO ESCOLAR:</label>
+                    <select id="filterAno" class="filter-input">
+                        <option value="">TODOS OS ANOS</option>
+                        <option value="1º MÉDIO">1º MÉDIO</option>
+                        <option value="2º MÉDIO">2º MÉDIO</option>
+                        <option value="3º MÉDIO">3º MÉDIO</option>
+                        <option value="9º FUNDAMENTAL">9º FUNDAMENTAL</option>
+                    </select>
+                    <label style="margin-top: 15px; display: block;">STATUS:</label>
+                    <select id="filterStatus" class="filter-input">
+                        <option value="">TODOS OS NÍVEIS</option>
+                        <option value="APTO">APTO</option>
+                        <option value="INAPTO">INAPTO</option>
+                        <option value="EM DESENVOLVIMENTO">EM DESENVOLVIMENTO</option>
+                    </select>
+                    <div style="display: flex; gap: 10px; margin-top: 25px;">
+                        <button class="btn-action" onclick="applyFilter()" style="flex: 2; justify-content: center;">FILTRAR</button>
+                        <button class="btn-action-2" onclick="clearFilters()" style="flex: 1;">LIMPAR</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -120,7 +158,6 @@
                 <form action="/dashboard/add-aluno" method="POST" class="filter-options">
                     <label>NOME COMPLETO:</label>
                     <input type="text" name="nome" class="filter-input" placeholder="Nome do aluno" required>
-                    
                     <label style="margin-top: 15px; display: block;">ANO ESCOLAR:</label>
                     <select name="ano_escolar" class="filter-input">
                         <option value="1º MÉDIO">1º MÉDIO</option>
@@ -128,27 +165,31 @@
                         <option value="3º MÉDIO">3º MÉDIO</option>
                         <option value="9º FUNDAMENTAL">9º FUNDAMENTAL</option>
                     </select>
-
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <div style="flex: 1;">
-                            <label>IDADE:</label>
-                            <input type="number" name="idade" class="filter-input" placeholder="00" required>
-                        </div>
-                        <div style="flex: 1;">
-                            <label>NOTA INICIAL:</label>
-                            <input type="number" step="0.1" name="nota" class="filter-input" placeholder="0.0">
-                        </div>
+                        <div style="flex: 1;"><label>IDADE:</label><input type="number" name="idade" class="filter-input" required></div>
+                        <div style="flex: 1;"><label>NOTA INICIAL:</label><input type="number" step="0.1" name="nota" class="filter-input"></div>
                     </div>
+                    <button type="submit" class="btn-action" style="margin-top: 30px; width: 100%; justify-content: center;">FINALIZAR CADASTRO</button>
+                </form>
+            </div>
+        </div>
 
-                    <button type="submit" class="btn-action" style="margin-top: 30px; width: 100%; justify-content: center;">
-                        FINALIZAR CADASTRO
-                    </button>
+        <div id="notaModal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeNotaModal()"><i class="fas fa-times-circle"></i></button>
+                <h2 class="section-title">NOVA NOTA: <span id="nomeAlunoModal" style="color: var(--primary-color);"></span></h2>
+                <form action="/dashboard/atribuir-nota" method="POST" class="filter-options">
+                    <input type="hidden" name="aluno_id" id="alunoIdModal">
+                    <label>TÍTULO DA NOTA:</label><input type="text" name="titulo" class="filter-input" required>
+                    <label style="margin-top: 15px; display: block;">DESCRIÇÃO:</label><textarea name="descricao" class="filter-input" style="height: 80px; padding: 10px;"></textarea>
+                    <label style="margin-top: 15px; display: block;">VALOR DA NOTA:</label><input type="number" step="0.1" name="valor" min="0" max="10" class="filter-input" required>
+                    <button type="submit" class="btn-action" style="margin-top: 25px; width: 100%; justify-content: center;">ATRIBUIR</button>
                 </form>
             </div>
         </div>
 
         <footer class="dash-footer">
-            <a href="#" class="export-link">EXPORTAR COM UMA PLANILHA</a>
+            <a href="javascript:void(0)" onclick="exportarTabelaParaExcel()" class="export-link">EXPORTAR COM UMA PLANILHA</a>
             <div class="footer-credits">
                 <p>Powered by SENAI Duque de Caxias.</p>
                 <a href="/dashboard/equipe"><p>Time de desenvolvedores</p></a>
@@ -157,58 +198,203 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const currentPath = window.location.pathname;
-            document.querySelectorAll('.side-link').forEach(link => {
-                if (link.getAttribute('href') === currentPath) link.classList.add('active');
-            });
-        });
-
-        let isEditMode = false;
-        function toggleEditMode() {
-            const btn = document.getElementById('editToggleBtn');
-            const form = document.getElementById('updateForm');
-            if (!isEditMode) {
-                isEditMode = true;
-                document.body.classList.add('editing');
-                btn.querySelector('span').innerText = "SALVAR";
-                btn.style.backgroundColor = "#ff0101";
-            } else {
-                form.submit();
-            }
-        }
-
         function openFilter() { document.getElementById('filterModal').style.display = 'flex'; }
         function closeFilter() { document.getElementById('filterModal').style.display = 'none'; }
         function openAddModal() { document.getElementById('addAlunoModal').style.display = 'flex'; }
         function closeAddModal() { document.getElementById('addAlunoModal').style.display = 'none'; }
+        function openNotaModal(id, nome) {
+            document.getElementById('alunoIdModal').value = id;
+            document.getElementById('nomeAlunoModal').innerText = nome.toUpperCase();
+            document.getElementById('notaModal').style.display = 'flex';
+        }
+        function closeNotaModal() { document.getElementById('notaModal').style.display = 'none'; }
+
+        let isEditMode = false;
+        function toggleEditMode() {
+            const btn = document.getElementById('editToggleBtn');
+            if (!isEditMode) {
+                isEditMode = true;
+                document.body.classList.add('editing');
+                btn.querySelector('span').innerText = "SALVAR";
+                btn.style.backgroundColor = "#ff0000";
+            } else {
+                document.getElementById('updateForm').submit();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const dataAlunos = <%- JSON.stringify(alunos) %>;
+            dataAlunos.forEach(aluno => {
+                const canvas = document.getElementById(`chart-${aluno.id}`);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const historicoValores = (aluno.notas_individuais) ? aluno.notas_individuais.map(n => parseFloat(n.valor)) : [parseFloat(aluno.nota)];
+                const historicoLabels = (aluno.notas_individuais) ? aluno.notas_individuais.map(n => n.titulo) : ['Inicial'];
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: historicoLabels,
+                        datasets: [{
+                            label: 'Nota',
+                            data: historicoValores,
+                            borderColor: '#ff0101',
+                            backgroundColor: 'rgba(255, 1, 1, 0.1)',
+                            borderWidth: 4,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 6,
+                            pointBackgroundColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#888' } },
+                            x: { grid: { display: false }, ticks: { color: '#888' } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            });
+        });
 
         function applyFilter() {
-            const min = parseInt(document.getElementById('minPresenca').value) || 0;
+            const selAno = document.getElementById('filterAno').value;
+            const selStatus = document.getElementById('filterStatus').value;
             document.querySelectorAll("#alunosTableBody tr").forEach(row => {
-                const presenca = parseInt(row.getAttribute('data-presenca')) || 0;
-                row.style.display = (presenca >= min) ? "" : "none";
+                const ano = row.cells[2].textContent.trim();
+                const status = row.cells[6].textContent.trim();
+                row.style.display = ((selAno==="" || ano===selAno) && (selStatus==="" || status===selStatus)) ? "" : "none";
             });
+            closeFilter();
+        }
+
+        function clearFilters() {
+            document.getElementById('filterAno').value = "";
+            document.getElementById('filterStatus').value = "";
+            document.querySelectorAll("#alunosTableBody tr").forEach(row => row.style.display = "");
             closeFilter();
         }
 
         document.getElementById('searchInput').addEventListener('keyup', function() {
             const filter = this.value.toUpperCase();
             document.querySelectorAll("#alunosTableBody tr").forEach(row => {
-                const name = row.cells[1]?.textContent.toUpperCase() || "";
-                row.style.display = (name.indexOf(filter) > -1) ? "" : "none";
+                row.style.display = row.cells[1].textContent.toUpperCase().includes(filter) ? "" : "none";
             });
         });
 
         function confirmDelete(id, nome) {
-            if (confirm(`Deseja realmente remover o aluno ${nome}?`)) {
-                window.location.href = `/dashboard/delete-aluno/${id}`;
-            }
+            if (confirm(`Remover aluno ${nome}?`)) window.location.href = `/dashboard/delete-aluno/${id}`;
         }
+
+
+
+
+        async function exportarTabelaParaExcel() {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Relatório AnalisAI');
+    const dataAlunos = <%- JSON.stringify(alunos) %>;
+
+    worksheet.columns = [
+        { key: 'c1', width: 15 }, { key: 'c2', width: 35 }, { key: 'c3', width: 25 },
+        { key: 'c4', width: 12 }, { key: 'c5', width: 15 }, { key: 'c6', width: 15 }, { key: 'c7', width: 25 }
+    ];
+
+    try {
+        const response = await fetch('/img/xls-logo.png');
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        const logoId = workbook.addImage({ buffer: arrayBuffer, extension: 'png' });
+        worksheet.addImage(logoId, { tl: { col: 0, row: 0 }, br: { col: 2, row: 7 } });
+
+        worksheet.mergeCells('C2:G4');
+        const titleCell = worksheet.getCell('C2');
+        titleCell.value = 'RELATÓRIO GERAL DE DESEMPENHO';
+        titleCell.font = { size: 16, bold: true };
+        titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+    } catch (e) { console.log("Erro logo"); }
+
+    const headerRow = worksheet.getRow(9);
+    headerRow.values = ['ID', 'ALUNO', 'ANO ESCOLAR', 'IDADE', 'MÉDIA', 'PRESENÇA', 'NÍVEL'];
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.eachCell(cell => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0101' } };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    });
+
+    dataAlunos.forEach(aluno => {
+        let nivel = 'EM DESENVOLVIMENTO';
+        if (aluno.nota >= 7 && aluno.presenca >= 75) nivel = 'APTO';
+        else if (aluno.nota < 5 || aluno.presenca < 50) nivel = 'INAPTO';
+
+        const row = worksheet.addRow({
+            c1: aluno.id,
+            c2: aluno.nome,
+            c3: aluno.ano_escolar,
+            c4: aluno.idade,
+            c5: parseFloat(aluno.nota || 0).toFixed(1),
+            c6: (aluno.presenca || 0) + '%',
+            c7: nivel
+        });
+
+        row.eachCell((cell, colNum) => {
+            cell.alignment = { horizontal: colNum === 2 ? 'left' : 'center', vertical: 'middle' };
+        });
+    });
+
+    let currentOuterRow = worksheet.lastRow.number + 3;
+
+    dataAlunos.forEach(aluno => {
+        const titleRow = worksheet.getRow(currentOuterRow);
+        titleRow.values = [`HISTÓRICO INDIVIDUAL: ${aluno.nome.toUpperCase()}`];
+        titleRow.font = { bold: true, color: { argb: 'FFFF0101' } };
+        worksheet.mergeCells(`A${currentOuterRow}:G${currentOuterRow}`);
+        
+        currentOuterRow++;
+        const subHeader = worksheet.getRow(currentOuterRow);
+        subHeader.values = ['DATA', 'TÍTULO DA ATIVIDADE', 'DESCRIÇÃO', null, null, null, 'NOTA'];
+        subHeader.font = { italic: true, bold: true };
+        worksheet.mergeCells(`C${currentOuterRow}:F${currentOuterRow}`);
+        subHeader.eachCell(c => c.alignment = { horizontal: 'center' });
+        
+        currentOuterRow++;
+
+        if (aluno.notas_individuais && aluno.notas_individuais.length > 0) {
+            aluno.notas_individuais.forEach(n => {
+                const detailRow = worksheet.getRow(currentOuterRow);
+                const dataF = new Date(n.data_criacao).toLocaleDateString('pt-BR');
+                
+                detailRow.getCell(1).value = dataF;
+                detailRow.getCell(2).value = n.titulo;
+                detailRow.getCell(3).value = n.descricao || '-';
+                detailRow.getCell(7).value = parseFloat(n.valor).toFixed(1);
+
+                detailRow.getCell(1).alignment = { horizontal: 'center' };
+                detailRow.getCell(2).alignment = { horizontal: 'left' };
+                detailRow.getCell(3).alignment = { horizontal: 'left' };
+                detailRow.getCell(7).alignment = { horizontal: 'center' };
+                detailRow.getCell(7).font = { bold: true };
+
+                worksheet.mergeCells(`C${currentOuterRow}:F${currentOuterRow}`);
+                currentOuterRow++;
+            });
+        } else {
+            worksheet.getRow(currentOuterRow).values = ['-', 'Sem registros', '-', null, null, null, '-'];
+            worksheet.mergeCells(`C${currentOuterRow}:F${currentOuterRow}`);
+            currentOuterRow++;
+        }
+        currentOuterRow += 2;
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), `Relatorio_Completo_AnalisAI.xlsx`);
+}
 
         window.onclick = (e) => {
             if (e.target.className === 'modal-overlay') {
-                closeFilter(); closeAddModal();
+                closeFilter(); closeAddModal(); closeNotaModal();
             }
         }
     </script>

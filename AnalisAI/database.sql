@@ -16,6 +16,15 @@ CREATE TABLE IF NOT EXISTS alunos (
     nivel VARCHAR(30) 
 );
 
+CREATE TABLE notas_detalhadas (
+    id SERIAL PRIMARY KEY,
+    aluno_id INTEGER REFERENCES alunos(id) ON DELETE CASCADE,
+    titulo VARCHAR(100),
+    descricao TEXT,
+    valor DECIMAL(4,2),
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 INSERT INTO usuarios (nome, email, senha) 
 VALUES ('Administrador', 'admin', '123')
 ON CONFLICT (email) DO NOTHING;

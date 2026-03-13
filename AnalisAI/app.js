@@ -90,14 +90,42 @@ app.get('/dashboard', checkAuth, (req, res) => {
   res.render('dashboard/main', { user: req.session.user });
 });
 
-app.get('/dashboard/edit', checkAuth, async (req, res) => {
+app.get('/dashboard/edit', async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM alunos ORDER BY id ASC');
+        const result = await db.query(`
+            SELECT a.*, 
+            (SELECT json_agg(n.* ORDER BY n.data_criacao ASC) 
+            FROM notas_detalhadas n 
+            WHERE n.aluno_id = a.id) as notas_individuais
+            FROM alunos a
+            ORDER BY a.nome ASC
+        `);
         
         res.render('dashboard/edit', { alunos: result.rows });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Erro ao carregar os dados dos alunos.');
+        res.send("Erro ao carregar dados");
+    }
+});
+
+app.post('/dashboard/atribuir-nota', async (req, res) => {
+    const { aluno_id, titulo, descricao, valor } = req.body;
+
+    try {
+        await db.query(
+            'INSERT INTO notas_detalhadas (aluno_id, titulo, descricao, valor) VALUES ($1, $2, $3, $4)',
+            [aluno_id, titulo, descricao, valor]
+        );
+        await db.query(`
+            UPDATE alunos 
+            SET nota = (SELECT AVG(valor) FROM notas_detalhadas WHERE aluno_id = $1)
+            WHERE id = $1
+        `, [aluno_id]);
+
+        res.redirect('/dashboard/edit');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Erro ao salvar nota");
     }
 });
 
@@ -121,21 +149,23 @@ app.post('/dashboard/update-notas', checkAuth, async (req, res) => {
     }
 });
 
-app.post('/dashboard/add-aluno', checkAuth, async (req, res) => {
+app.post('/dashboard/add-aluno', async (req, res) => {
     const { nome, ano_escolar, idade, nota } = req.body;
-    
-    let nivel = (nota >= 7) ? 'APTO' : (nota >= 5 ? 'EM DESENVOLVIMENTO' : 'INAPTO');
-    
     try {
-        await db.query(
-            'INSERT INTO alunos (nome, ano_escolar, idade, nota, presenca, nivel) VALUES ($1, $2, $3, $4, $5, $6)',
-            [nome.toUpperCase(), ano_escolar, idade, nota || 0, 100, nivel]
+        const novoAluno = await db.query(
+            'INSERT INTO alunos (nome, ano_escolar, idade, nota, presenca) VALUES ($1, $2, $3, $4, 100) RETURNING id',
+            [nome, ano_escolar, idade, nota]
         );
+        const alunoId = novoAluno.rows[0].id;
+
+        if (nota && nota > 0) {
+            await db.query(
+                'INSERT INTO notas_detalhadas (aluno_id, titulo, descricao, valor) VALUES ($1, $2, $3, $4)',
+                [alunoId, 'Nota Inicial', 'Valor atribuído no cadastro', nota]
+            );
+        }
         res.redirect('/dashboard/edit');
-    } catch (err) {
-        console.error(err);
-        res.redirect('/dashboard/edit');
-    }
+    } catch (err) { res.status(500).send("Erro"); }
 });
 
 app.get('/dashboard/delete-aluno/:id', checkAuth, async (req, res) => {
