@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>AnalisAI - Gráficos de Evolução</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/sidebar.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/graficos.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dash-body">
+
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-layout">
+        <header class="dash-header">
+            <div class="logo"><img src="/img/logo3-white.png" alt="AnalisAI"></div>
+            <h2 class="page-title">GRÁFICOS DE EVOLUÇÃO</h2>
+        </header>
+
+        <main class="dash-content graficos-grid">
+            
+            <p class="section-label">ENSINO MÉDIO | ENSINO FUNDAMENTAL</p>
+            <div class="row-top">
+                <div class="dash-card card-grafico">
+                    <% if (stats.total > 0) { %>
+                        <canvas id="chartAptos"></canvas>
+                        <p class="chart-label label-verde">ENSINO APTO</p>
+                    <% } else { %>
+                        <div class="empty-chart">SEM DADOS PARA EXIBIR</div>
+                    <% } %>
+                </div>
+                <div class="dash-card card-grafico">
+                    <% if (stats.total > 0) { %>
+                        <canvas id="chartInaptos"></canvas>
+                        <p class="chart-label label-vermelho">ENSINO INAPTO</p>
+                    <% } else { %>
+                        <div class="empty-chart">SEM DADOS PARA EXIBIR</div>
+                    <% } %>
+                </div>
+            </div>
+
+            <p class="section-label">ENSINO MÉDIO - P/ ALUNO</p>
+            <div class="dash-card card-grafico-large">
+                <% if (stats.total > 0) { %>
+                    <canvas id="chartMedio"></canvas>
+                <% } else { %>
+                    <div class="empty-chart">NENHUM DADO DISPONÍVEL</div>
+                <% } %>
+            </div>
+
+            <p class="section-label">ENSINO FUNDAMENTAL - P/ ALUNO</p>
+            <div class="dash-card card-grafico-small">
+                <% if (stats.total > 0) { %>
+                    <canvas id="chartFundamental"></canvas>
+                <% } else { %>
+                    <div class="empty-chart">NENHUM DADO DISPONÍVEL</div>
+                <% } %>
+            </div>
+        </main>
+
+        <footer class="dash-footer">
+            <div class="footer-credits">
+                <p>Powered by SENAI Duque de Caxias.</p>
+                <p>Time de desenvolvedores</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+
+        const stats = <%- JSON.stringify(stats) %>;
+
+        if (stats.total > 0) {
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            };
+
+            new Chart(document.getElementById('chartAptos'), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [stats.apto, stats.total - stats.apto],
+                        backgroundColor: ['#00ff00', '#1a1a1a'],
+                        borderWidth: 0,
+                        cutout: '80%'
+                    }]
+                },
+                options: commonOptions
+            });
+
+            new Chart(document.getElementById('chartInaptos'), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [stats.inapto, stats.total - stats.inapto],
+                        backgroundColor: ['#ff0101', '#1a1a1a'],
+                        borderWidth: 0,
+                        cutout: '80%'
+                    }]
+                },
+                options: commonOptions
+            });
+
+            new Chart(document.getElementById('chartMedio'), {
+                type: 'bar',
+                data: {
+                    labels: ['Média Geral'],
+                    datasets: [{
+                        data: [stats.mediaMedio],
+                        backgroundColor: '#ff0101'
+                    }]
+                },
+                options: {
+                ...commonOptions,
+                scales: { y: { beginAtZero: true, max: 10 } }
+            }
+            });
+
+            new Chart(document.getElementById('chartFundamental'), {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar'],
+                    datasets: [{
+                        data: [stats.mediaFundamental],
+                        borderColor: '#ff0101',
+                        backgroundColor: 'transparent',
+                        tension: 0.4
+                    }]
+                },
+                options: commonOptions
+            });
+        }
+    </script>
+</body>
+</html>

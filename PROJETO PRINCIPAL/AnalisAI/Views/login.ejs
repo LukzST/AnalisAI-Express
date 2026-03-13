@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnalisAI - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+
+    <div class="back-button">
+        <a href="/"><i class="fas fa-undo-alt"></i> VOLTAR</a>
+    </div>
+
+    <div class="page">
+        <div class="logo-analisai">
+            <img src="/img/logo3-white.png" alt="AnalisAI">
+        </div>
+
+        <div class="login-container">
+            
+            <% if (erro) { %>
+                <div class="erro-box">
+                    <%= erro %>
+                </div>
+            <% } %>
+
+            <form action="/login" method="POST">
+                <div class="input-group">
+                    <input type="text" name="usuario" placeholder="USUÁRIO" required>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" name="senha" placeholder="SENHA" required>
+                </div>
+                
+                <button type="submit">ENTRAR</button>
+            </form>
+        </div>
+
+        <div class="signup-link">
+            <a href="/cadastro">NÃO TEM UMA CONTA? CADASTRE-SE!</a>
+        </div>
+
+        <footer class="footer-terms">
+            <i class="fas fa-shield-alt"></i>
+            <a href="/termos" class="termos">
+                <span>TERMOS DE SERVIÇO</span>
+            </a>
+        </footer>
+    </div>
+
+</body>
+</html>

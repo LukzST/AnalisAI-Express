@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnalisAI - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/sidebar.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body class="dash-body">
+
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-layout">
+        <header class="dash-header">
+            <div class="logo">
+                <img src="/img/logo3-white.png" alt="AnalisAI">
+            </div>
+            <a href="/logout" class="btn-sair">SAIR DA CONTA</a>
+        </header>
+
+        <main class="dash-content">
+            <div class="section-container">
+                <h2 class="section-title">ENSINO MÉDIO</h2>
+                <div class="dash-card"></div>
+            </div>
+
+            <div class="section-container">
+                <h2 class="section-title">ENSINO FUNDAMENTAL</h2>
+                <div class="dash-card"></div>
+            </div>
+        </main>
+
+        <footer class="dash-footer">
+            <a href="#" class="export-link">EXPORTAR COM UMA PLANILHA</a>
+            <div class="footer-credits">
+                <p>Powered by SENAI Duque de Caxias.</p>
+                <a href="/dashboard/equipe">
+                    <p>Time de desenvolvedores</p>
+                </a>
+            </div>
+        </footer>
+    </div>
+
+
+    <script>
+        function openModal() {
+    document.getElementById('infoModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('infoModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('infoModal');
+    if (event.target == modal) {
+        closeModal();
+    }
+}   
+    </script>
+</body>
+</html>

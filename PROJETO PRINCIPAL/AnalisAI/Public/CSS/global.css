@@ -1,0 +1,35 @@
+:root {
+    --primary-color: #ff0101;
+    --secondary-color: #0e0e0e;
+    --footer-color: #0e0e0e;
+    --text-color: #ffffff;
+    --font-family: 'Inter-Medium';
+}
+
+@font-face {
+    font-family: 'Inter-Medium';
+    src: url('../fonts/Inter-Medium.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background-color: var(--secondary-color);
+    font-family: var(--font-family);
+    color: var(--text-color);
+}
+@keyframes fadeInPage {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+body {
+    animation: fadeInPage 0.5s ease-out;
+}

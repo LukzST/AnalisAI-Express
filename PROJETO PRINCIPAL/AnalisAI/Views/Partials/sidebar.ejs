@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<aside class="sidebar">
+    <div class="sidebar-top">
+        <a href="/dashboard" class="side-link"><i class="fas fa-home"></i></a>
+        <a href="/dashboard/edit" class="side-link"><i class="fas fa-pen"></i></a>
+        <a href="/dashboard/graficos" class="side-link"><i class="fas fa-th-large"></i></a>
+    </div>
+    
+    <div class="sidebar-bottom">
+        <a href="/dashboard/equipe" class="side-link"><i class="fas fa-users"></i></a>
+        <a href="javascript:void(0)" class="side-link" onclick="openModal()">
+            <i class="fas fa-info-circle"></i>
+        </a>
+    </div>
+</aside>
+
+<div id="infoModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()">
+            <i class="fas fa-times-circle"></i>
+        </button>
+        <div class="modal-body">
+            <img src="/img/logo3-white.png" alt="AnalisAI" class="modal-logo">
+            <h3 class="version-text">VERSÃO 1.0</h3>
+            <p class="copyright-text">© SENAI - Serviço Nacional de Aprendizagem Industrial</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll('.side-link');
+
+    links.forEach(link => {
+        const linkPath = link.getAttribute('href');
+        if (currentPath === linkPath) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+});
+</script>

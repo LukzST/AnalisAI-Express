@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnalisAI - Editor de Notas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/sidebar.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/edit.css">
+</head>
+<body class="dash-body">
+
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-layout">
+        <header class="dash-header">
+            <div class="logo">
+                <img src="/img/logo3-white.png" alt="AnalisAI">
+            </div>
+            <h2 class="page-title">EDITOR DE NOTAS</h2>
+        </header>
+
+        <div class="toolbar">
+            <div class="action-buttons">
+                <button class="btn-icon btn-filter" onclick="openFilter()" title="Filtrar">
+                    <i class="fas fa-filter"></i>
+                </button>
+                
+                <button class="btn-icon" onclick="openAddModal()" title="Adicionar Aluno">
+                    <i class="fas fa-plus"></i>
+                </button>
+                
+                <button class="btn-action btn-edit-mode" id="editToggleBtn" onclick="toggleEditMode()">
+                    <i class="fas fa-pencil-alt"></i> <span>EDITAR</span>
+                </button>
+            </div>
+
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Pesquisar aluno...">
+            </div>
+        </div>
+
+        <main class="edit-content">
+            <div class="table-container">
+                <form id="updateForm" action="/dashboard/update-notas" method="POST">
+                    <table class="alunos-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ALUNO</th>
+                                <th>ANO ESCOLAR</th>
+                                <th>IDADE</th>
+                                <th>NOTAS</th>
+                                <th>PRESENÇA (%)</th>
+                                <th>NÍVEL</th>
+                                <th>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alunosTableBody">
+                            <% if (alunos && alunos.length > 0) { %>
+                                <% alunos.forEach(aluno => { %>
+                                    <tr data-presenca="<%= aluno.presenca %>">
+                                        <td>
+                                            <%= aluno.id %>
+                                            <input type="hidden" name="id" value="<%= aluno.id %>">
+                                        </td>
+                                        <td><%= aluno.nome %></td>
+                                        <td><%= aluno.ano_escolar %></td>
+                                        <td><%= aluno.idade %></td>
+                                        
+                                        <td class="editable-cell">
+                                            <span class="view-mode"><%= aluno.nota %></span>
+                                            <input type="number" step="0.1" name="nota" value="<%= aluno.nota %>" class="edit-input">
+                                        </td>
+                                        
+                                        <td class="editable-cell">
+                                            <span class="view-mode"><%= aluno.presenca %></span>%
+                                            <input type="number" name="presenca" value="<%= aluno.presenca %>" class="edit-input">
+                                        </td>
+                                        
+                                        <td class="status <%= aluno.nivel === 'APTO' ? 'apto' : (aluno.nivel === 'INAPTO' ? 'inapto' : 'desenvolvimento') %>">
+                                            <%= aluno.nivel %>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0)" onclick="confirmDelete('<%= aluno.id %>', '<%= aluno.nome %>')" class="delete-link">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="8" style="padding: 50px; color: #555;">Nenhum aluno cadastrado.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </main>
+
+        <div id="filterModal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeFilter()"><i class="fas fa-times-circle"></i></button>
+                <h2 class="section-title">FILTRAR POR...</h2>
+                <div class="filter-options">
+                    <label>PRESENÇA MÍNIMA (%):</label>
+                    <input type="number" id="minPresenca" class="filter-input" placeholder="Ex: 75">
+                    <button class="btn-action" onclick="applyFilter()" style="margin-top: 20px; width: 100%; justify-content: center;">APLICAR</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="addAlunoModal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeAddModal()"><i class="fas fa-times-circle"></i></button>
+                <h2 class="section-title">CADASTRAR ALUNO</h2>
+                <form action="/dashboard/add-aluno" method="POST" class="filter-options">
+                    <label>NOME COMPLETO:</label>
+                    <input type="text" name="nome" class="filter-input" placeholder="Nome do aluno" required>
+                    
+                    <label style="margin-top: 15px; display: block;">ANO ESCOLAR:</label>
+                    <select name="ano_escolar" class="filter-input">
+                        <option value="1º MÉDIO">1º MÉDIO</option>
+                        <option value="2º MÉDIO">2º MÉDIO</option>
+                        <option value="3º MÉDIO">3º MÉDIO</option>
+                        <option value="9º FUNDAMENTAL">9º FUNDAMENTAL</option>
+                    </select>
+
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <div style="flex: 1;">
+                            <label>IDADE:</label>
+                            <input type="number" name="idade" class="filter-input" placeholder="00" required>
+                        </div>
+                        <div style="flex: 1;">
+                            <label>NOTA INICIAL:</label>
+                            <input type="number" step="0.1" name="nota" class="filter-input" placeholder="0.0">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-action" style="margin-top: 30px; width: 100%; justify-content: center;">
+                        FINALIZAR CADASTRO
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <footer class="dash-footer">
+            <a href="#" class="export-link">EXPORTAR COM UMA PLANILHA</a>
+            <div class="footer-credits">
+                <p>Powered by SENAI Duque de Caxias.</p>
+                <a href="/dashboard/equipe"><p>Time de desenvolvedores</p></a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.side-link').forEach(link => {
+                if (link.getAttribute('href') === currentPath) link.classList.add('active');
+            });
+        });
+
+        let isEditMode = false;
+        function toggleEditMode() {
+            const btn = document.getElementById('editToggleBtn');
+            const form = document.getElementById('updateForm');
+            if (!isEditMode) {
+                isEditMode = true;
+                document.body.classList.add('editing');
+                btn.querySelector('span').innerText = "SALVAR";
+                btn.style.backgroundColor = "#ff0101";
+            } else {
+                form.submit();
+            }
+        }
+
+        function openFilter() { document.getElementById('filterModal').style.display = 'flex'; }
+        function closeFilter() { document.getElementById('filterModal').style.display = 'none'; }
+        function openAddModal() { document.getElementById('addAlunoModal').style.display = 'flex'; }
+        function closeAddModal() { document.getElementById('addAlunoModal').style.display = 'none'; }
+
+        function applyFilter() {
+            const min = parseInt(document.getElementById('minPresenca').value) || 0;
+            document.querySelectorAll("#alunosTableBody tr").forEach(row => {
+                const presenca = parseInt(row.getAttribute('data-presenca')) || 0;
+                row.style.display = (presenca >= min) ? "" : "none";
+            });
+            closeFilter();
+        }
+
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const filter = this.value.toUpperCase();
+            document.querySelectorAll("#alunosTableBody tr").forEach(row => {
+                const name = row.cells[1]?.textContent.toUpperCase() || "";
+                row.style.display = (name.indexOf(filter) > -1) ? "" : "none";
+            });
+        });
+
+        function confirmDelete(id, nome) {
+            if (confirm(`Deseja realmente remover o aluno ${nome}?`)) {
+                window.location.href = `/dashboard/delete-aluno/${id}`;
+            }
+        }
+
+        window.onclick = (e) => {
+            if (e.target.className === 'modal-overlay') {
+                closeFilter(); closeAddModal();
+            }
+        }
+    </script>
+</body>
+</html>
