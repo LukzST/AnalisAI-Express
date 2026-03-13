@@ -1,0 +1,85 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 50px;
+    background-color: rgba(14, 14, 14, 0.9);
+    border-bottom: 2px solid var(--primary-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    height: 70px;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+}
+
+.logo-analisai {
+    transition: transform 0.3s ease;
+    object-fit: contain;
+}
+
+.logo-analisai:hover {
+    transform: scale(1.05);
+}
+
+.navegacao-botoes {
+    display: flex;
+    align-items: center;
+}
+
+.botao-entrar {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    background-color: transparent;
+    border: 1.5px solid transparent;
+    padding: 8px 20px;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+}
+
+.icon-login {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+
+.login-button {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.botao-entrar:hover {
+    background-color: rgba(255, 1, 1, 0.1);
+    border-color: var(--primary-color);
+}
+
+.botao-entrar:hover .icon-login {
+    transform: translateX(-3px);
+}
+
+.botao-entrar:hover .login-button {
+    color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .header {
+        padding: 15px 20px;
+    }
+    
+    .login-button {
+        display: none; 
+    }
+    
+    .icon-login {
+        margin-right: 0;
+    }
+}

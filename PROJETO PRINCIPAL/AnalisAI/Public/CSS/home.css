@@ -1,28 +1,14 @@
 :root {
     --primary-color: #ff0101;
     --secondary-color: #0e0e0e;
-    --footer-color: #0e0e0e;
+    --card-bg: #151515;
     --text-color: #ffffff;
-    --font-family: 'Inter-Medium', sans-serif;
-}
-
-@font-face {
-    font-family: 'Inter-Medium';
-    src: url('../fonts/Inter-Medium.woff') format('woff');
+    --font-family: 'Inter', sans-serif;
 }
 
 @keyframes fadeInPage {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-body {
-    animation: fadeInPage 0.5s ease-out;
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 * {
@@ -35,78 +21,8 @@ body {
     font-family: var(--font-family);
     background-color: var(--secondary-color);
     color: var(--text-color);
-    line-height: 1.6;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--primary-color);
-    padding: 1rem;
-    min-height: 40px;
-    border-bottom: 2px solid var(--text-color);
-}
-.footer {
-    display: flex;
-    position: static;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 60px; 
-    align-items: center;
-    background-color: var(--footer-color);
-    border-top: 4px solid var(--primary-color);
-    z-index: 1000;
-}
-
-.footer p {
-    margin: 0;
-    width: 100%;
-    text-align: center;
-    color: var(--text-color);
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-}
-
-.navegacao-botoes {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 15px;
-    margin-left: auto;
-}
-
-.navegacao-botoes a {
-    display: flex;
-    font-family: var(--font-family);
-    font-weight: bold   ;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-color);
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.dashboard-layout {
-    display: flex;
-    min-height: 100vh;
-}
-
-.dash-sidebar {
-    width: 250px;
-    background: #2c3e50;
-    color: white;
-}
-
-.content {
-    flex: 1;
-    padding: 20px;
-}
-
-
-.icon-login {
-    margin-right: 5px;
+    overflow-x: hidden;
+    animation: fadeInPage 0.6s ease-out;
 }
 
 .section-1-presentaion {
@@ -115,51 +31,61 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 80px 20px;
+    padding: 100px 20px;
     position: relative;
-    min-height: 70vh;
+    min-height: 85vh;
 }
 
 .section-1-presentaion::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0; width: 100%; height: 100%;
     background-image: url('/img/back.jpg');
     background-size: cover;
     background-position: center;
-    opacity: 0.2; 
+    opacity: 0.1;
     z-index: -1;
-    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+}
+
+.titulo-s1 img.senai_logo {
+    width: 320px;
+    margin-bottom: 30px;
 }
 
 .titulo-s1 h1 {
-    font-size: 3rem;
-    margin: 20px 0;
-    max-width: 800px;
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    max-width: 900px;
+    letter-spacing: -1px;
+}
+
+.titulo-s1 p {
+    font-size: 1.2rem;
+    color: #888;
+    margin-bottom: 40px;
 }
 
 .botao-acessar {
     display: inline-block;
-    background-color: var(--primary-color);
+    background-color: transparent;
     color: white;
-    padding: 15px 50px;
-    font-size: 1.4rem;
+    padding: 18px 60px;
+    font-size: 1.1rem;
     font-weight: bold;
     text-decoration: none;
     text-transform: uppercase;
-    border-radius: 8px;
-    border: 2px solid #7e0000;
-    transition: 0.3s ease;
-    margin-top: 20px;
+    border-radius: 50px;
+    border: 2px solid var(--primary-color);
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 1, 1, 0.2);
 }
 
 .botao-acessar:hover {
-    background-color: #610000;
+    background-color: var(--primary-color);
     transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(255, 1, 1, 0.4);
 }
 
 .section-2-about-senai-cic {
@@ -167,35 +93,45 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 60px 20px;
+    margin: -50px auto 100px; 
+    padding: 0 20px;
 }
 
 .section-2-box1 {
-    background-color: #1a1a1a;
+    background-color: var(--card-bg);
     padding: 40px;
-    border-radius: 12px;
-    border-top: 5px solid var(--primary-color);
+    border-radius: 30px; 
+    border: 2px solid transparent;
     text-align: center;
-    transition: transform 0.3s ease, background-color 0.3s;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
 .section-2-box1:hover {
+    border-color: var(--primary-color);
     transform: translateY(-10px);
-    background-color: #222;
 }
 
 .box-icon {
-    font-size: 3rem;
+    font-size: 2.5rem;
     color: var(--primary-color);
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .section-2-box1 h2 {
     margin-bottom: 15px;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.section-2-box1 p {
+    color: #888;
+    font-size: 0.95rem;
+    line-height: 1.6;
 }
 
 @media (max-width: 768px) {
-    .titulo-s1 h1 { font-size: 2rem; }
+    .titulo-s1 h1 { font-size: 1.8rem; }
+    .section-1-presentaion { padding: 60px 20px; }
 }
