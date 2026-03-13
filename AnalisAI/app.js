@@ -18,9 +18,10 @@ app.use(session({
 }));
 
 function checkAuth(req, res, next) {
-  if (req.session.user) {
+  if (req.session.user && req.session.userStatus === 'ATIVO') {
     next();
   } else {
+    req.session.destroy();
     res.redirect('/login');
   }
 }
@@ -54,8 +55,8 @@ app.post('/cadastro', async (req, res) => {
 
   try {
     await db.query(
-      'INSERT INTO usuarios (nome, email, senha) VALUES ($1, $2, $3)',
-      [nome, usuario, senha]
+      'INSERT INTO usuarios (nome, email, senha, status, cargo) VALUES ($1, $2, $3, $4, $5)',
+      [nome, usuario, senha, 'ATIVO', 'Professor']
     );
     res.redirect('/login');
   } catch (err) {
@@ -75,8 +76,14 @@ app.post('/login', async (req, res) => {
 
     if (result.rows.length > 0) {
       const user = result.rows[0];
+      
+      if (user.status !== 'ATIVO') {
+        return res.render('login', { erro: 'Sua conta está inativa. Contate o administrador.' });
+      }
+
       if (senha === user.senha) {
         req.session.user = user.nome;
+        req.session.userStatus = user.status;
         return res.redirect('/dashboard');
       }
     }
@@ -90,7 +97,7 @@ app.get('/dashboard', checkAuth, (req, res) => {
   res.render('dashboard/main', { user: req.session.user });
 });
 
-app.get('/dashboard/edit', async (req, res) => {
+app.get('/dashboard/edit', checkAuth, async (req, res) => {
     try {
         const result = await db.query(`
             SELECT a.*, 
@@ -108,7 +115,7 @@ app.get('/dashboard/edit', async (req, res) => {
     }
 });
 
-app.post('/dashboard/atribuir-nota', async (req, res) => {
+app.post('/dashboard/atribuir-nota', checkAuth, async (req, res) => {
     const { aluno_id, titulo, descricao, valor } = req.body;
 
     try {
@@ -133,13 +140,18 @@ app.post('/dashboard/update-notas', checkAuth, async (req, res) => {
     const { id, nota, presenca } = req.body;
     
     try {
-        for (let i = 0; i < id.length; i++) {
-            let nivel = (nota[i] >= 7 && presenca[i] >= 75) ? 'APTO' : 'INAPTO';
-            if (nota[i] >= 5 && nota[i] < 7) nivel = 'EM DESENVOLVIMENTO';
+        const ids = Array.isArray(id) ? id : [id];
+        const notas = Array.isArray(nota) ? nota : [nota];
+        const presencas = Array.isArray(presenca) ? presenca : [presenca];
+
+        for (let i = 0; i < ids.length; i++) {
+            let n = parseFloat(notas[i]);
+            let p = parseInt(presencas[i]);
+            let nivel = (n >= 7 && p >= 75) ? 'APTO' : (n < 5 || p < 50 ? 'INAPTO' : 'EM DESENVOLVIMENTO');
 
             await db.query(
                 'UPDATE alunos SET nota = $1, presenca = $2, nivel = $3 WHERE id = $4',
-                [nota[i], presenca[i], nivel, id[i]]
+                [n, p, nivel, ids[i]]
             );
         }
         res.redirect('/dashboard/edit');
@@ -149,7 +161,7 @@ app.post('/dashboard/update-notas', checkAuth, async (req, res) => {
     }
 });
 
-app.post('/dashboard/add-aluno', async (req, res) => {
+app.post('/dashboard/add-aluno', checkAuth, async (req, res) => {
     const { nome, ano_escolar, idade, nota } = req.body;
     try {
         const novoAluno = await db.query(
@@ -179,7 +191,6 @@ app.get('/dashboard/delete-aluno/:id', checkAuth, async (req, res) => {
         res.status(500).send("Erro ao remover aluno.");
     }
 });
-
 
 app.get('/dashboard/graficos', checkAuth, async (req, res) => {
     try {
@@ -216,7 +227,7 @@ app.get('/dashboard/equipe', checkAuth, (req, res) => {
   res.render('dashboard/equipe');
 });
 
-app.get('/dashboard/usuarios', async (req, res) => {
+app.get('/dashboard/usuarios', checkAuth, async (req, res) => {
     try {
         const result = await db.query('SELECT id, nome, email, cargo, status FROM usuarios ORDER BY nome ASC');
         res.render('dashboard/usuarios', { usuarios: result.rows });
@@ -225,7 +236,7 @@ app.get('/dashboard/usuarios', async (req, res) => {
     }
 });
 
-app.post('/dashboard/usuarios/add', async (req, res) => {
+app.post('/dashboard/usuarios/add', checkAuth, async (req, res) => {
     const { nome, email, senha, cargo } = req.body;
     try {
         await db.query(
@@ -238,7 +249,7 @@ app.post('/dashboard/usuarios/add', async (req, res) => {
     }
 });
 
-app.post('/dashboard/usuarios/update', async (req, res) => {
+app.post('/dashboard/usuarios/update', checkAuth, async (req, res) => {
     const { id, nome, email, cargo, status } = req.body;
     try {
         await db.query(
@@ -251,7 +262,7 @@ app.post('/dashboard/usuarios/update', async (req, res) => {
     }
 });
 
-app.get('/dashboard/usuarios/delete/:id', async (req, res) => {
+app.get('/dashboard/usuarios/delete/:id', checkAuth, async (req, res) => {
     try {
         await db.query('DELETE FROM usuarios WHERE id = $1', [req.params.id]);
         res.redirect('/dashboard/usuarios');
