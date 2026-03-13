@@ -271,3 +271,29 @@ details p {
     .titulo-s1 h1 { font-size: 1.8rem; }
     .section-1-presentaion { padding: 60px 20px; }
 }
+
+.side-link {
+    color: #ff0101;
+    font-size: 20px;
+    text-decoration: none;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.side-link.active {
+    background-color: #ff0101;
+    color: #ffffff !important;
+}
+
+.side-link:hover:not(.active) {
+    background-color: rgba(255, 1, 1, 0.1);
+}
+
+.side-link i {
+    pointer-events: none;
+}
