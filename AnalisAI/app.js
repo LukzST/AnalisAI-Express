@@ -5,6 +5,7 @@ const app = express();
 const favicon = require('serve-favicon');
 const path = require('path');
 
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
@@ -16,7 +17,6 @@ app.use(session({
   saveUninitialized: true
 }));
 
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 function checkAuth(req, res, next) {
   if (req.session.user) {
     next();
