@@ -1,3 +1,18 @@
+:root {
+    --primary-color: #ff0101;
+    --secondary-color: #0e0e0e;
+    --footer-color: #0e0e0e;
+    --text-color: #ffffff;
+    --font-family: 'Inter-Medium';
+}
+
+@font-face {
+    font-family: 'Inter-Medium';
+    src: url('../fonts/Inter-Medium.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
 .header {
     display: flex;
     justify-content: space-between;
@@ -42,6 +57,11 @@
     transition: all 0.3s ease;
 }
 
+.botao-entrar p {
+    font-family: var(--font-family);
+    font-weight: normal;
+}
+
 .icon-login {
     width: 24px;
     height: 24px;
@@ -53,6 +73,7 @@
     color: #ffffff;
     font-weight: 600;
     font-size: 1rem;
+    font-family: var(--font-family);
     margin: 0;
     letter-spacing: 0.5px;
 }
