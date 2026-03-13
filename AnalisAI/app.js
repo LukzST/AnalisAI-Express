@@ -17,7 +17,6 @@ app.use(session({
 }));
 
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-
 function checkAuth(req, res, next) {
   if (req.session.user) {
     next();
