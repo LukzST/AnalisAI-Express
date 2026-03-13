@@ -125,6 +125,7 @@ body {
 
 .input-group input::placeholder {
     color: #444;
+    font-family: var(--font-family);
 }
 
 button {
@@ -134,7 +135,7 @@ button {
     color: white;
     padding: 12px 45px;
     font-size: 16px;
-    font-weight: bold;
+    font-family: var(--font-family);
     cursor: pointer;
     margin-top: 10px;
     transition: 0.3s;
@@ -158,6 +159,7 @@ button:hover {
 
 .termos {
     text-decoration: none;
+    font-family: var(--font-family);
     color: #ffffff62;
 }
 
