@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <%- include('partials/head-universal') %>
-    <title>AnalisAI | Bem-vindo</title>
+    <title>AnalisAI | Inteligência em Análise Educacional</title>
     <link rel="stylesheet" href="/css/home.css">
 </head>
 <body>
@@ -14,31 +14,82 @@
             <div class="titulo-s1">
                 <img src="/img/logo3-white.png" alt="AnalisAI" class="senai_logo">
                 <h1>SISTEMA DE ANÁLISE DE AVANÇOS</h1>
-                <p>Organize, colabore e alcance seus objetivos com eficiência.</p>
+                <p>A tecnologia que transforma dados escolares em estratégias de ensino de alta performance.</p>
             </div>
             <a href="/login" class="botao-acessar">Acessar Sistema</a>
         </section>
 
         <section class="section-2-about-senai-cic">
             <div class="section-2-box1">
-                <div class="box-icon"><i class="fas fa-university"></i></div>
-                <h2>SENAI CIC</h2>
-                <p>Referência em formação profissional, o SENAI CIC atua como hub tecnológico preparando talentos para a Indústria 4.0.</p>
+                <div class="box-icon"><i class="fas fa-microchip"></i></div>
+                <h2>Indústria 4.0</h2>
+                <p>Conectamos a educação profissional às exigências tecnológicas do mercado moderno.</p>
             </div>
 
             <div class="section-2-box1">
-                <div class="box-icon"><i class="fas fa-chart-line"></i></div>
-                <h2>ANÁLISE DE DADOS</h2>
-                <p>Transformamos avaliações complexas em indicadores visuais claros para identificar a aptidão de cada estudante.</p>
+                <div class="box-icon"><i class="fas fa-project-diagram"></i></div>
+                <h2>Visão 360º</h2>
+                <p>Indicadores automáticos que mostram a evolução individual e coletiva em tempo real.</p>
             </div>
 
             <div class="section-2-box1">
-                <div class="box-icon"><i class="fas fa-bullseye"></i></div>
-                <h2>RESULTADOS</h2>
-                <p>Acompanhe a evolução das turmas e garanta o sucesso acadêmico com decisões baseadas em dados organizados.</p>
+                <div class="box-icon"><i class="fas fa-shield-alt"></i></div>
+                <h2>Segurança</h2>
+                <p>Dados protegidos e organizados em ambiente PostgreSQL de alta confiabilidade.</p>
+            </div>
+        </section>
+
+        <section class="features-section">
+            <h2 class="main-title">FUNCIONALIDADES ÚTEIS</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <h3>Gestão de Notas</h3>
+                        <p>Edição rápida e intuitiva de desempenho acadêmico.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <div>
+                        <h3>Gráficos Dinâmicos</h3>
+                        <p>Visualização instantânea de alunos aptos e inaptos.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-file-export"></i>
+                    <div>
+                        <h3>Exportação de Dados</h3>
+                        <p>Gere relatórios para otimizar suas reuniões de conselho.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="faq-section">
+            <h2 class="main-title">DÚVIDAS FREQUENTES</h2>
+            <div class="faq-container">
+                <details>
+                    <summary>Como o nível do aluno é calculado?</summary>
+                    <p>O sistema cruza a nota (mínima 7.0) com a presença (mínima 75%) para definir automaticamente entre Apto ou Inapto.</p>
+                </details>
+                <details>
+                    <summary>O sistema é exclusivo para o SENAI?</summary>
+                    <p>Atualmente foi desenvolvido como ferramenta interna para otimização de fluxos do SENAI CIC.</p>
+                </details>
             </div>
         </section>
     </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>© 2026 ANALISAI - SERVIÇO NACIONAL DE APRENDIZAGEM INDUSTRIAL</p>
+            <div class="footer-sub">
+                <span>Unidade SENAI CIC - Curitiba/PR</span>
+                <a href="/termos" style="color: var(--primary-color); text-decoration: none;">Termos de Uso</a>
+            </div>
+        </div>
+    </footer>
 
 </body>
 </html>

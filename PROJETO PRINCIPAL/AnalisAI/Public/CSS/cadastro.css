@@ -52,7 +52,7 @@ body {
     text-decoration: none;
     color: white;
     font-size: 14px;
-    font-weight: bold;
+    font-family: var(--font-family);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -86,7 +86,6 @@ body {
     border-radius: 50px;
     text-align: center;
     font-size: 13px;
-    font-weight: bold;
     text-transform: uppercase;
 }
 
