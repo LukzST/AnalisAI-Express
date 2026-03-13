@@ -216,6 +216,50 @@ app.get('/dashboard/equipe', checkAuth, (req, res) => {
   res.render('dashboard/equipe');
 });
 
+app.get('/dashboard/usuarios', async (req, res) => {
+    try {
+        const result = await db.query('SELECT id, nome, email, cargo, status FROM usuarios ORDER BY nome ASC');
+        res.render('dashboard/usuarios', { usuarios: result.rows });
+    } catch (err) {
+        res.status(500).send("Erro ao carregar usuários");
+    }
+});
+
+app.post('/dashboard/usuarios/add', async (req, res) => {
+    const { nome, email, senha, cargo } = req.body;
+    try {
+        await db.query(
+            'INSERT INTO usuarios (nome, email, senha, cargo, status) VALUES ($1, $2, $3, $4, $5)',
+            [nome, email, senha, cargo, 'ATIVO']
+        );
+        res.redirect('/dashboard/usuarios');
+    } catch (err) {
+        res.status(500).send("Erro ao cadastrar usuário");
+    }
+});
+
+app.post('/dashboard/usuarios/update', async (req, res) => {
+    const { id, nome, email, cargo, status } = req.body;
+    try {
+        await db.query(
+            'UPDATE usuarios SET nome=$1, email=$2, cargo=$3, status=$4 WHERE id=$5',
+            [nome, email, cargo, status, id]
+        );
+        res.redirect('/dashboard/usuarios');
+    } catch (err) {
+        res.status(500).send("Erro ao atualizar usuário");
+    }
+});
+
+app.get('/dashboard/usuarios/delete/:id', async (req, res) => {
+    try {
+        await db.query('DELETE FROM usuarios WHERE id = $1', [req.params.id]);
+        res.redirect('/dashboard/usuarios');
+    } catch (err) {
+        res.status(500).send("Erro ao excluir usuário");
+    }
+});
+
 app.get('/logout', (req, res) => {
   req.session.destroy();
   res.redirect('/');

@@ -1,9 +1,11 @@
-
-CREATE TABLE IF NOT EXISTS usuarios (
+CREATE TABLE  IF NOT EXISTS  usuarios (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    senha VARCHAR(255) NOT NULL
+    senha VARCHAR(255) NOT NULL,
+    cargo VARCHAR(50) DEFAULT 'Professor',
+    status VARCHAR(20) DEFAULT 'ATIVO',
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS alunos (
@@ -16,7 +18,7 @@ CREATE TABLE IF NOT EXISTS alunos (
     nivel VARCHAR(30) 
 );
 
-CREATE TABLE notas_detalhadas (
+CREATE TABLE IF NOT EXISTS notas_detalhadas (
     id SERIAL PRIMARY KEY,
     aluno_id INTEGER REFERENCES alunos(id) ON DELETE CASCADE,
     titulo VARCHAR(100),

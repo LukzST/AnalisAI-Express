@@ -106,8 +106,13 @@
                 </form>
             </div>
 
+            
             <div class="evolution-container">
                 <h2 class="section-title">EVOLUÇÃO INDIVIDUAL POR ALUNO</h2>
+                <div class="search-container" style="margin-bottom: 25px; max-width: 400px;">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="chartSearchInput" placeholder="Procurar gráfico de aluno...">
+                </div>
                 <div class="charts-grid">
                     <% if (alunos && alunos.length > 0) { %>
                         <% alunos.forEach(aluno => { %>
@@ -197,7 +202,42 @@
         </footer>
     </div>
 
+    <div id="exportSuccessModal" class="modal-overlay">
+    <div class="modal-content" style="text-align: center; max-width: 400px; border-color: #217346;">
+        <button class="close-btn" onclick="closeExportModal()"><i class="fas fa-times-circle" style="border-color: #217346;"></i></button>
+        <i class="fas fa-file-excel" style="font-size: 3rem; color: #217346; margin-bottom: 15px;"></i>
+        <h2 class="section-title" style="border: none; padding: 0;">SUCESSO!</h2>
+        <p style="color: #fff; margin-bottom: 20px;">A planilha foi gerada e o download começou.</p>
+        <button class="btn-action" onclick="closeExportModal()" style="width: 100%; justify-content: center; border-color: #217346; background-color: #217346;">
+            FECHAR
+        </button>
+    </div>
+</div>
+
     <script>
+        document.getElementById('chartSearchInput').addEventListener('keyup', function() {
+            const searchTerm = this.value.toUpperCase();
+            const chartCards = document.querySelectorAll(".chart-card");
+
+            chartCards.forEach(card => {
+                const studentName = card.querySelector("h3").textContent.toUpperCase();
+                
+                if (studentName.includes(searchTerm)) {
+                    card.style.display = "";
+                } else {
+                    card.style.display = "none"; 
+                }
+            });
+        });
+
+        function openExportModal() {
+            document.getElementById('exportSuccessModal').style.display = 'flex';
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportSuccessModal').style.display = 'none';
+        }
+
         function openFilter() { document.getElementById('filterModal').style.display = 'flex'; }
         function closeFilter() { document.getElementById('filterModal').style.display = 'none'; }
         function openAddModal() { document.getElementById('addAlunoModal').style.display = 'flex'; }
@@ -293,104 +333,106 @@
 
 
         async function exportarTabelaParaExcel() {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Relatório AnalisAI');
-    const dataAlunos = <%- JSON.stringify(alunos) %>;
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Relatório AnalisAI');
+            const dataAlunos = <%- JSON.stringify(alunos) %>;
 
-    worksheet.columns = [
-        { key: 'c1', width: 15 }, { key: 'c2', width: 35 }, { key: 'c3', width: 25 },
-        { key: 'c4', width: 12 }, { key: 'c5', width: 15 }, { key: 'c6', width: 15 }, { key: 'c7', width: 25 }
-    ];
+            worksheet.columns = [
+                { key: 'c1', width: 15 }, { key: 'c2', width: 35 }, { key: 'c3', width: 25 },
+                { key: 'c4', width: 12 }, { key: 'c5', width: 15 }, { key: 'c6', width: 15 }, { key: 'c7', width: 25 }
+            ];
 
-    try {
-        const response = await fetch('/img/xls-logo.png');
-        const blob = await response.blob();
-        const arrayBuffer = await blob.arrayBuffer();
-        const logoId = workbook.addImage({ buffer: arrayBuffer, extension: 'png' });
-        worksheet.addImage(logoId, { tl: { col: 0, row: 0 }, br: { col: 2, row: 7 } });
+            try {
+                const response = await fetch('/img/xls-logo.png');
+                const blob = await response.blob();
+                const arrayBuffer = await blob.arrayBuffer();
+                const logoId = workbook.addImage({ buffer: arrayBuffer, extension: 'png' });
+                worksheet.addImage(logoId, { tl: { col: 0, row: 0 }, br: { col: 2, row: 7 } });
 
-        worksheet.mergeCells('C2:G4');
-        const titleCell = worksheet.getCell('C2');
-        titleCell.value = 'RELATÓRIO GERAL DE DESEMPENHO';
-        titleCell.font = { size: 16, bold: true };
-        titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
-    } catch (e) { console.log("Erro logo"); }
+                worksheet.mergeCells('C2:G4');
+                const titleCell = worksheet.getCell('C2');
+                titleCell.value = 'RELATÓRIO GERAL DE DESEMPENHO';
+                titleCell.font = { size: 16, bold: true };
+                titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+            } catch (e) { console.log("Erro logo"); }
 
-    const headerRow = worksheet.getRow(9);
-    headerRow.values = ['ID', 'ALUNO', 'ANO ESCOLAR', 'IDADE', 'MÉDIA', 'PRESENÇA', 'NÍVEL'];
-    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    headerRow.eachCell(cell => {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0101' } };
-        cell.alignment = { horizontal: 'center', vertical: 'middle' };
-    });
-
-    dataAlunos.forEach(aluno => {
-        let nivel = 'EM DESENVOLVIMENTO';
-        if (aluno.nota >= 7 && aluno.presenca >= 75) nivel = 'APTO';
-        else if (aluno.nota < 5 || aluno.presenca < 50) nivel = 'INAPTO';
-
-        const row = worksheet.addRow({
-            c1: aluno.id,
-            c2: aluno.nome,
-            c3: aluno.ano_escolar,
-            c4: aluno.idade,
-            c5: parseFloat(aluno.nota || 0).toFixed(1),
-            c6: (aluno.presenca || 0) + '%',
-            c7: nivel
-        });
-
-        row.eachCell((cell, colNum) => {
-            cell.alignment = { horizontal: colNum === 2 ? 'left' : 'center', vertical: 'middle' };
-        });
-    });
-
-    let currentOuterRow = worksheet.lastRow.number + 3;
-
-    dataAlunos.forEach(aluno => {
-        const titleRow = worksheet.getRow(currentOuterRow);
-        titleRow.values = [`HISTÓRICO INDIVIDUAL: ${aluno.nome.toUpperCase()}`];
-        titleRow.font = { bold: true, color: { argb: 'FFFF0101' } };
-        worksheet.mergeCells(`A${currentOuterRow}:G${currentOuterRow}`);
-        
-        currentOuterRow++;
-        const subHeader = worksheet.getRow(currentOuterRow);
-        subHeader.values = ['DATA', 'TÍTULO DA ATIVIDADE', 'DESCRIÇÃO', null, null, null, 'NOTA'];
-        subHeader.font = { italic: true, bold: true };
-        worksheet.mergeCells(`C${currentOuterRow}:F${currentOuterRow}`);
-        subHeader.eachCell(c => c.alignment = { horizontal: 'center' });
-        
-        currentOuterRow++;
-
-        if (aluno.notas_individuais && aluno.notas_individuais.length > 0) {
-            aluno.notas_individuais.forEach(n => {
-                const detailRow = worksheet.getRow(currentOuterRow);
-                const dataF = new Date(n.data_criacao).toLocaleDateString('pt-BR');
-                
-                detailRow.getCell(1).value = dataF;
-                detailRow.getCell(2).value = n.titulo;
-                detailRow.getCell(3).value = n.descricao || '-';
-                detailRow.getCell(7).value = parseFloat(n.valor).toFixed(1);
-
-                detailRow.getCell(1).alignment = { horizontal: 'center' };
-                detailRow.getCell(2).alignment = { horizontal: 'left' };
-                detailRow.getCell(3).alignment = { horizontal: 'left' };
-                detailRow.getCell(7).alignment = { horizontal: 'center' };
-                detailRow.getCell(7).font = { bold: true };
-
-                worksheet.mergeCells(`C${currentOuterRow}:F${currentOuterRow}`);
-                currentOuterRow++;
+            const headerRow = worksheet.getRow(9);
+            headerRow.values = ['ID', 'ALUNO', 'ANO ESCOLAR', 'IDADE', 'MÉDIA', 'PRESENÇA', 'NÍVEL'];
+            headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            headerRow.eachCell(cell => {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0101' } };
+                cell.alignment = { horizontal: 'center', vertical: 'middle' };
             });
-        } else {
-            worksheet.getRow(currentOuterRow).values = ['-', 'Sem registros', '-', null, null, null, '-'];
-            worksheet.mergeCells(`C${currentOuterRow}:F${currentOuterRow}`);
-            currentOuterRow++;
-        }
-        currentOuterRow += 2;
-    });
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([buffer]), `Relatorio_Completo_AnalisAI.xlsx`);
-}
+            dataAlunos.forEach(aluno => {
+                let nivel = 'EM DESENVOLVIMENTO';
+                if (aluno.nota >= 7 && aluno.presenca >= 75) nivel = 'APTO';
+                else if (aluno.nota < 5 || aluno.presenca < 50) nivel = 'INAPTO';
+
+                const row = worksheet.addRow({
+                    c1: aluno.id,
+                    c2: aluno.nome,
+                    c3: aluno.ano_escolar,
+                    c4: aluno.idade,
+                    c5: parseFloat(aluno.nota || 0).toFixed(1),
+                    c6: (aluno.presenca || 0) + '%',
+                    c7: nivel
+                });
+
+                row.eachCell((cell, colNum) => {
+                    cell.alignment = { horizontal: colNum === 2 ? 'left' : 'center', vertical: 'middle' };
+                });
+            });
+
+            let currentOuterRow = worksheet.lastRow.number + 3;
+
+            dataAlunos.forEach(aluno => {
+                const titleRow = worksheet.getRow(currentOuterRow);
+                titleRow.values = [`HISTÓRICO INDIVIDUAL: ${aluno.nome.toUpperCase()}`];
+                titleRow.font = { bold: true, color: { argb: 'FFFF0101' } };
+                worksheet.mergeCells(`A${currentOuterRow}:G${currentOuterRow}`);
+                
+                currentOuterRow++;
+                const subHeader = worksheet.getRow(currentOuterRow);
+                subHeader.values = ['DATA', 'TÍTULO DA ATIVIDADE', 'DESCRIÇÃO', null, null, null, 'NOTA'];
+                subHeader.font = { italic: true, bold: true };
+                worksheet.mergeCells(`C${currentOuterRow}:F${currentOuterRow}`);
+                subHeader.eachCell(c => c.alignment = { horizontal: 'center' });
+                
+                currentOuterRow++;
+
+                if (aluno.notas_individuais && aluno.notas_individuais.length > 0) {
+                    aluno.notas_individuais.forEach(n => {
+                        const detailRow = worksheet.getRow(currentOuterRow);
+                        const dataF = new Date(n.data_criacao).toLocaleDateString('pt-BR');
+                        
+                        detailRow.getCell(1).value = dataF;
+                        detailRow.getCell(2).value = n.titulo;
+                        detailRow.getCell(3).value = n.descricao || '-';
+                        detailRow.getCell(7).value = parseFloat(n.valor).toFixed(1);
+
+                        detailRow.getCell(1).alignment = { horizontal: 'center' };
+                        detailRow.getCell(2).alignment = { horizontal: 'left' };
+                        detailRow.getCell(3).alignment = { horizontal: 'left' };
+                        detailRow.getCell(7).alignment = { horizontal: 'center' };
+                        detailRow.getCell(7).font = { bold: true };
+
+                        worksheet.mergeCells(`C${currentOuterRow}:F${currentOuterRow}`);
+                        currentOuterRow++;
+                    });
+                } else {
+                    worksheet.getRow(currentOuterRow).values = ['-', 'Sem registros', '-', null, null, null, '-'];
+                    worksheet.mergeCells(`C${currentOuterRow}:F${currentOuterRow}`);
+                    currentOuterRow++;
+                }
+                currentOuterRow += 2;
+            });
+
+            const buffer = await workbook.xlsx.writeBuffer();
+            saveAs(new Blob([buffer]), `Relatorio_Completo_AnalisAI.xlsx`);
+
+            openExportModal();
+        }
 
         window.onclick = (e) => {
             if (e.target.className === 'modal-overlay') {

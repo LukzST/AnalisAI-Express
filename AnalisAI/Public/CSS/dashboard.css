@@ -179,8 +179,8 @@ body.dash-body {
 .version-text {
     font-size: 1rem;
     color: #888;
+    font-family: var(--font-family);
     margin-bottom: 30px;
-    letter-spacing: 2px;
 }
 
 .copyright-text {
