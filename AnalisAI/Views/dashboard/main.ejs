@@ -40,7 +40,7 @@
                     <div class="stats-card apto">
                         <div class="stats-info">
                             <h3>APTOS</h3>
-                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('MÉDIO') && a.nota >= 7 && a.presenca >= 75).length %></p>
+                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('MÉDIO') && a.nivel === 'APTO').length %></p>
                         </div>
                         <i class="fas fa-check-circle icon-bg"></i>
                     </div>
@@ -48,7 +48,7 @@
                     <div class="stats-card inapto">
                         <div class="stats-info">
                             <h3>INAPTOS</h3>
-                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('MÉDIO') && (a.nota < 5 || a.presenca < 50)).length %></p>
+                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('MÉDIO') && a.nivel === 'INAPTO').length %></p>
                         </div>
                         <i class="fas fa-times-circle icon-bg"></i>
                     </div>
@@ -69,7 +69,7 @@
                     <div class="stats-card apto">
                         <div class="stats-info">
                             <h3>APTOS</h3>
-                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL') && a.nota >= 7 && a.presenca >= 75).length %></p>
+                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL') && a.nivel === 'APTO').length %></p>
                         </div>
                         <i class="fas fa-check-circle icon-bg"></i>
                     </div>
@@ -77,10 +77,105 @@
                     <div class="stats-card inapto">
                         <div class="stats-info">
                             <h3>INAPTOS</h3>
-                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL') && (a.nota < 5 || a.presenca < 50)).length %></p>
+                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL') && a.nivel === 'INAPTO').length %></p>
                         </div>
                         <i class="fas fa-times-circle icon-bg"></i>
                     </div>
+                </div>
+            </section>
+
+            <!-- NOVA SEÇÃO: RANKING DE COMPETÊNCIAS -->
+            <section class="section-container ranking-section">
+                <h2 class="section-title"><i class="fas fa-trophy"></i> RANKING DE COMPETÊNCIAS</h2>
+                
+                <div class="ranking-tabs">
+                    <button class="ranking-tab active" onclick="showRanking('geral')">GERAL</button>
+                    <button class="ranking-tab" onclick="showRanking('medio')">ENSINO MÉDIO</button>
+                    <button class="ranking-tab" onclick="showRanking('fundamental')">ENSINO FUNDAMENTAL</button>
+                </div>
+
+                <div id="rankingGeral" class="ranking-content active">
+                    <% if (rankingGeral && rankingGeral.length > 0) { %>
+                        <div class="ranking-list">
+                            <% rankingGeral.forEach((comp, index) => { %>
+                                <div class="ranking-item">
+                                    <div class="ranking-position <%= index === 0 ? 'gold' : (index === 1 ? 'silver' : (index === 2 ? 'bronze' : '')) %>">
+                                        <%= index + 1 %>º
+                                    </div>
+                                    <div class="ranking-info">
+                                        <h4><%= comp.nome %></h4>
+                                        <p><%= comp.total_avaliacoes %> avaliações</p>
+                                    </div>
+                                    <div class="ranking-media">
+                                        <span class="media-nota <%= comp.media >= 7 ? 'apto' : (comp.media >= 5 ? 'desenvolvimento' : 'inapto') %>">
+                                            <%= comp.media.toFixed(1) %>
+                                        </span>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <div class="empty-ranking">
+                            <i class="fas fa-chart-bar"></i>
+                            <p>Nenhuma competência avaliada ainda</p>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div id="rankingMedio" class="ranking-content">
+                    <% if (rankingMedio && rankingMedio.length > 0) { %>
+                        <div class="ranking-list">
+                            <% rankingMedio.forEach((comp, index) => { %>
+                                <div class="ranking-item">
+                                    <div class="ranking-position <%= index === 0 ? 'gold' : (index === 1 ? 'silver' : (index === 2 ? 'bronze' : '')) %>">
+                                        <%= index + 1 %>º
+                                    </div>
+                                    <div class="ranking-info">
+                                        <h4><%= comp.nome %></h4>
+                                        <p><%= comp.total_avaliacoes %> avaliações</p>
+                                    </div>
+                                    <div class="ranking-media">
+                                        <span class="media-nota <%= comp.media >= 7 ? 'apto' : (comp.media >= 5 ? 'desenvolvimento' : 'inapto') %>">
+                                            <%= comp.media.toFixed(1) %>
+                                        </span>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <div class="empty-ranking">
+                            <i class="fas fa-chart-bar"></i>
+                            <p>Nenhuma competência avaliada no Ensino Médio</p>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div id="rankingFundamental" class="ranking-content">
+                    <% if (rankingFundamental && rankingFundamental.length > 0) { %>
+                        <div class="ranking-list">
+                            <% rankingFundamental.forEach((comp, index) => { %>
+                                <div class="ranking-item">
+                                    <div class="ranking-position <%= index === 0 ? 'gold' : (index === 1 ? 'silver' : (index === 2 ? 'bronze' : '')) %>">
+                                        <%= index + 1 %>º
+                                    </div>
+                                    <div class="ranking-info">
+                                        <h4><%= comp.nome %></h4>
+                                        <p><%= comp.total_avaliacoes %> avaliações</p>
+                                    </div>
+                                    <div class="ranking-media">
+                                        <span class="media-nota <%= comp.media >= 7 ? 'apto' : (comp.media >= 5 ? 'desenvolvimento' : 'inapto') %>">
+                                            <%= comp.media.toFixed(1) %>
+                                        </span>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <div class="empty-ranking">
+                            <i class="fas fa-chart-bar"></i>
+                            <p>Nenhuma competência avaliada no Ensino Fundamental</p>
+                        </div>
+                    <% } %>
                 </div>
             </section>
         </main>
@@ -88,7 +183,7 @@
         <footer class="dash-footer">
             <div class="footer-actions">
                 <a href="/dashboard/edit" class="btn-secondary-dash">
-                    <i class="fas fa-pencil-alt"></i> GERENCIAR NOTAS
+                    <i class="fas fa-pencil-alt"></i> GERENCIAR COMPETÊNCIAS
                 </a>
                 <a href="/dashboard/graficos" class="btn-secondary-dash">
                     <i class="fas fa-chart-pie"></i> VER ESTATÍSTICAS
@@ -100,5 +195,207 @@
             </div>
         </footer>
     </div>
+
+    <style>
+        /* Estilos para o Ranking */
+        .ranking-section {
+            margin-top: 40px;
+        }
+
+        .ranking-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #1a1a1a;
+            padding-bottom: 15px;
+        }
+
+        .ranking-tab {
+            background: transparent;
+            border: none;
+            color: #444;
+            padding: 10px 25px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: 0.3s;
+            border-radius: 30px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .ranking-tab:hover {
+            background: #111;
+            color: #fff;
+        }
+
+        .ranking-tab.active {
+            background: #ff0101;
+            color: white;
+        }
+
+        .ranking-content {
+            display: none;
+        }
+
+        .ranking-content.active {
+            display: block;
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px 20px;
+            background: #0c0c0c;
+            border: 1px solid #1a1a1a;
+            border-radius: 15px;
+            transition: 0.3s;
+        }
+
+        .ranking-item:hover {
+            border-color: #ff0101;
+            transform: translateX(5px);
+        }
+
+        .ranking-position {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50%;
+            background: #1a1a1a;
+            color: #888;
+        }
+
+        .ranking-position.gold {
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
+            border: 2px solid #FFD700;
+        }
+
+        .ranking-position.silver {
+            background: rgba(192, 192, 192, 0.2);
+            color: #C0C0C0;
+            border: 2px solid #C0C0C0;
+        }
+
+        .ranking-position.bronze {
+            background: rgba(205, 127, 50, 0.2);
+            color: #CD7F32;
+            border: 2px solid #CD7F32;
+        }
+
+        .ranking-info {
+            flex: 1;
+        }
+
+        .ranking-info h4 {
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+
+        .ranking-info p {
+            color: #555;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+        }
+
+        .ranking-media {
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .media-nota {
+            display: inline-block;
+            padding: 8px 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 30px;
+        }
+
+        .media-nota.apto {
+            background: rgba(33, 115, 70, 0.15);
+            color: #217346;
+            border: 1px solid #217346;
+        }
+
+        .media-nota.desenvolvimento {
+            background: rgba(212, 160, 23, 0.15);
+            color: #d4a017;
+            border: 1px solid #d4a017;
+        }
+
+        .media-nota.inapto {
+            background: rgba(255, 1, 1, 0.15);
+            color: #ff0101;
+            border: 1px solid #ff0101;
+        }
+
+        .empty-ranking {
+            text-align: center;
+            padding: 60px 20px;
+            background: #0c0c0c;
+            border: 1px solid #1a1a1a;
+            border-radius: 25px;
+        }
+
+        .empty-ranking i {
+            font-size: 3rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .empty-ranking p {
+            color: #555;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .ranking-tabs {
+                flex-direction: column;
+            }
+            
+            .ranking-item {
+                flex-wrap: wrap;
+            }
+            
+            .ranking-position {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+
+    <script>
+        function showRanking(tipo) {
+            document.querySelectorAll('.ranking-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.ranking-content').forEach(content => content.classList.remove('active'));
+            
+            if (tipo === 'geral') {
+                document.querySelectorAll('.ranking-tab')[0].classList.add('active');
+                document.getElementById('rankingGeral').classList.add('active');
+            } else if (tipo === 'medio') {
+                document.querySelectorAll('.ranking-tab')[1].classList.add('active');
+                document.getElementById('rankingMedio').classList.add('active');
+            } else {
+                document.querySelectorAll('.ranking-tab')[2].classList.add('active');
+                document.getElementById('rankingFundamental').classList.add('active');
+            }
+        }
+    </script>
 </body>
 </html>

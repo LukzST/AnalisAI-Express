@@ -4,6 +4,7 @@ const db = require('./db');
 const app = express();
 const favicon = require('serve-favicon');
 const path = require('path');
+const flash = require('connect-flash');
 
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
@@ -16,6 +17,14 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }));
+
+app.use(flash());
+
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  next();
+});
 
 function checkAuth(req, res, next) {
   if (req.session.user && req.session.userStatus === 'ATIVO') {
@@ -84,6 +93,7 @@ app.post('/login', async (req, res) => {
       if (senha === user.senha) {
         req.session.user = user.nome;
         req.session.userStatus = user.status;
+        req.session.userId = user.id;
         return res.redirect('/dashboard');
       }
     }
@@ -95,98 +105,235 @@ app.post('/login', async (req, res) => {
 
 app.get('/dashboard', checkAuth, async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM alunos');
+        const alunosResult = await db.query('SELECT * FROM alunos');
+        const alunos = alunosResult.rows;
+
+        const rankingGeralResult = await db.query(`
+            SELECT 
+                c.nome,
+                COALESCE(AVG(ac.nota), 0) as media,
+                COUNT(ac.id) as total_avaliacoes
+            FROM competencias c
+            LEFT JOIN aluno_competencias ac ON c.id = ac.competencia_id
+            GROUP BY c.id, c.nome
+            HAVING COUNT(ac.id) > 0
+            ORDER BY media DESC
+        `);
+
+        const rankingMedioResult = await db.query(`
+            SELECT 
+                c.nome,
+                COALESCE(AVG(ac.nota), 0) as media,
+                COUNT(ac.id) as total_avaliacoes
+            FROM competencias c
+            LEFT JOIN aluno_competencias ac ON c.id = ac.competencia_id
+            LEFT JOIN alunos a ON ac.aluno_id = a.id
+            WHERE a.ano_escolar LIKE '%MÉDIO%'
+            GROUP BY c.id, c.nome
+            HAVING COUNT(ac.id) > 0
+            ORDER BY media DESC
+        `);
+
+        const rankingFundamentalResult = await db.query(`
+            SELECT 
+                c.nome,
+                COALESCE(AVG(ac.nota), 0) as media,
+                COUNT(ac.id) as total_avaliacoes
+            FROM competencias c
+            LEFT JOIN aluno_competencias ac ON c.id = ac.competencia_id
+            LEFT JOIN alunos a ON ac.aluno_id = a.id
+            WHERE a.ano_escolar LIKE '%FUNDAMENTAL%'
+            GROUP BY c.id, c.nome
+            HAVING COUNT(ac.id) > 0
+            ORDER BY media DESC
+        `);
+
+        const rankingGeral = rankingGeralResult.rows.map(item => ({
+            ...item,
+            media: parseFloat(item.media) || 0
+        }));
+
+        const rankingMedio = rankingMedioResult.rows.map(item => ({
+            ...item,
+            media: parseFloat(item.media) || 0
+        }));
+
+        const rankingFundamental = rankingFundamentalResult.rows.map(item => ({
+            ...item,
+            media: parseFloat(item.media) || 0
+        }));
+
         res.render('dashboard/main', { 
             user: req.session.user, 
-            alunos: result.rows 
+            alunos: alunos,
+            rankingGeral: rankingGeral,
+            rankingMedio: rankingMedio,
+            rankingFundamental: rankingFundamental
         });
+
     } catch (err) {
-        res.render('dashboard/main', { user: req.session.user, alunos: [] });
+        console.error(err);
+        res.render('dashboard/main', { 
+            user: req.session.user, 
+            alunos: [],
+            rankingGeral: [],
+            rankingMedio: [],
+            rankingFundamental: []
+        });
     }
 });
 
 app.get('/dashboard/edit', checkAuth, async (req, res) => {
     try {
         const result = await db.query(`
-            SELECT a.*, 
-            (SELECT json_agg(n.* ORDER BY n.data_criacao ASC) 
-            FROM notas_detalhadas n 
-            WHERE n.aluno_id = a.id) as notas_individuais
+            SELECT 
+                a.*,
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', nd.id,
+                                'titulo', nd.titulo,
+                                'descricao', nd.descricao,
+                                'valor', nd.valor,
+                                'data_criacao', nd.data_criacao
+                            ) ORDER BY nd.data_criacao DESC
+                        )
+                        FROM notas_detalhadas nd
+                        WHERE nd.aluno_id = a.id
+                    ), 
+                    '[]'::json
+                ) as notas_individuais,
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', ac.id,
+                                'competencia_id', ac.competencia_id,
+                                'nome', c.nome,
+                                'descricao', c.descricao,
+                                'categoria', c.categoria,
+                                'nota', ac.nota,
+                                'observacoes', ac.observacoes,
+                                'data_registro', ac.data_registro
+                            ) ORDER BY ac.data_registro DESC
+                        )
+                        FROM aluno_competencias ac
+                        JOIN competencias c ON ac.competencia_id = c.id
+                        WHERE ac.aluno_id = a.id
+                    ),
+                    '[]'::json
+                ) as competencias
             FROM alunos a
             ORDER BY a.nome ASC
         `);
-        
-        res.render('dashboard/edit', { alunos: result.rows });
+
+        const competenciasList = await db.query(`
+            SELECT id, nome, descricao, categoria
+            FROM competencias 
+            WHERE ativo = true 
+            ORDER BY nome ASC
+        `);
+
+        res.render('dashboard/edit', { 
+            alunos: result.rows,
+            listaCompetencias: competenciasList.rows,
+            user: req.session.user 
+        });
     } catch (err) {
         console.error(err);
         res.send("Erro ao carregar dados");
     }
 });
 
-app.post('/dashboard/atribuir-nota', checkAuth, async (req, res) => {
-    const { aluno_id, titulo, descricao, valor } = req.body;
-
+app.get('/dashboard/competencias-aluno/:id', checkAuth, async (req, res) => {
+    const alunoId = req.params.id;
+    
     try {
-        await db.query(
-            'INSERT INTO notas_detalhadas (aluno_id, titulo, descricao, valor) VALUES ($1, $2, $3, $4)',
-            [aluno_id, titulo, descricao, valor]
-        );
-        await db.query(`
-            UPDATE alunos 
-            SET nota = (SELECT AVG(valor) FROM notas_detalhadas WHERE aluno_id = $1)
-            WHERE id = $1
-        `, [aluno_id]);
-
-        res.redirect('/dashboard/edit');
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Erro ao salvar nota");
+        const result = await db.query(`
+            SELECT 
+                ac.*, 
+                c.nome, 
+                c.descricao as competencia_desc,
+                c.categoria,
+                TO_CHAR(ac.data_registro, 'DD/MM/YYYY') as data_formatada
+            FROM aluno_competencias ac
+            JOIN competencias c ON ac.competencia_id = c.id
+            WHERE ac.aluno_id = $1
+            ORDER BY ac.data_registro DESC
+        `, [alunoId]);
+        
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Erro ao buscar competências:', error);
+        res.status(500).json({ error: 'Erro ao buscar competências' });
     }
 });
 
-app.post('/dashboard/update-notas', checkAuth, async (req, res) => {
-    const { id, nota, presenca } = req.body;
+app.post('/dashboard/adicionar-competencia', checkAuth, async (req, res) => {
+    const { aluno_id, competencia_id, nota, observacoes } = req.body;
+    
+    if (!aluno_id || !competencia_id || !nota) {
+        req.flash('error_msg', 'Todos os campos obrigatórios devem ser preenchidos');
+        return res.redirect('/dashboard/edit');
+    }
+
+    if (nota < 0 || nota > 10) {
+        req.flash('error_msg', 'A nota deve estar entre 0 e 10');
+        return res.redirect('/dashboard/edit');
+    }
     
     try {
-        const ids = Array.isArray(id) ? id : [id];
-        const notas = Array.isArray(nota) ? nota : [nota];
-        const presencas = Array.isArray(presenca) ? presenca : [presenca];
+        await db.query(
+            'INSERT INTO aluno_competencias (aluno_id, competencia_id, nota, observacoes) VALUES ($1, $2, $3, $4)',
+            [aluno_id, competencia_id, nota, observacoes || null]
+        );
+        
+        req.flash('success_msg', 'Competência adicionada com sucesso!');
+        res.redirect('/dashboard/edit');
+    } catch (error) {
+        console.error('Erro ao adicionar competência:', error);
+        req.flash('error_msg', 'Erro ao adicionar competência');
+        res.redirect('/dashboard/edit');
+    }
+});
 
-        for (let i = 0; i < ids.length; i++) {
-            let n = parseFloat(notas[i]);
-            let p = parseInt(presencas[i]);
-            let nivel = (n >= 7 && p >= 75) ? 'APTO' : (n < 5 || p < 50 ? 'INAPTO' : 'EM DESENVOLVIMENTO');
+app.get('/dashboard/deletar-competencia/:id', checkAuth, async (req, res) => {
+    const compId = req.params.id;
+    
+    try {
+        await db.query('DELETE FROM aluno_competencias WHERE id = $1', [compId]);
+        req.flash('success_msg', 'Competência removida com sucesso');
+        res.redirect('/dashboard/edit');
+    } catch (error) {
+        console.error('Erro ao deletar competência:', error);
+        req.flash('error_msg', 'Erro ao deletar competência');
+        res.redirect('/dashboard/edit');
+    }
+});
 
-            await db.query(
-                'UPDATE alunos SET nota = $1, presenca = $2, nivel = $3 WHERE id = $4',
-                [n, p, nivel, ids[i]]
-            );
-        }
+app.post('/dashboard/atualizar-presenca', checkAuth, async (req, res) => {
+    const { aluno_id, presenca } = req.body;
+    
+    try {
+        await db.query('UPDATE alunos SET presenca = $1 WHERE id = $2', [presenca, aluno_id]);
+        req.flash('success_msg', 'Presença atualizada com sucesso!');
         res.redirect('/dashboard/edit');
     } catch (err) {
         console.error(err);
+        req.flash('error_msg', 'Erro ao atualizar presença');
         res.redirect('/dashboard/edit');
     }
 });
 
 app.post('/dashboard/add-aluno', checkAuth, async (req, res) => {
-    const { nome, ano_escolar, idade, nota } = req.body;
+    const { nome, ano_escolar, idade } = req.body;
     try {
-        let n = parseFloat(nota) || 0;
-        let p = 100;
-        let nivel = (n >= 7 && p >= 75) ? 'APTO' : (n < 5 || p < 50 ? 'INAPTO' : 'EM DESENVOLVIMENTO');
-
-        const result = await db.query(
-            'INSERT INTO alunos (nome, ano_escolar, idade, nota, presenca, nivel) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id', 
-            [nome, ano_escolar, idade, n, p, nivel]
+        await db.query(
+            'INSERT INTO alunos (nome, ano_escolar, idade, nota, presenca, nivel) VALUES ($1, $2, $3, $4, $5, $6)', 
+            [nome, ano_escolar, idade, 0, 100, 'EM DESENVOLVIMENTO']
         );
 
-        if (n > 0) {
-            await db.query(
-                'INSERT INTO notas_detalhadas (aluno_id, titulo, descricao, valor) VALUES ($1, $2, $3, $4)', 
-                [result.rows[0].id, 'Nota Inicial', 'Cadastro', n]
-            );
-        }
         res.redirect('/dashboard/edit');
     } catch (err) { 
         console.error(err);

@@ -23,6 +23,19 @@
             <h2 class="page-title">EDITOR DE NOTAS</h2>
         </header>
 
+        <% if (success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success">
+                <%= success_msg %>
+                <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+            </div>
+        <% } %>
+        <% if (error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-error">
+                <%= error_msg %>
+                <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+            </div>
+        <% } %>
+
         <div class="toolbar">
             <div class="action-buttons">
                 <button class="btn-icon btn-filter" id="btnFilter" onclick="openFilter()" title="Filtrar">
@@ -32,9 +45,9 @@
                 <button class="btn-icon" onclick="openAddModal()" title="Adicionar Aluno">
                     <i class="fas fa-plus"></i>
                 </button>
-                
-                <button class="btn-action btn-edit-mode" id="editToggleBtn" onclick="toggleEditMode()">
-                    <i class="fas fa-pencil-alt"></i> <span>EDITAR</span>
+
+                <button class="btn-icon" onclick="exportarTabelaParaExcel()" title="Exportar Tabela">
+                    <i class="fas fa-file-export"></i>
                 </button>
             </div>
 
@@ -46,65 +59,111 @@
 
         <main class="edit-content">
             <div class="table-container">
-                <form id="updateForm" action="/dashboard/update-notas" method="POST">
-                    <table class="alunos-table" id="alunosTable">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>ALUNO</th>
-                                <th>ANO ESCOLAR</th>
-                                <th>IDADE</th>
-                                <th>MÉDIA DE NOTAS</th>
-                                <th>PRESENÇA (%)</th>
-                                <th>NÍVEL</th>
-                                <th>AÇÕES</th>
-                            </tr>
-                        </thead>
-                        <tbody id="alunosTableBody">
-                            <% if (alunos && alunos.length > 0) { %>
-                                <% alunos.forEach(aluno => { 
-                                    let nivelReal = 'EM DESENVOLVIMENTO';
-                                    if (aluno.nota >= 7 && aluno.presenca >= 75) nivelReal = 'APTO';
-                                    else if (aluno.nota < 5 || aluno.presenca < 50) nivelReal = 'INAPTO';
-                                %>
-                                    <tr data-presenca="<%= aluno.presenca %>" data-nota="<%= aluno.nota %>">
-                                        <td>
-                                            <%= aluno.id %>
-                                            <input type="hidden" name="id" value="<%= aluno.id %>">
-                                        </td>
-                                        <td><%= aluno.nome %></td>
-                                        <td><%= aluno.ano_escolar %></td>
-                                        <td><%= aluno.idade %></td>
-                                        
-                                        <td class="editable-cell">
-                                            <span class="view-mode"><%= parseFloat(aluno.nota).toFixed(1) %></span>
-                                            <input type="number" step="0.1" name="nota" value="<%= aluno.nota %>" class="edit-input">
-                                        </td>
-                                        
-                                        <td class="editable-cell">
-                                            <span class="view-mode"><%= aluno.presenca %></span>%
-                                            <input type="number" name="presenca" value="<%= aluno.presenca %>" class="edit-input">
-                                        </td>
-                                        
-                                        <td class="status <%= nivelReal.toLowerCase().replace(' ', '-') %>">
-                                            <%= nivelReal %>
-                                        </td>
-                                        <td class="td-actions">
-                                            <button type="button" class="btn-table-add" onclick="openNotaModal('<%= aluno.id %>', '<%= aluno.nome %>')" title="Atribuir Nota">
-                                                <i class="fas fa-plus-circle"></i>
-                                            </button>
-                                            <a href="javascript:void(0)" onclick="confirmDelete('<%= aluno.id %>', '<%= aluno.nome %>')" class="delete-link">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                <% }); %>
-                            <% } %>
-                        </tbody>
-                    </table>
-                </form>
+                <table class="alunos-table" id="alunosTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ALUNO</th>
+                            <th>ANO ESCOLAR</th>
+                            <th>IDADE</th>
+                            <th>MÉDIA DE NOTAS</th>
+                            <th>PRESENÇA (%)</th>
+                            <th>NÍVEL</th>
+                            <th>AÇÕES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alunosTableBody">
+                        <% if (alunos && alunos.length > 0) { %>
+                            <% alunos.forEach(aluno => { 
+                                let mediaCompetencias = 0;
+                                let temCompetencias = aluno.competencias && aluno.competencias.length > 0;
+                                
+                                if (temCompetencias) {
+                                    const soma = aluno.competencias.reduce((acc, comp) => acc + parseFloat(comp.nota), 0);
+                                    mediaCompetencias = soma / aluno.competencias.length;
+                                }
+                                
+                                let nivelReal = 'EM DESENVOLVIMENTO';
+                                let nivelClass = 'em-desenvolvimento';
+                                
+                                if (mediaCompetencias >= 7 && aluno.presenca >= 75) {
+                                    nivelReal = 'APTO';
+                                    nivelClass = 'apto';
+                                } else if (mediaCompetencias < 5 || aluno.presenca < 50) {
+                                    nivelReal = 'INAPTO';
+                                    nivelClass = 'inapto';
+                                }
+                            %>
+                                <tr data-aluno-id="<%= aluno.id %>" data-presenca="<%= aluno.presenca %>">
+                                    <td><%= aluno.id %></td>
+                                    <td><%= aluno.nome %></td>
+                                    <td><%= aluno.ano_escolar %></td>
+                                    <td><%= aluno.idade %></td>
+                                    <td class="media-notas">
+                                        <% if (temCompetencias) { %>
+                                            <strong><%= mediaCompetencias.toFixed(1) %></strong>
+                                            <small style="color: #888; display: block;">(<%= aluno.competencias.length %> competências)</small>
+                                        <% } else { %>
+                                            <span style="color: #888;">Sem competências</span>
+                                        <% } %>
+                                    </td>
+                                    <td><%= aluno.presenca %>%</td>
+                                    <td class="status <%= nivelClass %>"><%= nivelReal %></td>
+                                    <td class="td-actions">
+                                        <button type="button" class="btn-table-edit" onclick="openEditModal('<%= aluno.id %>', '<%= aluno.nome %>', '<%= aluno.presenca %>')" title="Editar Aluno">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <a href="javascript:void(0)" onclick="confirmDelete('<%= aluno.id %>', '<%= aluno.nome %>')" class="delete-link" title="Excluir Aluno">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } %>
+                    </tbody>
+                </table>
             </div>
 
+            <div class="competencias-section">
+                <h2 class="section-title">COMPETÊNCIAS POR ALUNO</h2>
+                <div class="search-container" style="margin-bottom: 25px; max-width: 400px;">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="competenciasSearchInput" placeholder="Procurar competências de aluno...">
+                </div>
+                <div class="competencias-grid">
+                    <% if (alunos && alunos.length > 0) { %>
+                        <% alunos.forEach(aluno => { 
+                            if (aluno.competencias && aluno.competencias.length > 0) { %>
+                                <div class="competencia-card" data-aluno-nome="<%= aluno.nome.toLowerCase() %>">
+                                    <div class="competencia-header">
+                                        <h3><%= aluno.nome %></h3>
+                                        <span class="competencia-ano"><%= aluno.ano_escolar %></span>
+                                    </div>
+                                    <div class="competencia-list">
+                                        <% aluno.competencias.forEach(comp => { 
+                                            let compClass = 'em-desenvolvimento';
+                                            if (comp.nota >= 7) compClass = 'apto';
+                                            else if (comp.nota < 5) compClass = 'inapto';
+                                        %>
+                                            <div class="competencia-item">
+                                                <div class="competencia-info">
+                                                    <span class="competencia-nome"><%= comp.nome %></span>
+                                                    <% if (comp.observacoes) { %>
+                                                        <span class="competencia-desc"><%= comp.observacoes.substring(0, 30) %><%= comp.observacoes.length > 30 ? '...' : '' %></span>
+                                                    <% } %>
+                                                </div>
+                                                <span class="competencia-nota <%= compClass %>">
+                                                    <%= parseFloat(comp.nota).toFixed(1) %>
+                                                </span>
+                                            </div>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% } %>
+                        <% }); %>
+                    <% } %>
+                </div>
+            </div>
             
             <div class="evolution-container">
                 <h2 class="section-title">EVOLUÇÃO INDIVIDUAL POR ALUNO</h2>
@@ -114,13 +173,15 @@
                 </div>
                 <div class="charts-grid">
                     <% if (alunos && alunos.length > 0) { %>
-                        <% alunos.forEach(aluno => { %>
-                            <div class="chart-card">
-                                <h3>ALUNO: <%= aluno.nome %></h3>
-                                <div class="chart-wrapper" style="position: relative; height: 300px; width: 100%;">
-                                    <canvas id="chart-<%= aluno.id %>"></canvas>
+                        <% alunos.forEach(aluno => { 
+                            if (aluno.competencias && aluno.competencias.length > 0) { %>
+                                <div class="chart-card" data-aluno-nome="<%= aluno.nome.toLowerCase() %>">
+                                    <h3>ALUNO: <%= aluno.nome %></h3>
+                                    <div class="chart-wrapper" style="position: relative; height: 300px; width: 100%;">
+                                        <canvas id="chart-<%= aluno.id %>"></canvas>
+                                    </div>
                                 </div>
-                            </div>
+                            <% } %>
                         <% }); %>
                     <% } %>
                 </div>
@@ -171,31 +232,75 @@
                     </select>
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
                         <div style="flex: 1;"><label>IDADE:</label><input type="number" name="idade" class="filter-input" required></div>
-                        <div style="flex: 1;">
-                            <label>NOTA INICIAL:</label>
-                            <input type="number" step="0.1" name="nota" class="filter-input" max="10"></div>
                     </div>
                     <button type="submit" class="btn-action" style="margin-top: 30px; width: 100%; justify-content: center;">FINALIZAR CADASTRO</button>
                 </form>
             </div>
         </div>
 
-        <div id="notaModal" class="modal-overlay">
-            <div class="modal-content">
-                <button class="close-btn" onclick="closeNotaModal()"><i class="fas fa-times-circle"></i></button>
-                <h2 class="section-title">NOVA NOTA: <span id="nomeAlunoModal" style="color: var(--primary-color);"></span></h2>
-                <form action="/dashboard/atribuir-nota" method="POST" class="filter-options">
-                    <input type="hidden" name="aluno_id" id="alunoIdModal">
-                    <label>TÍTULO DA NOTA:</label><input type="text" name="titulo" class="filter-input" required>
-                    <label style="margin-top: 15px; display: block;">DESCRIÇÃO:</label><textarea name="descricao" class="filter-input" style="height: 80px; padding: 10px;"></textarea>
-                    <label style="margin-top: 15px; display: block;">VALOR DA NOTA:</label><input type="number" step="0.1" name="valor" min="0" max="10" class="filter-input" required>
-                    <button type="submit" class="btn-action" style="margin-top: 25px; width: 100%; justify-content: center;">ATRIBUIR</button>
-                </form>
+        <div id="editAlunoModal" class="modal-overlay">
+            <div class="modal-content modal-lg">
+                <button class="close-btn" onclick="closeEditModal()"><i class="fas fa-times-circle"></i></button>
+                <h2 class="section-title">EDITAR ALUNO: <span id="editNomeAluno" style="color: var(--primary-color);"></span></h2>
+                
+                <div class="edit-tabs">
+                    <button class="tab-btn active" onclick="showEditTab('competencias')">COMPETÊNCIAS</button>
+                    <button class="tab-btn" onclick="showEditTab('presenca')">PRESENÇA</button>
+                </div>
+
+                <div id="editCompetenciasTab" class="tab-content active">
+                    <div class="competencias-management">
+                        <h3>COMPETÊNCIAS REGISTRADAS</h3>
+                        <div id="competenciasListContainer" class="competencias-list-edit"></div>
+                        
+                        <h3 style="margin-top: 30px;">ADICIONAR NOVA COMPETÊNCIA</h3>
+                        <form action="/dashboard/adicionar-competencia" method="POST" class="filter-options">
+                            <input type="hidden" name="aluno_id" id="editAlunoIdComp">
+                            
+                            <label>COMPETÊNCIA:</label>
+                            <select name="competencia_id" class="filter-input" required>
+                                <option value="">SELECIONE UMA COMPETÊNCIA</option>
+                                <% if (listaCompetencias && listaCompetencias.length > 0) { %>
+                                    <% listaCompetencias.forEach(comp => { %>
+                                        <option value="<%= comp.id %>"><%= comp.nome %></option>
+                                    <% }); %>
+                                <% } %>
+                            </select>
+                            
+                            <label style="margin-top: 15px; display: block;">NOTA (0-10):</label>
+                            <input type="number" step="0.1" name="nota" min="0" max="10" class="filter-input" required>
+                            
+                            <label style="margin-top: 15px; display: block;">OBSERVAÇÕES:</label>
+                            <textarea name="observacoes" class="filter-input" style="height: 80px; padding: 10px;" placeholder="Observações sobre o desenvolvimento..."></textarea>
+                            
+                            <button type="submit" class="btn-action" style="margin-top: 25px; width: 100%; justify-content: center;">REGISTRAR COMPETÊNCIA</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="editPresencaTab" class="tab-content">
+                    <form action="/dashboard/atualizar-presenca" method="POST" class="filter-options">
+                        <input type="hidden" name="aluno_id" id="editAlunoId">
+                        <label>PRESENÇA (%)</label>
+                        <input type="number" name="presenca" id="editPresencaInput" min="0" max="100" class="filter-input" required>
+                        <button type="submit" class="btn-action" style="margin-top: 25px; width: 100%; justify-content: center;">ATUALIZAR PRESENÇA</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="exportSuccessModal" class="modal-overlay">
+            <div class="modal-content modal-success">
+                <button class="close-btn" onclick="closeExportModal()"><i class="fas fa-times"></i></button>
+                <div class="success-icon-wrapper"><i class="fas fa-file-excel"></i></div>
+                <h2 class="modal-title-success">Relatório Gerado</h2>
+                <p class="modal-text-success">A planilha foi processada com sucesso e o seu download já começou.</p>
+                <button class="btn-success-action" onclick="closeExportModal()">CONCLUIR</button>
             </div>
         </div>
 
         <footer class="dash-footer">
-            <a href="javascript:void(0)" onclick="exportarTabelaParaExcel()" class="export-link">EXPORTAR COM UMA PLANILHA</a>
+            <a href="javascript:void(0)" onclick="exportarTabelaParaExcel()" class="export-link">EXPORTAR PLANILHA COMPLETA</a>
             <div class="footer-credits">
                 <p>© 2026 AnalisAI — SENAI Duque de Caxias.</p>
                 <a href="/dashboard/equipe"><p>Time de desenvolvedores</p></a>
@@ -203,107 +308,126 @@
         </footer>
     </div>
 
-    <div id="exportSuccessModal" class="modal-overlay">
-        <div class="modal-content modal-success">
-            <button class="close-btn" onclick="closeExportModal()">
-                <i class="fas fa-times"></i>
-            </button>
-            
-            <div class="success-icon-wrapper">
-                <i class="fas fa-file-excel"></i>
-            </div>
-            
-            <h2 class="modal-title-success">Relatório Gerado</h2>
-            
-            <p class="modal-text-success">
-                A planilha foi processada com sucesso e o seu download já começou.
-            </p>
-            
-            <button class="btn-success-action" onclick="closeExportModal()">
-                CONCLUIR
-            </button>
-        </div>
-    </div>
-
     <script>
-        document.getElementById('chartSearchInput').addEventListener('keyup', function() {
-            const searchTerm = this.value.toUpperCase();
-            const chartCards = document.querySelectorAll(".chart-card");
-
-            chartCards.forEach(card => {
-                const studentName = card.querySelector("h3").textContent.toUpperCase();
-                
-                if (studentName.includes(searchTerm)) {
-                    card.style.display = "";
-                } else {
-                    card.style.display = "none"; 
-                }
+        document.getElementById('competenciasSearchInput').addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            document.querySelectorAll(".competencia-card").forEach(card => {
+                const studentName = card.getAttribute('data-aluno-nome') || '';
+                card.style.display = studentName.includes(searchTerm) ? "" : "none";
             });
         });
 
-        function openExportModal() {
-            document.getElementById('exportSuccessModal').style.display = 'flex';
-        }
+        document.getElementById('chartSearchInput').addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            document.querySelectorAll(".chart-card").forEach(card => {
+                const studentName = card.getAttribute('data-aluno-nome') || '';
+                card.style.display = studentName.includes(searchTerm) ? "" : "none";
+            });
+        });
 
-        function closeExportModal() {
-            document.getElementById('exportSuccessModal').style.display = 'none';
-        }
-
+        function openExportModal() { document.getElementById('exportSuccessModal').style.display = 'flex'; }
+        function closeExportModal() { document.getElementById('exportSuccessModal').style.display = 'none'; }
         function openFilter() { document.getElementById('filterModal').style.display = 'flex'; }
         function closeFilter() { document.getElementById('filterModal').style.display = 'none'; }
         function openAddModal() { document.getElementById('addAlunoModal').style.display = 'flex'; }
         function closeAddModal() { document.getElementById('addAlunoModal').style.display = 'none'; }
-        function openNotaModal(id, nome) {
-            document.getElementById('alunoIdModal').value = id;
-            document.getElementById('nomeAlunoModal').innerText = nome.toUpperCase();
-            document.getElementById('notaModal').style.display = 'flex';
+        
+        function openEditModal(id, nome, presenca) {
+            document.getElementById('editAlunoId').value = id;
+            document.getElementById('editAlunoIdComp').value = id;
+            document.getElementById('editNomeAluno').innerText = nome.toUpperCase();
+            document.getElementById('editPresencaInput').value = presenca;
+            carregarCompetencias(id);
+            document.getElementById('editAlunoModal').style.display = 'flex';
+            showEditTab('competencias');
         }
-        function closeNotaModal() { document.getElementById('notaModal').style.display = 'none'; }
 
-        let isEditMode = false;
-        function toggleEditMode() {
-            const btn = document.getElementById('editToggleBtn');
-            if (!isEditMode) {
-                isEditMode = true;
-                document.body.classList.add('editing');
-                btn.querySelector('span').innerText = "SALVAR";
-                btn.style.backgroundColor = "#ff0000";
+        function closeEditModal() { 
+            document.getElementById('editAlunoModal').style.display = 'none'; 
+        }
+
+        function showEditTab(tabName) {
+            document.querySelectorAll('#editAlunoModal .tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('#editAlunoModal .tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tabName === 'competencias') {
+                document.querySelectorAll('#editAlunoModal .tab-btn')[0].classList.add('active');
+                document.getElementById('editCompetenciasTab').classList.add('active');
             } else {
-                document.getElementById('updateForm').submit();
+                document.querySelectorAll('#editAlunoModal .tab-btn')[1].classList.add('active');
+                document.getElementById('editPresencaTab').classList.add('active');
             }
+        }
+
+        function carregarCompetencias(alunoId) {
+            fetch(`/dashboard/competencias-aluno/${alunoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('competenciasListContainer');
+                    if (data.length === 0) {
+                        container.innerHTML = '<p style="color: #888; text-align: center;">Nenhuma competência registrada ainda.</p>';
+                    } else {
+                        let html = '';
+                        data.forEach(comp => {
+                            const notaClass = comp.nota >= 7 ? 'apto' : (comp.nota >= 5 ? 'desenvolvimento' : 'inapto');
+                            html += `
+                                <div class="competencia-edit-item">
+                                    <div class="competencia-edit-info">
+                                        <span class="competencia-edit-nome">${comp.nome}</span>
+                                        ${comp.observacoes ? `<small style="color:#888">${comp.observacoes}</small>` : ''}
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span class="competencia-edit-nota ${notaClass}">${parseFloat(comp.nota).toFixed(1)}</span>
+                                        <a href="/dashboard/deletar-competencia/${comp.id}" class="btn-delete-comp" onclick="return confirm('Remover esta competência?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        container.innerHTML = html;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    document.getElementById('competenciasListContainer').innerHTML = 
+                        '<p style="color: #ff0101; text-align: center;">Erro ao carregar competências.</p>';
+                });
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             const dataAlunos = <%- JSON.stringify(alunos) %>;
+            
             dataAlunos.forEach(aluno => {
                 const canvas = document.getElementById(`chart-${aluno.id}`);
-                if (!canvas) return;
+                if (!canvas || !aluno.competencias || aluno.competencias.length === 0) return;
+                
                 const ctx = canvas.getContext('2d');
-                const historicoValores = (aluno.notas_individuais) ? aluno.notas_individuais.map(n => parseFloat(n.valor)) : [parseFloat(aluno.nota)];
-                const historicoLabels = (aluno.notas_individuais) ? aluno.notas_individuais.map(n => n.titulo) : ['Inicial'];
+                const labels = aluno.competencias.map(c => c.nome.substring(0, 10));
+                const valores = aluno.competencias.map(c => parseFloat(c.nota));
 
                 new Chart(ctx, {
-                    type: 'line',
+                    type: 'bar',
                     data: {
-                        labels: historicoLabels,
+                        labels: labels,
                         datasets: [{
                             label: 'Nota',
-                            data: historicoValores,
+                            data: valores,
+                            backgroundColor: valores.map(v => 
+                                v >= 7 ? 'rgba(0, 255, 0, 0.5)' : 
+                                v >= 5 ? 'rgba(255, 255, 0, 0.5)' : 
+                                'rgba(255, 0, 0, 0.5)'
+                            ),
                             borderColor: '#ff0101',
-                            backgroundColor: 'rgba(255, 1, 1, 0.1)',
-                            borderWidth: 4,
-                            fill: true,
-                            tension: 0.3,
-                            pointRadius: 6,
-                            pointBackgroundColor: '#fff'
+                            borderWidth: 1
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#888' } },
-                            x: { grid: { display: false }, ticks: { color: '#888' } }
+                            y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+                            x: { grid: { display: false }, ticks: { color: '#888', maxRotation: 45, minRotation: 45 } }
                         },
                         plugins: { legend: { display: false } }
                     }
@@ -318,24 +442,21 @@
             document.querySelectorAll("#alunosTableBody tr").forEach(row => {
                 const ano = row.cells[2].textContent.trim();
                 const status = row.cells[6].textContent.trim();
-                row.style.display = ((selAno==="" || ano===selAno) && (selStatus==="" || status===selStatus)) ? "" : "none";
+                row.style.display = ((selAno === "" || ano === selAno) && (selStatus === "" || status === selStatus)) ? "" : "none";
             });
             
-            document.querySelectorAll(".chart-card").forEach(card => {
-                const nomeAluno = card.querySelector("h3").textContent.replace('ALUNO:', '').trim();
+            document.querySelectorAll(".chart-card, .competencia-card").forEach(card => {
+                const nomeAluno = card.querySelector("h3")?.textContent.replace('ALUNO:', '').trim() || '';
                 let encontrou = false;
+                
                 document.querySelectorAll("#alunosTableBody tr").forEach(row => {
-                    const nomeTabela = row.cells[1].textContent.trim();
-                    if (nomeTabela === nomeAluno) {
-                        const ano = row.cells[2].textContent.trim();
-                        const status = row.cells[6].textContent.trim();
-                        const matchesAno = (selAno === "" || ano === selAno);
-                        const matchesStatus = (selStatus === "" || status === selStatus);
-                        card.style.display = (matchesAno && matchesStatus) ? "" : "none";
-                        encontrou = true;
+                    if (row.style.display !== "none") {
+                        const nomeTabela = row.cells[1].textContent.trim();
+                        if (nomeTabela === nomeAluno) encontrou = true;
                     }
                 });
-                if (!encontrou) card.style.display = "none";
+                
+                card.style.display = encontrou ? "" : "none";
             });
             
             closeFilter();
@@ -344,8 +465,7 @@
         function clearFilters() {
             document.getElementById('filterAno').value = "";
             document.getElementById('filterStatus').value = "";
-            document.querySelectorAll("#alunosTableBody tr").forEach(row => row.style.display = "");
-            document.querySelectorAll(".chart-card").forEach(card => card.style.display = "");
+            document.querySelectorAll("#alunosTableBody tr, .chart-card, .competencia-card").forEach(el => el.style.display = "");
             closeFilter();
         }
 
@@ -366,8 +486,14 @@
             const dataAlunos = <%- JSON.stringify(alunos) %>;
 
             worksheet.columns = [
-                { key: 'c1', width: 15 }, { key: 'c2', width: 35 }, { key: 'c3', width: 25 },
-                { key: 'c4', width: 12 }, { key: 'c5', width: 15 }, { key: 'c6', width: 15 }, { key: 'c7', width: 25 }
+                { key: 'A', width: 10 },
+                { key: 'B', width: 20 },
+                { key: 'C', width: 20 },
+                { key: 'D', width: 24 },
+                { key: 'E', width: 12 },
+                { key: 'F', width: 12 },
+                { key: 'G', width: 25 },
+                { key: 'H', width: 120 }
             ];
 
             try {
@@ -375,96 +501,101 @@
                 const blob = await response.blob();
                 const arrayBuffer = await blob.arrayBuffer();
                 const logoId = workbook.addImage({ buffer: arrayBuffer, extension: 'png' });
-                worksheet.addImage(logoId, { tl: { col: 0, row: 0 }, br: { col: 2, row: 7 } });
-
-                worksheet.mergeCells('C2:G4');
-                const titleCell = worksheet.getCell('C2');
-                titleCell.value = 'RELATÓRIO GERAL DE DESEMPENHO';
-                titleCell.font = { size: 16, bold: true };
+                worksheet.addImage(logoId, { tl: { col: 0, row: 0 }, br: { col: 3, row: 6 } });
+                
+                worksheet.mergeCells('D2:G4');
+                const titleCell = worksheet.getCell('D2');
+                titleCell.value = 'RELATÓRIO GERAL DE DESEMPENHO POR COMPETÊNCIA';
+                titleCell.font = { size: 16, bold: true, color: { argb: 'FFFF0101' } };
                 titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
             } catch (e) { console.log("Erro logo"); }
 
-            const headerRow = worksheet.getRow(9);
-            headerRow.values = ['ID', 'ALUNO', 'ANO ESCOLAR', 'IDADE', 'MÉDIA', 'PRESENÇA', 'NÍVEL'];
+            const headerRow = worksheet.getRow(8);
+            headerRow.values = ['ID', 'ALUNO', 'ANO ESCOLAR', 'IDADE', 'MÉDIA', 'PRESENÇA', 'NÍVEL', 'COMPETÊNCIAS'];
             headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
             headerRow.eachCell(cell => {
                 cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0101' } };
                 cell.alignment = { horizontal: 'center', vertical: 'middle' };
             });
 
-            dataAlunos.forEach(aluno => {
-                let nivel = 'EM DESENVOLVIMENTO';
-                if (aluno.nota >= 7 && aluno.presenca >= 75) nivel = 'APTO';
-                else if (aluno.nota < 5 || aluno.presenca < 50) nivel = 'INAPTO';
+            dataAlunos.forEach((aluno, index) => {
+                let mediaCompetencias = 0;
+                let competenciasStr = '';
+                
+                if (aluno.competencias && aluno.competencias.length > 0) {
+                    const soma = aluno.competencias.reduce((acc, comp) => acc + parseFloat(comp.nota), 0);
+                    mediaCompetencias = (soma / aluno.competencias.length).toFixed(1);
+                    competenciasStr = aluno.competencias.map(comp => 
+                        `${comp.nome}: ${parseFloat(comp.nota).toFixed(1)}`
+                    ).join('; ');
+                } else {
+                    mediaCompetencias = '0.0';
+                    competenciasStr = 'Sem competências';
+                }
 
-                const row = worksheet.addRow({
-                    c1: aluno.id,
-                    c2: aluno.nome,
-                    c3: aluno.ano_escolar,
-                    c4: aluno.idade,
-                    c5: parseFloat(aluno.nota || 0).toFixed(1),
-                    c6: (aluno.presenca || 0) + '%',
-                    c7: nivel
-                });
+                let nivel = 'EM DESENVOLVIMENTO';
+                if (mediaCompetencias >= 7 && aluno.presenca >= 75) {
+                    nivel = 'APTO';
+                } else if (mediaCompetencias < 5 || aluno.presenca < 50) {
+                    nivel = 'INAPTO';
+                }
+
+                const row = worksheet.getRow(9 + index);
+                row.values = [aluno.id, aluno.nome, aluno.ano_escolar, aluno.idade, mediaCompetencias, aluno.presenca + '%', nivel, competenciasStr];
 
                 row.eachCell((cell, colNum) => {
                     cell.alignment = { horizontal: colNum === 2 ? 'left' : 'center', vertical: 'middle' };
                 });
             });
 
-            let currentOuterRow = worksheet.lastRow.number + 3;
+            let currentRow = 9 + dataAlunos.length + 2;
 
             dataAlunos.forEach(aluno => {
-                const titleRow = worksheet.getRow(currentOuterRow);
-                titleRow.values = [`HISTÓRICO INDIVIDUAL: ${aluno.nome.toUpperCase()}`];
-                titleRow.font = { bold: true, color: { argb: 'FFFF0101' } };
-                worksheet.mergeCells(`A${currentOuterRow}:G${currentOuterRow}`);
-                
-                currentOuterRow++;
-                const subHeader = worksheet.getRow(currentOuterRow);
-                subHeader.values = ['DATA', 'TÍTULO DA ATIVIDADE', 'DESCRIÇÃO', null, null, null, 'NOTA'];
-                subHeader.font = { italic: true, bold: true };
-                worksheet.mergeCells(`C${currentOuterRow}:F${currentOuterRow}`);
-                subHeader.eachCell(c => c.alignment = { horizontal: 'center' });
-                
-                currentOuterRow++;
+                const titleRow = worksheet.getRow(currentRow);
+                titleRow.getCell(1).value = `HISTÓRICO INDIVIDUAL: ${aluno.nome.toUpperCase()}`;
+                titleRow.getCell(1).font = { bold: true, color: { argb: 'FFFF0101' } };
+                worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+                currentRow++;
 
-                if (aluno.notas_individuais && aluno.notas_individuais.length > 0) {
-                    aluno.notas_individuais.forEach(n => {
-                        const detailRow = worksheet.getRow(currentOuterRow);
-                        const dataF = new Date(n.data_criacao).toLocaleDateString('pt-BR');
+                const compHeaderRow = worksheet.getRow(currentRow);
+                compHeaderRow.getCell(2).value = 'COMPETÊNCIAS';
+                compHeaderRow.getCell(7).value = 'NOTA';
+                compHeaderRow.getCell(2).font = { bold: true };
+                compHeaderRow.getCell(7).font = { bold: true };
+                compHeaderRow.getCell(2).alignment = { horizontal: 'left' };
+                compHeaderRow.getCell(7).alignment = { horizontal: 'center' };
+                currentRow++;
+
+                if (aluno.competencias && aluno.competencias.length > 0) {
+                    aluno.competencias.forEach(comp => {
+                        const compRow = worksheet.getRow(currentRow);
+                        compRow.getCell(2).value = comp.nome;
+                        compRow.getCell(3).value = comp.observacoes || 'Avaliação inicial';
+                        compRow.getCell(7).value = parseFloat(comp.nota).toFixed(1);
                         
-                        detailRow.getCell(1).value = dataF;
-                        detailRow.getCell(2).value = n.titulo;
-                        detailRow.getCell(3).value = n.descricao || '-';
-                        detailRow.getCell(7).value = parseFloat(n.valor).toFixed(1);
-
-                        detailRow.getCell(1).alignment = { horizontal: 'center' };
-                        detailRow.getCell(2).alignment = { horizontal: 'left' };
-                        detailRow.getCell(3).alignment = { horizontal: 'left' };
-                        detailRow.getCell(7).alignment = { horizontal: 'center' };
-                        detailRow.getCell(7).font = { bold: true };
-
-                        worksheet.mergeCells(`C${currentOuterRow}:F${currentOuterRow}`);
-                        currentOuterRow++;
+                        compRow.getCell(2).alignment = { horizontal: 'left' };
+                        compRow.getCell(3).alignment = { horizontal: 'left' };
+                        compRow.getCell(7).alignment = { horizontal: 'center' };
+                        compRow.getCell(7).font = { bold: true };
+                        
+                        worksheet.mergeCells(`C${currentRow}:F${currentRow}`);
+                        currentRow++;
                     });
                 } else {
-                    worksheet.getRow(currentOuterRow).values = ['-', 'Sem registros', '-', null, null, null, '-'];
-                    worksheet.mergeCells(`C${currentOuterRow}:F${currentOuterRow}`);
-                    currentOuterRow++;
+                    const emptyRow = worksheet.getRow(currentRow);
+                    emptyRow.getCell(2).value = 'Sem competências';
+                    emptyRow.getCell(3).value = '-';
+                    emptyRow.getCell(7).value = '-';
+                    worksheet.mergeCells(`C${currentRow}:F${currentRow}`);
+                    currentRow++;
                 }
-                currentOuterRow += 2;
+
+                currentRow += 2;
             });
 
             const buffer = await workbook.xlsx.writeBuffer();
             saveAs(new Blob([buffer]), `Relatorio_Completo_AnalisAI.xlsx`);
             openExportModal();
-        }
-
-        window.onclick = (e) => {
-            if (e.target.className === 'modal-overlay') {
-                closeFilter(); closeAddModal(); closeNotaModal();
-            }
         }
     </script>
 </body>

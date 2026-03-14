@@ -24,48 +24,63 @@
 
         <main class="dash-content graficos-grid">
             
-            <p class="section-label">Panorama de Aptidão Geral</p>
-            <div class="row-top">
+            <p class="section-label">PANORAMA DE NÍVEIS</p>
+            <div class="row-triple">
                 <div class="dash-card card-grafico">
                     <% if (stats.total > 0) { %>
                         <canvas id="chartAptos"></canvas>
-                        <p class="chart-label label-verde">Alunos Aptos</p>
+                        <p class="chart-label label-verde">ALUNOS APTOS</p>
+                        <p class="chart-value"><%= stats.apto %></p>
                     <% } else { %>
-                        <div class="empty-chart">Sem dados para exibir</div>
+                        <div class="empty-chart">SEM DADOS PARA EXIBIR</div>
                     <% } %>
                 </div>
                 <div class="dash-card card-grafico">
                     <% if (stats.total > 0) { %>
                         <canvas id="chartInaptos"></canvas>
-                        <p class="chart-label label-vermelho">Alunos Inaptos</p>
+                        <p class="chart-label label-vermelho">ALUNOS INAPTOS</p>
+                        <p class="chart-value"><%= stats.inapto %></p>
                     <% } else { %>
-                        <div class="empty-chart">Sem dados para exibir</div>
+                        <div class="empty-chart">SEM DADOS PARA EXIBIR</div>
+                    <% } %>
+                </div>
+                <div class="dash-card card-grafico">
+                    <% if (stats.total > 0) { %>
+                        <canvas id="chartDesenvolvimento"></canvas>
+                        <p class="chart-label label-amarelo">EM DESENVOLVIMENTO</p>
+                        <p class="chart-value"><%= stats.total - stats.apto - stats.inapto %></p>
+                    <% } else { %>
+                        <div class="empty-chart">SEM DADOS PARA EXIBIR</div>
                     <% } %>
                 </div>
             </div>
 
-            <p class="section-label">Média Ensino Médio</p>
+            <p class="section-label">MÉDIA ENSINO MÉDIO</p>
             <div class="dash-card card-grafico-large">
                 <% if (stats.total > 0) { %>
                     <canvas id="chartMedio"></canvas>
+                    <p class="chart-value-large"><%= stats.mediaMedio %></p>
                 <% } else { %>
-                    <div class="empty-chart">Nenhum dado disponível</div>
+                    <div class="empty-chart">NENHUM DADO DISPONÍVEL</div>
                 <% } %>
             </div>
 
-            <p class="section-label">Média Ensino Fundamental</p>
+            <p class="section-label">MÉDIA ENSINO FUNDAMENTAL</p>
             <div class="dash-card card-grafico-small">
                 <% if (stats.total > 0) { %>
                     <canvas id="chartFundamental"></canvas>
+                    <p class="chart-value-large"><%= stats.mediaFundamental %></p>
                 <% } else { %>
-                    <div class="empty-chart">Nenhum dado disponível</div>
+                    <div class="empty-chart">NENHUM DADO DISPONÍVEL</div>
                 <% } %>
             </div>
         </main>
 
         <footer class="dash-footer">
             <div class="footer-actions">
-                <a href="/dashboard/edit" class="btn-secondary-dash">VOLTAR AO EDITOR</a>
+                <a href="/dashboard/edit" class="btn-secondary-dash">
+                    <i class="fas fa-arrow-left"></i> VOLTAR AO EDITOR
+                </a>
             </div>
             <div class="footer-credits">
                 <p>© 2026 AnalisAI — SENAI Duque de Caxias.</p>
@@ -78,6 +93,8 @@
         const stats = <%- JSON.stringify(stats) %>;
 
         if (stats.total > 0) {
+            stats.desenvolvimento = stats.total - stats.apto - stats.inapto;
+
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -126,10 +143,23 @@
                 options: commonOptions
             });
 
+            new Chart(document.getElementById('chartDesenvolvimento'), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [stats.desenvolvimento, stats.total - stats.desenvolvimento],
+                        backgroundColor: ['#d4a017', '#111'],
+                        borderWidth: 0,
+                        cutout: '85%'
+                    }]
+                },
+                options: commonOptions
+            });
+
             new Chart(document.getElementById('chartMedio'), {
                 type: 'bar',
                 data: {
-                    labels: ['Média da Turma'],
+                    labels: ['MÉDIA DA TURMA'],
                     datasets: [{
                         data: [stats.mediaMedio],
                         backgroundColor: 'rgba(255, 1, 1, 0.3)',
@@ -145,7 +175,7 @@
             new Chart(document.getElementById('chartFundamental'), {
                 type: 'bar',
                 data: {
-                    labels: ['Média da Turma'],
+                    labels: ['MÉDIA DA TURMA'],
                     datasets: [{
                         data: [stats.mediaFundamental],
                         backgroundColor: 'rgba(255, 1, 1, 0.3)',
