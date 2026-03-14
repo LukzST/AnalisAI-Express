@@ -355,29 +355,79 @@ app.get('/dashboard/delete-aluno/:id', checkAuth, async (req, res) => {
 
 app.get('/dashboard/graficos', checkAuth, async (req, res) => {
     try {
-        const query = await db.query(`
+        const alunosResult = await db.query(`
             SELECT 
-                COUNT(*)::int as total,
-                COUNT(*) FILTER (WHERE nivel = 'APTO')::int as apto,
-                COUNT(*) FILTER (WHERE nivel = 'INAPTO')::int as inapto,
-                COALESCE(AVG(nota) FILTER (WHERE ano_escolar LIKE '%MÉDIO%'), 0)::float as media_medio,
-                COALESCE(AVG(nota) FILTER (WHERE ano_escolar LIKE '%FUNDAMENTAL%'), 0)::float as media_fundamental
-            FROM alunos
+                a.*,
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'nota', ac.nota
+                            )
+                        )
+                        FROM aluno_competencias ac
+                        WHERE ac.aluno_id = a.id
+                    ),
+                    '[]'::json
+                ) as competencias
+            FROM alunos a
         `);
 
-        const row = query.rows[0];
+        const alunos = alunosResult.rows;
+        
+        let total = 0;
+        let apto = 0;
+        let inapto = 0;
+        let somaMedio = 0;
+        let countMedio = 0;
+        let somaFundamental = 0;
+        let countFundamental = 0;
+
+        alunos.forEach(aluno => {
+            total++;
+            
+            let mediaCompetencias = 0;
+            if (aluno.competencias && aluno.competencias.length > 0) {
+                const soma = aluno.competencias.reduce((acc, comp) => acc + parseFloat(comp.nota), 0);
+                mediaCompetencias = soma / aluno.competencias.length;
+            }
+
+            if (mediaCompetencias >= 7 && aluno.presenca >= 75) {
+                apto++;
+            } else if (mediaCompetencias < 5 || aluno.presenca < 50) {
+                inapto++;
+            }
+
+            if (aluno.ano_escolar.includes('MÉDIO')) {
+                somaMedio += mediaCompetencias;
+                countMedio++;
+            } else if (aluno.ano_escolar.includes('FUNDAMENTAL')) {
+                somaFundamental += mediaCompetencias;
+                countFundamental++;
+            }
+        });
+
         const stats = {
-            total: row.total || 0,
-            apto: row.apto || 0,
-            inapto: row.inapto || 0,
-            mediaMedio: row.media_medio.toFixed(1),
-            mediaFundamental: row.media_fundamental.toFixed(1)
+            total: total,
+            apto: apto,
+            inapto: inapto,
+            mediaMedio: countMedio > 0 ? (somaMedio / countMedio).toFixed(1) : 0,
+            mediaFundamental: countFundamental > 0 ? (somaFundamental / countFundamental).toFixed(1) : 0
         };
 
         res.render('dashboard/graficos', { stats });
+
     } catch (err) {
         console.error(err);
-        res.status(500).send("Erro ao processar dados dos gráficos.");
+        res.render('dashboard/graficos', { 
+            stats: {
+                total: 0,
+                apto: 0,
+                inapto: 0,
+                mediaMedio: 0,
+                mediaFundamental: 0
+            }
+        });
     }
 });
 
