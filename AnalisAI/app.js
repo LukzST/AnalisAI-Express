@@ -105,8 +105,47 @@ app.post('/login', async (req, res) => {
 
 app.get('/dashboard', checkAuth, async (req, res) => {
     try {
-        const alunosResult = await db.query('SELECT * FROM alunos');
+        const alunosResult = await db.query(`
+            SELECT 
+                a.*,
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'nota', ac.nota
+                            )
+                        )
+                        FROM aluno_competencias ac
+                        WHERE ac.aluno_id = a.id
+                    ),
+                    '[]'::json
+                ) as competencias
+            FROM alunos a
+            ORDER BY a.nome ASC
+        `);
+
         const alunos = alunosResult.rows;
+
+        const alunosComNivel = alunos.map(aluno => {
+            let mediaCompetencias = 0;
+            if (aluno.competencias && aluno.competencias.length > 0) {
+                const soma = aluno.competencias.reduce((acc, comp) => acc + parseFloat(comp.nota), 0);
+                mediaCompetencias = soma / aluno.competencias.length;
+            }
+
+            let nivel = 'EM DESENVOLVIMENTO';
+            if (mediaCompetencias >= 7 && aluno.presenca >= 75) {
+                nivel = 'APTO';
+            } else if (mediaCompetencias < 5 || aluno.presenca < 50) {
+                nivel = 'INAPTO';
+            }
+
+            return {
+                ...aluno,
+                nivel: nivel,
+                media_competencias: mediaCompetencias.toFixed(1)
+            };
+        });
 
         const rankingGeralResult = await db.query(`
             SELECT 
@@ -165,7 +204,7 @@ app.get('/dashboard', checkAuth, async (req, res) => {
 
         res.render('dashboard/main', { 
             user: req.session.user, 
-            alunos: alunos,
+            alunos: alunosComNivel,
             rankingGeral: rankingGeral,
             rankingMedio: rankingMedio,
             rankingFundamental: rankingFundamental

@@ -22,6 +22,7 @@
 }
 
 * {
+    font-weight: normal;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -30,6 +31,7 @@
 body.dash-body {
     background-color: var(--bg-dark);
     font-family: var(--font-family);
+    font-weight: normal;
     color: var(--text-white);
     min-height: 100vh;
     display: flex;
@@ -129,11 +131,14 @@ body.dash-body {
 }
 
 .stats-card.apto { border-bottom: 6px solid #217346; }
+.stats-card.desenvolvimento { border-bottom: 6px solid #d4a017; }
 .stats-card.inapto { border-bottom: 6px solid var(--primary-red); }
 
+
 .stats-info h3 {
-    font-size: 0.75rem;
+    font-size: 1rem;
     color: #666;
+    font-weight: normal;
     letter-spacing: 2px;
     margin-bottom: 15px;
     text-transform: uppercase;
@@ -375,7 +380,6 @@ body.dash-body {
             padding: 10px 25px;
             cursor: pointer;
             font-size: 0.8rem;
-            font-weight: bold;
             transition: 0.3s;
             border-radius: 30px;
             letter-spacing: 1px;
@@ -454,12 +458,14 @@ body.dash-body {
         }
 
         .ranking-info {
+            font-weight: normal;
             flex: 1;
         }
 
         .ranking-info h4 {
             color: #fff;
             font-size: 1rem;
+            font-weight: normal;
             margin-bottom: 3px;
             text-transform: uppercase;
         }
@@ -536,3 +542,536 @@ body.dash-body {
                 font-size: 1rem;
             }
         }
+
+        @media screen and (max-width: 1440px) {
+    .main-layout {
+        padding: 35px 50px;
+    }
+    
+    .dash-header {
+        margin-bottom: 40px;
+    }
+    
+    .logo img {
+        max-width: 160px;
+    }
+    
+    .dash-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+    }
+    
+    .stats-card {
+        padding: 35px;
+    }
+    
+    .stats-number {
+        font-size: 3rem;
+    }
+    
+    .icon-bg {
+        font-size: 7rem;
+        right: -15px;
+        bottom: -15px;
+    }
+    
+    .dash-footer {
+        padding: 50px 0 25px;
+    }
+    
+    .ranking-item {
+        padding: 12px 18px;
+    }
+    
+    .ranking-position {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+    
+    .ranking-info h4 {
+        font-size: 0.95rem;
+    }
+    
+    .media-nota {
+        padding: 7px 12px;
+        font-size: 1.1rem;
+    }
+    
+    .modal-content {
+        padding: 70px 50px;
+        max-width: 550px;
+    }
+    
+    .close-btn {
+        font-size: 32px;
+        top: 25px;
+        right: 25px;
+    }
+    
+    .btn-primary-dash, .btn-secondary-dash, .btn-primary-dash-2 {
+        padding: 10px 22px;
+        font-size: 0.75rem;
+    }
+    
+    .footer-actions {
+        gap: 20px;
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .main-layout {
+        padding: 30px 40px;
+        margin-left: 85px;
+    }
+    
+    .dash-header {
+        margin-bottom: 35px;
+        padding-bottom: 15px;
+    }
+    
+    .logo img {
+        max-width: 140px;
+    }
+    
+    .header-user span {
+        font-size: 0.8rem;
+    }
+    
+    .logout-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .section-title-2 {
+        font-size: 1.1rem;
+        margin-bottom: 25px;
+    }
+    
+    .dash-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .stats-card {
+        padding: 30px;
+    }
+    
+    .stats-info h3 {
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+    }
+    
+    .icon-bg {
+        font-size: 6rem;
+        right: -10px;
+        bottom: -10px;
+    }
+    
+    .ranking-tabs {
+        gap: 8px;
+        margin-bottom: 25px;
+        padding-bottom: 12px;
+    }
+    
+    .ranking-tab {
+        padding: 8px 20px;
+        font-size: 0.75rem;
+    }
+    
+    .ranking-item {
+        padding: 10px 15px;
+        gap: 15px;
+    }
+    
+    .ranking-position {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .ranking-info h4 {
+        font-size: 0.9rem;
+    }
+    
+    .ranking-info p {
+        font-size: 0.65rem;
+    }
+    
+    .ranking-media {
+        min-width: 60px;
+    }
+    
+    .media-nota {
+        padding: 6px 10px;
+        font-size: 1rem;
+    }
+    
+    .empty-ranking {
+        padding: 50px 15px;
+    }
+    
+    .empty-ranking i {
+        font-size: 2.5rem;
+    }
+    
+    .empty-ranking p {
+        font-size: 0.8rem;
+    }
+    
+    .dash-footer {
+        padding: 40px 0 20px;
+    }
+    
+    .footer-actions {
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .btn-primary-dash, .btn-secondary-dash, .btn-primary-dash-2 {
+        padding: 8px 18px;
+        font-size: 0.7rem;
+        gap: 8px;
+    }
+    
+    .btn-primary-dash i, .btn-secondary-dash i, .btn-primary-dash-2 i {
+        font-size: 0.9rem;
+    }
+    
+    .export-link {
+        font-size: 0.75rem;
+        letter-spacing: 1.5px;
+    }
+    
+    .footer-credits {
+        font-size: 0.75rem;
+    }
+    
+    .modal-content {
+        padding: 60px 40px;
+        max-width: 500px;
+    }
+    
+    .close-btn {
+        font-size: 30px;
+        top: 20px;
+        right: 20px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .main-layout {
+        padding: 20px;
+        margin-left: 0;
+    }
+    
+    .dash-header {
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        text-align: center;
+    }
+    
+    .logo img {
+        max-width: 120px;
+    }
+    
+    .header-user {
+        width: 100%;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    .header-user span {
+        font-size: 0.7rem;
+    }
+    
+    .logout-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+    
+    .section-title-2 {
+        font-size: 1rem;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .dash-content {
+        gap: 40px;
+    }
+    
+    .dash-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .stats-card {
+        padding: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .stats-info {
+        flex: 1;
+    }
+    
+    .stats-info h3 {
+        font-size: 0.8rem;
+        margin-bottom: 8px;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+    }
+    
+    .icon-bg {
+        position: relative;
+        right: auto;
+        bottom: auto;
+        font-size: 2.5rem;
+        opacity: 0.2;
+        transform: none;
+        margin-left: 15px;
+    }
+    
+    .stats-card.apto, 
+    .stats-card.desenvolvimento, 
+    .stats-card.inapto {
+        border-bottom: none;
+        border-left: 6px solid transparent;
+    }
+    
+    .stats-card.apto { border-left-color: #217346; }
+    .stats-card.desenvolvimento { border-left-color: #d4a017; }
+    .stats-card.inapto { border-left-color: var(--primary-red); }
+    
+    .ranking-section {
+        margin-top: 30px;
+    }
+    
+    .ranking-tabs {
+        flex-direction: column;
+        gap: 5px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+    }
+    
+    .ranking-tab {
+        width: 100%;
+        padding: 10px;
+        font-size: 0.7rem;
+    }
+    
+    .ranking-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 15px;
+    }
+    
+    .ranking-position {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+    
+    .ranking-info {
+        width: 100%;
+    }
+    
+    .ranking-info h4 {
+        font-size: 0.85rem;
+    }
+    
+    .ranking-info p {
+        font-size: 0.6rem;
+    }
+    
+    .ranking-media {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .media-nota {
+        width: 100%;
+        padding: 8px;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+    
+    .empty-ranking {
+        padding: 40px 15px;
+    }
+    
+    .empty-ranking i {
+        font-size: 2rem;
+    }
+    
+    .empty-ranking p {
+        font-size: 0.7rem;
+    }
+    
+    .dash-footer {
+        flex-direction: column;
+        gap: 20px;
+        padding: 30px 0 20px;
+        text-align: center;
+    }
+    
+    .footer-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .btn-primary-dash, .btn-secondary-dash, .btn-primary-dash-2 {
+        width: 100%;
+        justify-content: center;
+        padding: 10px;
+        font-size: 0.65rem;
+    }
+    
+    .export-link {
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+    }
+    
+    .footer-credits {
+        width: 100%;
+        text-align: center;
+        font-size: 0.7rem;
+    }
+    
+    .footer-credits p {
+        margin: 5px 0;
+    }
+    
+    .modal-content {
+        padding: 50px 20px;
+        max-width: 90%;
+        border-radius: 30px;
+    }
+    
+    .close-btn {
+        font-size: 28px;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .btn-primary-dash::after,
+    .btn-secondary-dash::after,
+    .btn-primary-dash-2::after {
+        display: none;
+    }
+    
+    .dash-card {
+        min-height: 350px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .main-layout {
+        padding: 15px;
+    }
+    
+    .stats-card {
+        padding: 20px;
+    }
+    
+    .stats-info h3 {
+        font-size: 0.7rem;
+    }
+    
+    .stats-number {
+        font-size: 1.8rem;
+    }
+    
+    .icon-bg {
+        font-size: 2rem;
+    }
+    
+    .section-title-2 {
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .ranking-position {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+    
+    .ranking-info h4 {
+        font-size: 0.8rem;
+    }
+    
+    .media-nota {
+        font-size: 0.85rem;
+    }
+    
+    .modal-content {
+        padding: 40px 15px;
+    }
+    
+    .close-btn {
+        font-size: 24px;
+        top: 10px;
+        right: 10px;
+    }
+}
+
+@media screen and (max-width: 360px) {
+    .main-layout {
+        padding: 10px;
+    }
+    
+    .stats-number {
+        font-size: 1.5rem;
+    }
+    
+    .icon-bg {
+        font-size: 1.8rem;
+    }
+    
+    .ranking-item {
+        padding: 12px;
+    }
+    
+    .ranking-info h4 {
+        font-size: 0.75rem;
+    }
+    
+    .footer-credits {
+        font-size: 0.65rem;
+    }
+}
+
+@media screen and (min-width: 1921px) {
+    .main-layout {
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 50px 80px;
+    }
+    
+    .dash-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .stats-number {
+        font-size: 4rem;
+    }
+    
+    .icon-bg {
+        font-size: 10rem;
+    }
+}

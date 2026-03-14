@@ -226,7 +226,7 @@
                 <h2 class="section-title-2">CADASTRAR ALUNO</h2>
                 <form action="/dashboard/add-aluno" method="POST" class="filter-options">
                     <label>NOME COMPLETO:</label>
-                    <input type="text" name="nome" class="filter-input" placeholder="Nome do aluno" required>
+                    <input type="text" name="nome" class="filter-input" pattern="[A-Za-zÀ-ÖØ-öø-ÿ\s]+" oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s]/g, '')" placeholder="Nome do aluno" required>
                     <label style="margin-top: 15px; display: block;">ANO ESCOLAR:</label>
                     <select name="ano_escolar" class="filter-input">
                         <option value="1º MÉDIO">1º MÉDIO</option>
@@ -235,7 +235,7 @@
                         <option value="9º FUNDAMENTAL">9º FUNDAMENTAL</option>
                     </select>
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <div style="flex: 1;"><label>IDADE:</label><input type="number" name="idade" class="filter-input" required></div>
+                        <div style="flex: 1;"><label>IDADE:</label><input type="number" name="idade" min="14" max="20" class="filter-input" required></div>
                     </div>
                     <button type="submit" class="btn-action" style="margin-top: 30px; width: 100%; justify-content: center;">FINALIZAR CADASTRO</button>
                 </form>

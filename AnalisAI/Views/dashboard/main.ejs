@@ -52,6 +52,14 @@
                         </div>
                         <i class="fas fa-times-circle icon-bg"></i>
                     </div>
+
+                    <div class="stats-card desenvolvimento">
+                        <div class="stats-info">
+                            <h3>EM DESENVOLVIMENTO</h3>
+                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('MÉDIO') && a.nivel === 'EM DESENVOLVIMENTO').length %></p>
+                        </div>
+                        <i class="fas fa-chart-line icon-bg"></i>
+                    </div>
                 </div>
             </section>
 
@@ -80,6 +88,14 @@
                             <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL') && a.nivel === 'INAPTO').length %></p>
                         </div>
                         <i class="fas fa-times-circle icon-bg"></i>
+                    </div>
+
+                    <div class="stats-card desenvolvimento">
+                        <div class="stats-info">
+                            <h3>EM DESENVOLVIMENTO</h3>
+                            <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL') && a.nivel === 'EM DESENVOLVIMENTO').length %></p>
+                        </div>
+                        <i class="fas fa-chart-line icon-bg"></i>
                     </div>
                 </div>
             </section>

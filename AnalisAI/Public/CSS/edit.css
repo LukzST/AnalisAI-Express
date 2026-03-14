@@ -18,6 +18,7 @@
 
 * {
     margin: 0;
+    font-weight: normal;
     padding: 0;
     box-sizing: border-box;
     font-family: var(--font-family);
@@ -294,17 +295,14 @@ body.dash-body {
 
 .status.apto {
     color: var(--success-green);
-    font-weight: bold;
 }
 
 .status.inapto {
     color: var(--primary-red);
-    font-weight: bold;
 }
 
 .status.em-desenvolvimento {
     color: var(--warning-yellow);
-    font-weight: bold;
 }
 
 .media-notas {
@@ -525,8 +523,7 @@ body.dash-body {
 .chart-card h3 {
     color: #555;
     margin-bottom: 25px;
-    font-size: 0.75rem;
-    letter-spacing: 2px;
+    font-size: 1rem;
     text-transform: uppercase;
     font-weight: normal;
 }
@@ -1015,99 +1012,4 @@ select.filter-input option {
 .footer-credits a:hover {
     color: #666;
 }
-@media (max-width: 1200px) {
-    .main-layout {
-        margin-left: 85px;
-        padding: 30px;
-    }
-    
-    .charts-grid {
-        grid-template-columns: 1fr;
-    }
-}
 
-@media (max-width: 768px) {
-    .main-layout {
-        margin-left: 0;
-        padding: 20px;
-    }
-    
-    .toolbar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .action-buttons {
-        justify-content: center;
-    }
-    
-    .search-container {
-        max-width: 100%;
-    }
-    
-    .dash-header {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-    }
-    
-    .page-title {
-        font-size: 1rem;
-    }
-    
-    .table-container {
-        padding: 20px;
-    }
-    
-    .competencias-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .dash-footer {
-        flex-direction: column;
-        gap: 20px;
-        text-align: center;
-    }
-    
-    .footer-credits {
-        text-align: center;
-    }
-    
-    .modal-content {
-        padding: 40px 20px;
-    }
-    
-    .edit-tabs {
-        flex-direction: column;
-    }
-}
-
-@media (max-width: 480px) {
-    .main-layout {
-        padding: 15px;
-    }
-    
-    .btn-icon {
-        width: 45px;
-        height: 45px;
-        font-size: 16px;
-    }
-    
-    .btn-action {
-        padding: 0 20px;
-        height: 45px;
-        font-size: 0.75rem;
-    }
-    
-    .alunos-table td {
-        padding: 15px 10px;
-        font-size: 0.8rem;
-    }
-}
-
-.text-center { text-align: center; }
-.mt-20 { margin-top: 20px; }
-.mb-20 { margin-bottom: 20px; }
-.mt-40 { margin-top: 40px; }
-.mb-40 { margin-bottom: 40px; }
-.w-100 { width: 100%; }
