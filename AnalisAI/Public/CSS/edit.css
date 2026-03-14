@@ -987,25 +987,20 @@ select.filter-input option {
 
 .footer-credits {
     text-align: right;
-}
-
-.footer-credits p {
-    color: #444;
-    font-size: 0.7rem;
-    margin: 3px 0;
-    letter-spacing: 1px;
+    font-size: 0.85rem;
+    color: #333;
 }
 
 .footer-credits a {
     color: #444;
+    gap: 10px;
     text-decoration: none;
     transition: 0.3s;
 }
 
 .footer-credits a:hover {
-    color: var(--primary-red);
+    color: #666;
 }
-
 @media (max-width: 1200px) {
     .main-layout {
         margin-left: 85px;

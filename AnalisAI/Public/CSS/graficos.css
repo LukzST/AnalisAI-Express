@@ -228,24 +228,19 @@ canvas {
 
 .footer-credits {
     text-align: right;
-}
-
-.footer-credits p {
-    color: var(--text-muted);
-    font-size: 0.7rem;
-    margin: 3px 0;
-    letter-spacing: 1px;
-    text-align: right;
+    font-size: 0.85rem;
+    color: #333;
 }
 
 .footer-credits a {
-    color: var(--text-muted);
+    color: #444;
+    gap: 10px;
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: 0.3s;
 }
 
 .footer-credits a:hover {
-    color: var(--primary-red);
+    color: #666;
 }
 
 @media screen and (max-width: 1200px) {
