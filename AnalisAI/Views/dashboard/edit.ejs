@@ -49,6 +49,10 @@
                 <button class="btn-icon" onclick="exportarTabelaParaExcel()" title="Exportar Tabela">
                     <i class="fas fa-file-export"></i>
                 </button>
+
+                    <button class="btn-icon btn-erase" onclick="openEraseModal()" title="Apagar Todos os Dados">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
             </div>
 
             <div class="search-container">
@@ -308,7 +312,42 @@
         </footer>
     </div>
 
+
+        <div id="eraseAllModal" class="modal-overlay">
+        <div class="modal-content modal-small">
+            <button class="close-btn" onclick="closeEraseModal()"><i class="fas fa-times-circle"></i></button>
+            <div class="modal-icon-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2 class="modal-title-warning">APAGAR TUDO?</h2>
+            <p class="modal-text-warning">
+                Esta ação irá remover <strong>TODOS</strong> os alunos, notas e competências atribuídas.<br>
+                As competências padrão do sistema serão mantidas.<br>
+                <span style="color: #ff0101; font-weight: bold;">Esta operação não pode ser desfeita.</span>
+            </p>
+            <div class="modal-actions">
+                <form action="/dashboard/erase-all" method="POST">
+                    <button type="submit" class="btn-erase-confirm">
+                        <i class="fas fa-trash"></i> SIM, APAGAR TUDO
+                    </button>
+                </form>
+                <button onclick="closeEraseModal()" class="btn-cancel">
+                    CANCELAR
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
+
+        function openEraseModal() {
+            document.getElementById('eraseAllModal').style.display = 'flex';
+        }
+
+        function closeEraseModal() {
+            document.getElementById('eraseAllModal').style.display = 'none';
+        }
+
         document.getElementById('competenciasSearchInput').addEventListener('keyup', function() {
             const searchTerm = this.value.toLowerCase();
             document.querySelectorAll(".competencia-card").forEach(card => {

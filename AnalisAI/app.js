@@ -353,6 +353,21 @@ app.get('/dashboard/delete-aluno/:id', checkAuth, async (req, res) => {
     }
 });
 
+app.post('/dashboard/erase-all', checkAuth, async (req, res) => {
+    try {
+        await db.query('TRUNCATE TABLE aluno_competencias RESTART IDENTITY CASCADE');
+        await db.query('TRUNCATE TABLE notas_detalhadas RESTART IDENTITY CASCADE');
+        await db.query('TRUNCATE TABLE alunos RESTART IDENTITY CASCADE');
+        
+        req.flash('success_msg', 'Todos os dados foram apagados e os IDs foram resetados!');
+        res.redirect('/dashboard/edit');
+    } catch (err) {
+        console.error(err);
+        req.flash('error_msg', 'Erro ao apagar os dados');
+        res.redirect('/dashboard/edit');
+    }
+});
+
 app.get('/dashboard/graficos', checkAuth, async (req, res) => {
     try {
         const alunosResult = await db.query(`

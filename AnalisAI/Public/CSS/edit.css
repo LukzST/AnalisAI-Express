@@ -85,6 +85,88 @@ body.dash-body {
     gap: 15px;
 }
 
+.btn-erase {
+    border-color: #ff0101 !important;
+    color: #ff0101 !important;
+}
+
+.btn-erase:hover {
+    background: #ff0101 !important;
+    color: white !important;
+}
+
+.modal-small {
+    max-width: 400px;
+    text-align: center;
+}
+
+.modal-icon-warning {
+    font-size: 3rem;
+    color: #ff0101;
+    margin-bottom: 15px;
+}
+
+.modal-title-warning {
+    color: #ff0101;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.modal-text-warning {
+    color: #888;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-erase-confirm {
+    width: 100%;
+    padding: 15px;
+    background: #ff0101;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-transform: uppercase;
+}
+
+.btn-erase-confirm:hover {
+    background: #cc0000;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 1, 1, 0.3);
+}
+
+.btn-cancel {
+    width: 100%;
+    padding: 15px;
+    background: transparent;
+    color: #888;
+    border: 1px solid #222;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-transform: uppercase;
+}
+
+.btn-cancel:hover {
+    border-color: #444;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
 .btn-icon {
     width: 55px;
     height: 55px;
