@@ -80,14 +80,14 @@ body.dash-body {
 .graficos-grid {
     display: flex;
     flex-direction: column;
-    gap: 40px;
-    padding-bottom: 40px;
+    gap: 20px;
+    padding-bottom: 20px;
 }
 
 .section-label {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: #555;
-    margin-top: 20px;
+    margin-top: 40px;
     letter-spacing: 3px;
     text-transform: uppercase;
     text-align: left;
@@ -160,7 +160,8 @@ body.dash-body {
 
 .chart-value-large {
     font-size: 2.5rem;
-    margin-top: 20px;
+    margin-top: 10px;
+    margin-left: 25px;
     color: var(--primary-red);
     text-align: center;
 }

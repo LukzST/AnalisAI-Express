@@ -197,7 +197,7 @@ app.get('/dashboard/edit', checkAuth, async (req, res) => {
                                 'descricao', nd.descricao,
                                 'valor', nd.valor,
                                 'data_criacao', nd.data_criacao
-                            ) ORDER BY nd.data_criacao DESC
+                            ) ORDER BY nd.id ASC
                         )
                         FROM notas_detalhadas nd
                         WHERE nd.aluno_id = a.id
@@ -216,7 +216,7 @@ app.get('/dashboard/edit', checkAuth, async (req, res) => {
                                 'nota', ac.nota,
                                 'observacoes', ac.observacoes,
                                 'data_registro', ac.data_registro
-                            ) ORDER BY ac.data_registro DESC
+                            ) ORDER BY ac.id ASC
                         )
                         FROM aluno_competencias ac
                         JOIN competencias c ON ac.competencia_id = c.id
@@ -225,14 +225,13 @@ app.get('/dashboard/edit', checkAuth, async (req, res) => {
                     '[]'::json
                 ) as competencias
             FROM alunos a
-            ORDER BY a.nome ASC
+            ORDER BY a.id ASC
         `);
 
         const competenciasList = await db.query(`
             SELECT id, nome, descricao, categoria
             FROM competencias 
-            WHERE ativo = true 
-            ORDER BY nome ASC
+            ORDER BY id ASC
         `);
 
         res.render('dashboard/edit', { 
@@ -240,9 +239,13 @@ app.get('/dashboard/edit', checkAuth, async (req, res) => {
             listaCompetencias: competenciasList.rows,
             user: req.session.user 
         });
+
     } catch (err) {
-        console.error(err);
-        res.send("Erro ao carregar dados");
+        console.error("ERRO NO DASHBOARD EDIT:", err);
+        res.status(500).render('error', { 
+            message: "Não foi possível carregar os dados do painel pedagógico.",
+            error: err 
+        });
     }
 });
 
@@ -346,10 +349,20 @@ app.get('/dashboard/delete-aluno/:id', checkAuth, async (req, res) => {
     
     try {
         await db.query('DELETE FROM alunos WHERE id = $1', [id]);
+        const checkEmpty = await db.query('SELECT COUNT(*) FROM alunos');
+        
+        if (parseInt(checkEmpty.rows[0].count) === 0) {
+            await db.query('ALTER SEQUENCE alunos_id_seq RESTART WITH 1');
+        } else {
+            await db.query("SELECT setval('alunos_id_seq', (SELECT MAX(id) FROM alunos))");
+        }
+
+        req.flash('success_msg', 'Aluno removido e IDs reajustados!');
         res.redirect('/dashboard/edit');
     } catch (err) {
         console.error(err);
-        res.status(500).send("Erro ao remover aluno.");
+        req.flash('error_msg', 'Erro ao remover aluno.');
+        res.redirect('/dashboard/edit');
     }
 });
 

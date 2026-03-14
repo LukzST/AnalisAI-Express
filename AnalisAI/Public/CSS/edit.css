@@ -362,15 +362,6 @@ body.dash-body {
     padding: 0;
 }
 
-.section-title {
-    font-size: 0.8rem;
-    color: #444;
-    letter-spacing: 3px;
-    margin-bottom: 30px;
-    text-transform: uppercase;
-    font-weight: normal;
-}
-
 .competencias-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -836,6 +827,30 @@ select.filter-input option {
     background: rgba(255, 1, 1, 0.05);
     transform: translateY(-2px);
 }
+.btn-action-2 {
+    padding: 0 35px;
+    height: 55px;
+    text-align: center;
+    border-radius: 12px;
+    background: transparent;
+    border: 1px solid #222;
+    color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.85rem;
+    transition: 0.4s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-action-2:hover {
+    border-color: var(--primary-red);
+    color: white;
+    background: rgba(255, 1, 1, 0.05);
+    transform: translateY(-2px);
+}
 
 .btn-success-action {
     width: 100%;
@@ -975,8 +990,7 @@ select.filter-input option {
 .export-link {
     color: #444;
     text-decoration: none;
-    font-size: 0.8rem;
-    letter-spacing: 2px;
+    font-size: 1rem;
     transition: 0.3s;
     text-transform: uppercase;
 }

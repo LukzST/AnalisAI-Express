@@ -27,7 +27,7 @@
 
         <main class="dash-content">
             <section class="section-container">
-                <h2 class="section-title"><i class="fas fa-graduation-cap"></i> ENSINO MÉDIO</h2>
+                <h2 class="section-title-2"><i class="fas fa-graduation-cap"></i> ENSINO MÉDIO</h2>
                 <div class="dash-grid">
                     <div class="stats-card">
                         <div class="stats-info">
@@ -56,7 +56,7 @@
             </section>
 
             <section class="section-container">
-                <h2 class="section-title"><i class="fas fa-book"></i> ENSINO FUNDAMENTAL</h2>
+                <h2 class="section-title-2"><i class="fas fa-book"></i> ENSINO FUNDAMENTAL</h2>
                 <div class="dash-grid">
                     <div class="stats-card">
                         <div class="stats-info">
@@ -84,9 +84,8 @@
                 </div>
             </section>
 
-            <!-- NOVA SEÇÃO: RANKING DE COMPETÊNCIAS -->
             <section class="section-container ranking-section">
-                <h2 class="section-title"><i class="fas fa-trophy"></i> RANKING DE COMPETÊNCIAS</h2>
+                <h2 class="section-title-2"><i class="fas fa-trophy"></i> RANKING DE COMPETÊNCIAS</h2>
                 
                 <div class="ranking-tabs">
                     <button class="ranking-tab active" onclick="showRanking('geral')">GERAL</button>
@@ -195,190 +194,6 @@
             </div>
         </footer>
     </div>
-
-    <style>
-        /* Estilos para o Ranking */
-        .ranking-section {
-            margin-top: 40px;
-        }
-
-        .ranking-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #1a1a1a;
-            padding-bottom: 15px;
-        }
-
-        .ranking-tab {
-            background: transparent;
-            border: none;
-            color: #444;
-            padding: 10px 25px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: bold;
-            transition: 0.3s;
-            border-radius: 30px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .ranking-tab:hover {
-            background: #111;
-            color: #fff;
-        }
-
-        .ranking-tab.active {
-            background: #ff0101;
-            color: white;
-        }
-
-        .ranking-content {
-            display: none;
-        }
-
-        .ranking-content.active {
-            display: block;
-        }
-
-        .ranking-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .ranking-item {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 15px 20px;
-            background: #0c0c0c;
-            border: 1px solid #1a1a1a;
-            border-radius: 15px;
-            transition: 0.3s;
-        }
-
-        .ranking-item:hover {
-            border-color: #ff0101;
-            transform: translateX(5px);
-        }
-
-        .ranking-position {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 50%;
-            background: #1a1a1a;
-            color: #888;
-        }
-
-        .ranking-position.gold {
-            background: rgba(255, 215, 0, 0.2);
-            color: #FFD700;
-            border: 2px solid #FFD700;
-        }
-
-        .ranking-position.silver {
-            background: rgba(192, 192, 192, 0.2);
-            color: #C0C0C0;
-            border: 2px solid #C0C0C0;
-        }
-
-        .ranking-position.bronze {
-            background: rgba(205, 127, 50, 0.2);
-            color: #CD7F32;
-            border: 2px solid #CD7F32;
-        }
-
-        .ranking-info {
-            flex: 1;
-        }
-
-        .ranking-info h4 {
-            color: #fff;
-            font-size: 1rem;
-            margin-bottom: 3px;
-            text-transform: uppercase;
-        }
-
-        .ranking-info p {
-            color: #555;
-            font-size: 0.7rem;
-            letter-spacing: 1px;
-        }
-
-        .ranking-media {
-            min-width: 70px;
-            text-align: center;
-        }
-
-        .media-nota {
-            display: inline-block;
-            padding: 8px 15px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 30px;
-        }
-
-        .media-nota.apto {
-            background: rgba(33, 115, 70, 0.15);
-            color: #217346;
-            border: 1px solid #217346;
-        }
-
-        .media-nota.desenvolvimento {
-            background: rgba(212, 160, 23, 0.15);
-            color: #d4a017;
-            border: 1px solid #d4a017;
-        }
-
-        .media-nota.inapto {
-            background: rgba(255, 1, 1, 0.15);
-            color: #ff0101;
-            border: 1px solid #ff0101;
-        }
-
-        .empty-ranking {
-            text-align: center;
-            padding: 60px 20px;
-            background: #0c0c0c;
-            border: 1px solid #1a1a1a;
-            border-radius: 25px;
-        }
-
-        .empty-ranking i {
-            font-size: 3rem;
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        .empty-ranking p {
-            color: #555;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-        }
-
-        @media (max-width: 768px) {
-            .ranking-tabs {
-                flex-direction: column;
-            }
-            
-            .ranking-item {
-                flex-wrap: wrap;
-            }
-            
-            .ranking-position {
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
-            }
-        }
-    </style>
 
     <script>
         function showRanking(tipo) {

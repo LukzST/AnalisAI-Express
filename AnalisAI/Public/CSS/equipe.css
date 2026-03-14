@@ -1,9 +1,11 @@
 :root {
-    --primary-color: #ff0101;
-    --bg-color: #080808;
+    --primary-red: #ff0101;
+    --bg-dark: #080808;
     --card-bg: #0c0c0c;
     --text-white: #ffffff;
+    --text-muted: #888;
     --font-family: 'Inter-Medium', sans-serif;
+    --border-color: #1a1a1a;
 }
 
 @font-face {
@@ -20,19 +22,18 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: var(--font-family) !important;
-    font-weight: normal !important;
+    font-family: var(--font-family);
 }
 
 body {
-    background-color: var(--bg-color);
+    background-color: var(--bg-dark);
     color: var(--text-white);
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
     padding: 20px;
-    animation: fadeInPage 0.5s ease-out;
+    animation: fadeInPage 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .equipe-page-wrapper {
@@ -40,43 +41,49 @@ body {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 700px;
+    max-width: 750px;
 }
 
 .logo-equipe {
     text-align: center;
-    margin-bottom: 35px;
+    margin-bottom: 40px;
 }
 
 .logo-equipe img {
-    width: 200px;
+    width: 220px;
     height: auto;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .logo-equipe h3 {
-    font-size: 0.7rem;
-    letter-spacing: 4px;
-    color: #555;
+    font-size: 0.75rem;
+    letter-spacing: 5px;
+    color: var(--text-muted);
     text-transform: uppercase;
+    font-weight: normal;
 }
 
 .equipe-container {
     background-color: var(--card-bg);
-    border: 1px solid #1a1a1a;
-    border-radius: 20px;
-    padding: 50px;
+    border: 1px solid var(--border-color);
+    border-radius: 25px;
+    padding: 60px;
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 40px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    gap: 45px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    transition: border-color 0.4s ease;
+}
+
+.equipe-container:hover {
+    border-color: rgba(255, 1, 1, 0.2);
 }
 
 .equipe-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 30px;
     width: 100%;
 }
 
@@ -85,59 +92,81 @@ body {
 }
 
 .equipe-section h4 {
-    font-size: 0.65rem;
-    color: var(--primary-color);
-    margin-bottom: 15px;
-    letter-spacing: 2px;
+    font-size: 0.7rem;
+    color: var(--primary-red);
+    margin-bottom: 20px;
+    letter-spacing: 3px;
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.equipe-section h4 i {
+    font-size: 0.9rem;
+    opacity: 0.8;
 }
 
 .equipe-section p {
     font-size: 0.85rem;
-    line-height: 1.6;
-    color: #aaa;
+    line-height: 1.8;
+    color: #ccc;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
+    margin-bottom: 5px;
+    transition: color 0.3s ease;
+}
+
+.equipe-section p:hover {
+    color: var(--text-white);
 }
 
 .full-width {
     width: 100%;
-    padding-top: 25px;
+    padding-top: 35px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .button-area {
     display: flex;
     justify-content: center;
-    margin-top: 10px;
+    margin-top: 20px;
 }
 
 .btn-voltar {
     text-decoration: none;
-    color: #888;
+    color: var(--text-muted);
     border: 1px solid #222;
-    border-radius: 8px;
-    padding: 12px 40px;
-    font-size: 0.75rem;
-    letter-spacing: 1.5px;
-    transition: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border-radius: 12px;
+    padding: 14px 45px;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     background: transparent;
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .btn-voltar:hover {
-    border-color: var(--primary-color);
-    color: white;
+    border-color: var(--primary-red);
+    color: var(--text-white);
     background: rgba(255, 1, 1, 0.05);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 650px) {
     .equipe-grid {
         grid-template-columns: 1fr;
-        gap: 30px;
+        gap: 40px;
     }
     .equipe-container {
-        padding: 30px;
+        padding: 40px 30px;
+    }
+    .logo-equipe img {
+        width: 180px;
     }
 }
