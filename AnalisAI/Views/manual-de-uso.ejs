@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnalisAI - Manual do Usuário</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/sidebar.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        .pdf-container {
+            width: 100%;
+            height: calc(100vh - 150px);
+            margin-top: 20px;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            background: #0c0c0c;
+        }
+        
+        .pdf-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 12px;
+        }
+        
+        .pdf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .pdf-title {
+            font-size: 1.2rem;
+            color: var(--primary-red);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .btn-download {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--primary-red);
+            color: var(--primary-red);
+            border-radius: 8px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        
+        .btn-download:hover {
+            background: var(--primary-red);
+            color: white;
+        }
+    </style>
+</head>
+<body class="dash-body">
+    <%- include('partials/sidebar') %>
+    
+    <div class="main-layout">
+        <header class="dash-header">
+            <div class="logo">
+                <img src="/img/logo3-white.png" alt="AnalisAI">
+            </div>
+            <h2 class="page-title">MANUAL DO USUÁRIO</h2>
+        </header>
+        
+        <div class="pdf-header">
+            <span class="pdf-title">DOCUMENTO ORIENTADOR</span>
+            <a href="/pdf/AnalisAI_DOC.pdf" download class="btn-download">
+                <i class="fas fa-download"></i> BAIXAR PDF
+            </a>
+        </div>
+        
+        <div class="pdf-container">
+            <iframe src="/pdf/AnalisAI_DOC.pdf"></iframe>
+        </div>
+    </div>
+</body>
+</html>

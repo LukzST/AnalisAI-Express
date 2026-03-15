@@ -247,11 +247,11 @@ body.dash-body {
 
 .close-btn {
     position: absolute;
-    top: 30px;
-    right: 30px;
+    top: 25px;
+    right: 25px;
     background: none;
     border: none;
-    color: var(--primary-red);
+    color: #333;
     font-size: 35px;
     cursor: pointer;
     transition: 0.3s;

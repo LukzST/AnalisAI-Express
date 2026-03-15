@@ -316,29 +316,29 @@
 
 
         <div id="eraseAllModal" class="modal-overlay">
-        <div class="modal-content modal-small">
-            <button class="close-btn" onclick="closeEraseModal()"><i class="fas fa-times-circle"></i></button>
-            <div class="modal-icon-warning">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h2 class="modal-title-warning">APAGAR TUDO?</h2>
-            <p class="modal-text-warning">
-                Esta ação irá remover <strong>TODOS</strong> os alunos, notas e competências atribuídas.<br>
-                As competências padrão do sistema serão mantidas.<br>
-                <span style="color: #ff0101; font-weight: bold;">Esta operação não pode ser desfeita.</span>
-            </p>
-            <div class="modal-actions">
-                <form action="/dashboard/erase-all" method="POST">
-                    <button type="submit" class="btn-erase-confirm">
-                        <i class="fas fa-trash"></i> SIM, APAGAR TUDO
+            <div class="modal-content modal-small">
+                <button class="close-btn" onclick="closeEraseModal()"><i class="fas fa-times-circle"></i></button>
+                <div class="modal-icon-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h2 class="modal-title-warning">APAGAR TUDO?</h2>
+                <p class="modal-text-warning">
+                    Esta ação irá remover <strong>TODOS</strong> os alunos, notas e competências atribuídas.<br>
+                    As competências padrão do sistema serão mantidas.<br>
+                    <span style="color: #ff0101; font-weight: bold;">Esta operação não pode ser desfeita.</span>
+                </p>
+                <div class="modal-actions">
+                    <form action="/dashboard/erase-all" method="POST">
+                        <button type="submit" class="btn-erase-confirm">
+                            <i class="fas fa-trash"></i> SIM, APAGAR TUDO
+                        </button>
+                    </form>
+                    <button onclick="closeEraseModal()" class="btn-cancel">
+                        CANCELAR
                     </button>
-                </form>
-                <button onclick="closeEraseModal()" class="btn-cancel">
-                    CANCELAR
-                </button>
+                </div>
             </div>
         </div>
-    </div>
 
     <script>
 

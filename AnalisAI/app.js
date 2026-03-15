@@ -370,16 +370,49 @@ app.post('/dashboard/atualizar-presenca', checkAuth, async (req, res) => {
 
 app.post('/dashboard/add-aluno', checkAuth, async (req, res) => {
     const { nome, ano_escolar, idade } = req.body;
+    
+    const anosPermitidos = ['1º MÉDIO', '2º MÉDIO', '3º MÉDIO', '9º FUNDAMENTAL'];
+    
+    if (!anosPermitidos.includes(ano_escolar)) {
+        return res.status(400).render('error', {
+            titulo: 'ANO ESCOLAR INVÁLIDO',
+            mensagem: `O ano escolar "${ano_escolar}" não é permitido.`,
+            erroDetalhe: 'Anos permitidos: 1º MÉDIO, 2º MÉDIO, 3º MÉDIO, 9º FUNDAMENTAL'
+        });
+    }
+    
+    if (idade < 10 || idade > 20) {
+        return res.status(400).render('error', {
+            titulo: 'IDADE INVÁLIDA',
+            mensagem: 'A idade deve estar entre 10 e 20 anos.',
+            erroDetalhe: `Idade informada: ${idade}`
+        });
+    }
+    
     try {
         await db.query(
             'INSERT INTO alunos (nome, ano_escolar, idade, nota, presenca, nivel) VALUES ($1, $2, $3, $4, $5, $6)', 
             [nome, ano_escolar, idade, 0, 100, 'EM DESENVOLVIMENTO']
         );
 
+        req.flash('success_msg', 'Aluno cadastrado com sucesso!');
         res.redirect('/dashboard/edit');
     } catch (err) { 
         console.error(err);
-        res.status(500).send("Erro ao adicionar aluno"); 
+        
+        if (err.code === '23514') { 
+            return res.status(400).render('error', {
+                titulo: 'ANO ESCOLAR INVÁLIDO',
+                mensagem: 'O valor informado para ano escolar não é permitido.',
+                erroDetalhe: 'Use apenas: 1º MÉDIO, 2º MÉDIO, 3º MÉDIO, 9º FUNDAMENTAL'
+            });
+        }
+
+        res.status(500).render('error', {
+            titulo: 'ERRO NO SERVIDOR',
+            mensagem: 'Não foi possível cadastrar o aluno.',
+            erroDetalhe: err.message
+        });
     }
 });
 
@@ -502,6 +535,10 @@ app.get('/dashboard/equipe', checkAuth, (req, res) => {
   res.render('dashboard/equipe');
 });
 
+app.get('/manual-de-uso', (req, res) => {
+  res.render('manual-de-uso');
+});
+
 app.get('/dashboard/usuarios', checkAuth, async (req, res) => {
     try {
         const result = await db.query('SELECT id, nome, email, cargo, status FROM usuarios ORDER BY nome ASC');
@@ -549,6 +586,32 @@ app.get('/dashboard/usuarios/delete/:id', checkAuth, async (req, res) => {
 app.get('/logout', (req, res) => {
   req.session.destroy();
   res.redirect('/');
+});
+
+app.use((req, res) => {
+    res.status(404).render('error', {
+        titulo: 'PÁGINA NÃO ENCONTRADA',
+        mensagem: 'A página que você está procurando não existe.',
+        erroDetalhe: null
+    });
+});
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    
+    if (err.code === '23514') {
+        return res.status(400).render('error', {
+            titulo: 'ERRO DE VALIDAÇÃO',
+            mensagem: 'Um valor inválido foi enviado para o banco de dados.',
+            erroDetalhe: err.detail || err.message
+        });
+    }
+    
+    res.status(500).render('error', {
+        titulo: 'ERRO NO SERVIDOR',
+        mensagem: 'Ocorreu um erro interno no servidor.',
+        erroDetalhe: process.env.NODE_ENV === 'development' ? err.message : null
+    });
 });
 
 app.listen(3000, () => console.log('Servidor rodando em http://localhost:3000'));
