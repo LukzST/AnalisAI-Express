@@ -9,7 +9,6 @@ const flash = require('connect-flash');
 app.use(favicon(path.join(__dirname, 'Public', 'favicon.ico')));
 
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('Public'));
 app.use(express.urlencoded({ extended: true }));
 
