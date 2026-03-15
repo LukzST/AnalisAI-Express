@@ -1,8 +1,3 @@
--- =====================================================
--- DATABASE ANALISAI - ESTRUTURA ESSENCIAL
--- =====================================================
-
--- Tabela de Usuários
 CREATE TABLE IF NOT EXISTS usuarios (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -13,7 +8,6 @@ CREATE TABLE IF NOT EXISTS usuarios (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de Alunos (com restrição de ano_escolar)
 CREATE TABLE IF NOT EXISTS alunos (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -24,7 +18,6 @@ CREATE TABLE IF NOT EXISTS alunos (
     nivel VARCHAR(20) DEFAULT 'EM DESENVOLVIMENTO' CHECK (nivel IN ('APTO', 'INAPTO', 'EM DESENVOLVIMENTO'))
 );
 
--- Tabela de Notas Detalhadas
 CREATE TABLE IF NOT EXISTS notas_detalhadas (
     id SERIAL PRIMARY KEY,
     aluno_id INTEGER REFERENCES alunos(id) ON DELETE CASCADE,
@@ -34,7 +27,6 @@ CREATE TABLE IF NOT EXISTS notas_detalhadas (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de Competências (catálogo)
 CREATE TABLE IF NOT EXISTS competencias (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE,
@@ -44,7 +36,6 @@ CREATE TABLE IF NOT EXISTS competencias (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de Aluno_Competencias (relacionamento)
 CREATE TABLE IF NOT EXISTS aluno_competencias (
     id SERIAL PRIMARY KEY,
     aluno_id INTEGER NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
@@ -54,21 +45,14 @@ CREATE TABLE IF NOT EXISTS aluno_competencias (
     data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Índices para performance
 CREATE INDEX IF NOT EXISTS idx_aluno_competencias_aluno ON aluno_competencias(aluno_id);
 CREATE INDEX IF NOT EXISTS idx_aluno_competencias_comp ON aluno_competencias(competencia_id);
 CREATE INDEX IF NOT EXISTS idx_notas_aluno ON notas_detalhadas(aluno_id);
 
--- =====================================================
--- DADOS INICIAIS OBRIGATÓRIOS
--- =====================================================
-
--- Usuário administrador padrão
 INSERT INTO usuarios (nome, email, senha) 
 VALUES ('Lucas Eduardo', 'lucaseduarte6@gmail.com', '123456789')
 ON CONFLICT (email) DO NOTHING;
 
--- Competências padrão do sistema
 INSERT INTO competencias (nome, descricao, categoria) VALUES
 ('Raciocínio Lógico', 'Capacidade de resolver problemas usando lógica', 'Cognitiva'),
 ('Comunicação', 'Habilidade de expressar ideias de forma clara', 'Comportamental'),
@@ -82,15 +66,9 @@ INSERT INTO competencias (nome, descricao, categoria) VALUES
 ('Ética', 'Compromisso com valores morais', 'Comportamental')
 ON CONFLICT (nome) DO NOTHING;
 
--- =====================================================
--- DADOS DE EXEMPLO - UM ALUNO COM 5 COMPETÊNCIAS
--- =====================================================
-
--- Inserir um aluno de exemplo
 INSERT INTO alunos (nome, ano_escolar, idade, nota, presenca, nivel) VALUES 
 ('JOÃO PEDRO', '1º MÉDIO', 15, 6.5, 90, 'EM DESENVOLVIMENTO');
 
--- Inserir 5 competências para o aluno
 INSERT INTO aluno_competencias (aluno_id, competencia_id, nota, observacoes)
 SELECT 
     (SELECT id FROM alunos WHERE nome = 'JOÃO PEDRO'),
