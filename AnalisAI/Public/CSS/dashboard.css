@@ -282,6 +282,10 @@ body.dash-body {
     gap: 10px;
 }
 
+.btn-secondary-dash:hover a {
+     color: white;
+}
+
 .btn-primary-dash:hover, .btn-secondary-dash:hover, .btn-primary-dash-2:hover {
     border-color: var(--primary-red);
     color: var(--text-white);

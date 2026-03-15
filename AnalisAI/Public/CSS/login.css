@@ -52,7 +52,7 @@ body {
 }
 
 .back-button a:hover {
-    color: var(--primary-color);
+    color: white;
 }
 
 .page {
