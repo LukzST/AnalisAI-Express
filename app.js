@@ -103,7 +103,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.get('/dashboard', async (req, res) => {
+app.get('/dashboard', checkAuth, async (req, res) => {
     try {
         const alunosResult = await db.query(`
             SELECT 
@@ -614,4 +614,5 @@ app.use((err, req, res, next) => {
     });
 });
 
+console.log('Conectando ao banco:', process.env.DATABASE_URL ? 'Render ✅' : 'Local ❌');
 app.listen(3000, () => console.log('Servidor rodando em http://localhost:3000'));
