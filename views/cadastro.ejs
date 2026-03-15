@@ -11,7 +11,7 @@
 <body>
 
     <a href="/" style="text-decoration: none; color: white;">
-    <div class="btn-secondary-dash back-button">
+        <div class="btn-secondary-dash back-button">
             <i class="fas fa-undo-alt"></i> VOLTAR
         </div>
     </a>
@@ -21,11 +21,13 @@
             <img src="/IMG/logo3-white.png" alt="AnalisAI">
         </div>
 
-       <div class="login-container"> <% if (erro) { %>
-                    <div class="erro-box">
-                        <%= erro %>
-                    </div>
-                <% } %>
+        <div class="login-container">
+            <% if (error_msg && error_msg.length > 0) { %>
+                <div class="erro-box">
+                    <%= error_msg %>
+                </div>
+            <% } %>
+            
             <form action="/cadastro" method="POST">
                 <div class="input-group">
                     <input type="text" name="nome" placeholder="NOME COMPLETO" required>

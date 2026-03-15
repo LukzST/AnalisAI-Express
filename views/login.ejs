@@ -11,7 +11,7 @@
 <body>
 
     <a href="/" style="text-decoration: none; color: white;">
-    <div class="btn-secondary-dash back-button">
+        <div class="btn-secondary-dash back-button">
             <i class="fas fa-undo-alt"></i> VOLTAR
         </div>
     </a>
@@ -23,9 +23,15 @@
 
         <div class="login-container">
             
-            <% if (erro) { %>
+            <% if (error_msg && error_msg.length > 0) { %>
                 <div class="erro-box">
-                    <%= erro %>
+                    <%= error_msg %>
+                </div>
+            <% } %>
+            
+            <% if (success_msg && success_msg.length > 0) { %>
+                <div class="success-box">
+                    <%= success_msg %>
                 </div>
             <% } %>
 

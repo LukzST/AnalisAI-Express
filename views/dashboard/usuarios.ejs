@@ -19,8 +19,26 @@
             <div class="logo">
                 <img src="/IMG/logo3-white.png" alt="AnalisAI">
             </div>
-            <h2 class="page-title">GESTÃO DE USUÁRIOS</h2>
+            <div class="header-user">
+                <span>Bem-vindo, <strong><%= user %></strong> (<%= userCargo || 'Usuário' %>)</span>
+                <a href="/logout" class="logout-icon" title="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
         </header>
+
+        <% if (success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success">
+                <%= success_msg %>
+                <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+            </div>
+        <% } %>
+        <% if (error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-error">
+                <%= error_msg %>
+                <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+            </div>
+        <% } %>
 
         <div class="toolbar">
             <div class="action-buttons">
@@ -65,14 +83,16 @@
                                         <button class="btn-table-add" onclick="editUser('<%= user.id %>', '<%= user.nome %>', '<%= user.email %>', '<%= user.cargo %>', '<%= user.status %>')" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <a href="javascript:void(0)" onclick="confirmDeleteUser('<%= user.id %>', '<%= user.nome %>')" class="delete-link">
-                                            <i class="fas fa-user-minus"></i>
-                                        </a>
+                                        <% if (user.id !== userId) { %>
+                                            <a href="javascript:void(0)" onclick="confirmDeleteUser('<%= user.id %>', '<%= user.nome %>')" class="delete-link">
+                                                <i class="fas fa-user-minus"></i>
+                                            </a>
+                                        <% } %>
                                     </td>
                                 </tr>
                             <% }); %>
                         <% } else { %>
-                            <tr><td colspan="6" style="padding: 50px;">Nenhum usuário encontrado.</td></tr>
+                            <tr><td colspan="6" style="padding: 50px; text-align: center;">Nenhum usuário encontrado.</td></tr>
                         <% } %>
                     </tbody>
                 </table>
@@ -80,67 +100,106 @@
         </main>
     </div>
 
+    <!-- Modal de Usuário -->
     <div id="userModal" class="modal-overlay">
-    <div class="modal-content">
-        <button class="close-btn" onclick="closeUserModal()"><i class="fas fa-times-circle"></i></button>
-        <h2 class="section-title-2" id="userModalTitle">NOVO USUÁRIO</h2>
-        <form id="userForm" action="/dashboard/usuarios/add" method="POST" class="filter-options">
-            <input type="hidden" name="id" id="userId">
-            
-            <label>NOME COMPLETO:</label>
-            <input type="text" name="nome" id="userName" class="filter-input" required>
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeUserModal()"><i class="fas fa-times-circle"></i></button>
+            <h2 class="section-title-2" id="userModalTitle">NOVO USUÁRIO</h2>
+            <form id="userForm" action="/dashboard/usuarios/add" method="POST" class="filter-options">
+                <input type="hidden" name="id" id="userId">
+                
+                <label>NOME COMPLETO:</label>
+                <input type="text" name="nome" id="userName" class="filter-input" required>
 
-            <label style="margin-top: 15px; display: block;">E-MAIL:</label>
-            <input type="email" name="email" id="userEmail" class="filter-input" required>
+                <label style="margin-top: 15px; display: block;">E-MAIL:</label>
+                <input type="email" name="email" id="userEmail" class="filter-input" required>
 
-            <div id="passwordField">
-                <label style="margin-top: 15px; display: block;">SENHA:</label>
-                <input type="password" name="senha" class="filter-input">
-            </div>
+                <div id="passwordField">
+                    <label style="margin-top: 15px; display: block;">SENHA:</label>
+                    <input type="password" name="senha" class="filter-input">
+                </div>
 
-            <label style="margin-top: 15px; display: block;">CARGO:</label>
-            <select name="cargo" id="userCargo" class="filter-input">
-                <option value="Professor">Professor</option>
-                <option value="Coordenador">Coordenador</option>
-                <option value="Admin">Admin</option>
-            </select>
-
-            <div id="statusField" style="display: none;">
-                <label style="margin-top: 15px; display: block;">STATUS:</label>
-                <select name="status" id="userStatus" class="filter-input">
-                    <option value="ATIVO">ATIVO</option>
-                    <option value="INATIVO">INATIVO</option>
+                <label style="margin-top: 15px; display: block;">CARGO:</label>
+                <select name="cargo" id="userCargo" class="filter-input">
+                    <option value="Professor">Professor</option>
+                    <option value="Coordenador">Coordenador</option>
+                    <option value="Admin">Admin</option>
                 </select>
-            </div>
 
-            <button type="submit" class="btn-action" style="margin-top: 30px; width: 100%; justify-content: center;">SALVAR USUÁRIO</button>
-        </form>
+                <div id="statusField" style="display: none;">
+                    <label style="margin-top: 15px; display: block;">STATUS:</label>
+                    <select name="status" id="userStatus" class="filter-input">
+                        <option value="ATIVO">ATIVO</option>
+                        <option value="INATIVO">INATIVO</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-action" style="margin-top: 30px; width: 100%; justify-content: center;">SALVAR USUÁRIO</button>
+            </form>
+        </div>
     </div>
-</div>
+
+    <!-- Modal de Permissão Negada -->
+    <div id="permissionModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; border-color: #ff0101;">
+            <button class="close-btn" onclick="closePermissionModal()">
+                <i class="fas fa-times-circle"></i>
+            </button>
+            
+            <div style="text-align: center;">
+                <div style="font-size: 4rem; color: #ff0101; margin-bottom: 15px;">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                
+                <h2 class="section-title-2" style="color: #ff0101; margin-bottom: 15px;">
+                    ACESSO NEGADO
+                </h2>
+                
+                <p style="color: #888; font-size: 1rem; margin-bottom: 20px;">
+                    Apenas administradores podem gerenciar usuários.
+                </p>
+
+                <button class="btn-action" onclick="closePermissionModal()" style="width: 100%; justify-content: center; border-color: #ff0101; color: #ff0101;">
+                    <i class="fas fa-times"></i> ENTENDI
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
+        // Verificar se é admin
+        const isAdmin = <%= isAdmin %>;
+        
         function openAddUserModal() {
-            document.getElementById('userForm').action = "/dashboard/usuarios/add";
-            document.getElementById('userModalTitle').innerText = "NOVO USUÁRIO";
-            document.getElementById('userId').value = "";
-            document.getElementById('userName').value = "";
-            document.getElementById('userEmail').value = "";
-            document.getElementById('passwordField').style.display = "block";
-            document.getElementById('statusField').style.display = "none";
-            document.getElementById('userModal').style.display = 'flex';
+            if (isAdmin) {
+                document.getElementById('userForm').action = "/dashboard/usuarios/add";
+                document.getElementById('userModalTitle').innerText = "NOVO USUÁRIO";
+                document.getElementById('userId').value = "";
+                document.getElementById('userName').value = "";
+                document.getElementById('userEmail').value = "";
+                document.getElementById('passwordField').style.display = "block";
+                document.getElementById('statusField').style.display = "none";
+                document.getElementById('userModal').style.display = 'flex';
+            } else {
+                document.getElementById('permissionModal').style.display = 'flex';
+            }
         }
 
         function editUser(id, nome, email, cargo, status) {
-            document.getElementById('userForm').action = "/dashboard/usuarios/update";
-            document.getElementById('userModalTitle').innerText = "EDITAR USUÁRIO";
-            document.getElementById('userId').value = id;
-            document.getElementById('userName').value = nome;
-            document.getElementById('userEmail').value = email;
-            document.getElementById('userCargo').value = cargo;
-            document.getElementById('userStatus').value = status;
-            document.getElementById('passwordField').style.display = "none";
-            document.getElementById('statusField').style.display = "block";
-            document.getElementById('userModal').style.display = 'flex';
+            if (isAdmin) {
+                document.getElementById('userForm').action = "/dashboard/usuarios/update";
+                document.getElementById('userModalTitle').innerText = "EDITAR USUÁRIO";
+                document.getElementById('userId').value = id;
+                document.getElementById('userName').value = nome;
+                document.getElementById('userEmail').value = email;
+                document.getElementById('userCargo').value = cargo;
+                document.getElementById('userStatus').value = status;
+                document.getElementById('passwordField').style.display = "none";
+                document.getElementById('statusField').style.display = "block";
+                document.getElementById('userModal').style.display = 'flex';
+            } else {
+                document.getElementById('permissionModal').style.display = 'flex';
+            }
         }
 
         function closeUserModal() {
@@ -148,9 +207,17 @@
         }
 
         function confirmDeleteUser(id, nome) {
-            if (confirm(`Deseja realmente remover o acesso de ${nome}?`)) {
-                window.location.href = `/dashboard/usuarios/delete/${id}`;
+            if (isAdmin) {
+                if (confirm(`Deseja realmente remover o acesso de ${nome}?`)) {
+                    window.location.href = `/dashboard/usuarios/delete/${id}`;
+                }
+            } else {
+                document.getElementById('permissionModal').style.display = 'flex';
             }
+        }
+
+        function closePermissionModal() {
+            document.getElementById('permissionModal').style.display = 'none';
         }
 
         document.getElementById('userSearchInput').addEventListener('keyup', function() {
@@ -160,12 +227,6 @@
                 row.style.display = text.includes(filter) ? "" : "none";
             });
         });
-
-        function confirmDeleteUser(id, nome) {
-            if (confirm(`Remover acesso de ${nome}?`)) {
-                window.location.href = `/dashboard/usuarios/delete/${id}`;
-            }
-        }
     </script>
     
 </body>

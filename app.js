@@ -37,6 +37,15 @@ function checkAuth(req, res, next) {
   }
 }
 
+function checkAdmin(req, res, next) {
+  if (req.session.userCargo === 'Admin') {
+    next();
+  } else {
+    req.flash('error_msg', 'Acesso negado. Apenas administradores podem gerenciar usuários.');
+    res.redirect('/dashboard');
+  }
+}
+
 app.get('/', (req, res) => {
   res.render('index');
 });
@@ -286,6 +295,7 @@ app.post('/login', async (req, res) => {
         req.session.user = user.nome;
         req.session.userStatus = user.status;
         req.session.userId = user.id;
+        req.session.userCargo = user.cargo;
         req.flash('success_msg', `Bem-vindo, ${user.nome}!`);
         return res.redirect('/dashboard');
       }
@@ -320,6 +330,7 @@ app.get('/dashboard', checkAuth, async (req, res) => {
         `);
 
         const alunos = alunosResult.rows;
+        
 
         const alunosComNivel = alunos.map(aluno => {
             let mediaCompetencias = 0;
@@ -719,14 +730,29 @@ app.get('/manual-de-uso', (req, res) => {
 app.get('/dashboard/usuarios', checkAuth, async (req, res) => {
     try {
         const result = await db.query('SELECT id, nome, email, cargo, status FROM usuarios ORDER BY nome ASC');
-        res.render('dashboard/usuarios', { usuarios: result.rows });
+        
+        const isAdmin = req.session.userCargo === 'Admin';
+        const userCargo = req.session.userCargo;
+        const userId = req.session.userId;
+        const user = req.session.user;
+        
+        res.render('dashboard/usuarios', { 
+            usuarios: result.rows,
+            isAdmin: isAdmin,
+            userCargo: userCargo,
+            userId: userId,
+            user: user,
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg')
+        });
     } catch (err) {
+        console.error(err);
         req.flash('error_msg', 'Erro ao carregar usuários');
         res.redirect('/dashboard');
     }
 });
 
-app.post('/dashboard/usuarios/add', checkAuth, async (req, res) => {
+app.post('/dashboard/usuarios/add', checkAuth, checkAdmin, async (req, res) => {
     const { nome, email, senha, cargo } = req.body;
     try {
         await db.query(
@@ -741,7 +767,7 @@ app.post('/dashboard/usuarios/add', checkAuth, async (req, res) => {
     }
 });
 
-app.post('/dashboard/usuarios/update', checkAuth, async (req, res) => {
+app.post('/dashboard/usuarios/update', checkAuth, checkAdmin, async (req, res) => {
     const { id, nome, email, cargo, status } = req.body;
     try {
         await db.query(
@@ -756,7 +782,7 @@ app.post('/dashboard/usuarios/update', checkAuth, async (req, res) => {
     }
 });
 
-app.get('/dashboard/usuarios/delete/:id', checkAuth, async (req, res) => {
+app.get('/dashboard/usuarios/delete/:id', checkAuth, checkAdmin, async (req, res) => {
     try {
         await db.query('DELETE FROM usuarios WHERE id = $1', [req.params.id]);
         req.flash('success_msg', 'Usuário removido com sucesso!');
