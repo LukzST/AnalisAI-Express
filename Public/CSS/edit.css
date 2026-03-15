@@ -1020,7 +1020,6 @@ select.filter-input option {
     border-color: var(--primary-red);
     color: var(--primary-red);
     background: rgba(255, 1, 1, 0.05);
-    transform: translateY(-2px);
 }
 
 .btn-icon-2 i {
@@ -1047,3 +1046,5 @@ select.filter-input option {
         padding: 0 15px;
     }
 }
+
+
