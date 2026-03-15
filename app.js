@@ -11,6 +11,7 @@ app.use(favicon(path.join(__dirname, 'Public', 'favicon.ico')));
 app.set('view engine', 'ejs');
 app.use(express.static('Public'));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.use(session({
   secret: 'chave-secreta-meu-site',
@@ -548,6 +549,8 @@ app.get('/dashboard/usuarios', checkAuth, async (req, res) => {
     }
 });
 
+
+
 app.post('/dashboard/usuarios/add', checkAuth, async (req, res) => {
     const { nome, email, senha, cargo } = req.body;
     try {
@@ -588,6 +591,7 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
+
 app.use((req, res) => {
     res.status(404).render('error', {
         titulo: 'PÁGINA NÃO ENCONTRADA',
@@ -614,5 +618,5 @@ app.use((err, req, res, next) => {
     });
 });
 
-console.log('Conectando ao banco:', process.env.DATABASE_URL ? 'Render ✅' : 'Local ❌');
+console.log('Conectando ao banco:', 'postgresql://neondb_owner:npg_gbhV9DuMyCm8@ep-misty-rice-acbl3x03-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require' ? 'Render ✅' : 'Local ❌');
 app.listen(3000, () => console.log('Servidor rodando em http://localhost:3000'));

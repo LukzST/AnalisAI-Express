@@ -17,8 +17,10 @@
     "ejs": "^5.0.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "multer": "^2.1.1",
     "nodemon": "^3.1.14",
     "pg": "^8.20.0",
-    "serve-favicon": "^2.5.1"
+    "serve-favicon": "^2.5.1",
+    "xlsx": "^0.18.5"
   }
 }

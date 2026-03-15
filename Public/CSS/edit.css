@@ -999,4 +999,51 @@ select.filter-input option {
     color: #666;
 }
 
+.btn-icon-2 {
+    background: transparent;
+    border: 1px solid #222;
+    color: #888;
+    padding: 0 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 55px;
+}
 
+.btn-icon-2:hover {
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+    background: rgba(255, 1, 1, 0.05);
+    transform: translateY(-2px);
+}
+
+.btn-icon-2 i {
+    font-size: 1rem;
+    transition: inherit;
+}
+
+.btn-icon-2:hover i {
+    color: var(--primary-red);
+}
+
+@media screen and (max-width: 768px) {
+    .btn-icon-2 {
+        height: 45px;
+        font-size: 0.75rem;
+        padding: 0 20px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .btn-icon-2 {
+        height: 42px;
+        font-size: 0.7rem;
+        padding: 0 15px;
+    }
+}
