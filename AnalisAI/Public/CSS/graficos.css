@@ -37,7 +37,6 @@ body.dash-body {
     display: flex;
     flex-direction: column;
     padding: 40px 60px;
-    margin-left: 85px;
     min-height: 100vh;
 }
 

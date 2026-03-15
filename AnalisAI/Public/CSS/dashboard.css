@@ -861,12 +861,14 @@ body.dash-body {
     .ranking-tabs {
         flex-direction: column;
         gap: 5px;
+        align-items: center;
         margin-bottom: 20px;
         padding-bottom: 10px;
     }
     
     .ranking-tab {
-        width: 100%;
+        width: 90%;
+        height: 40px;
         padding: 10px;
         font-size: 0.7rem;
     }
