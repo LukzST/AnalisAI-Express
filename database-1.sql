@@ -83,44 +83,25 @@ INSERT INTO competencias (nome, descricao, categoria) VALUES
 ON CONFLICT (nome) DO NOTHING;
 
 -- =====================================================
--- DADOS DE EXEMPLO (OPCIONAIS - COMENTAR SE NÃO QUISER)
+-- DADOS DE EXEMPLO - UM ALUNO COM 5 COMPETÊNCIAS
 -- =====================================================
 
--- Alunos de exemplo
+-- Inserir um aluno de exemplo
 INSERT INTO alunos (nome, ano_escolar, idade, nota, presenca, nivel) VALUES 
-('LUCAS SILVA', '3º MÉDIO', 17, 9.5, 100, 'APTO'),
-('MARIA OLIVEIRA', '2º MÉDIO', 16, 4.2, 85, 'INAPTO'),
-('JOÃO PEDRO', '1º MÉDIO', 15, 6.5, 90, 'EM DESENVOLVIMENTO'),
-('ANA BEATRIZ', '9º FUNDAMENTAL', 14, 8.0, 95, 'APTO'),
-('CARLOS EDUARDO', '9º FUNDAMENTAL', 13, 3.5, 60, 'INAPTO'),
-('BEATRIZ SOUZA', '3º MÉDIO', 17, 7.0, 80, 'APTO');
+('JOÃO PEDRO', '1º MÉDIO', 15, 6.5, 90, 'EM DESENVOLVIMENTO');
 
--- Competências para os alunos de exemplo
+-- Inserir 5 competências para o aluno
 INSERT INTO aluno_competencias (aluno_id, competencia_id, nota, observacoes)
-SELECT a.id, c.id, 
-    CASE 
-        WHEN a.nome = 'LUCAS SILVA' AND c.nome = 'Raciocínio Lógico' THEN 9.0
-        WHEN a.nome = 'LUCAS SILVA' AND c.nome = 'Comunicação' THEN 8.5
-        WHEN a.nome = 'LUCAS SILVA' AND c.nome = 'Liderança' THEN 9.5
-        WHEN a.nome = 'MARIA OLIVEIRA' AND c.nome = 'Raciocínio Lógico' THEN 4.0
-        WHEN a.nome = 'MARIA OLIVEIRA' AND c.nome = 'Comunicação' THEN 5.5
-        WHEN a.nome = 'MARIA OLIVEIRA' AND c.nome = 'Organização' THEN 3.5
-        WHEN a.nome = 'JOÃO PEDRO' AND c.nome = 'Raciocínio Lógico' THEN 6.0
-        WHEN a.nome = 'JOÃO PEDRO' AND c.nome = 'Proatividade' THEN 7.0
-        WHEN a.nome = 'ANA BEATRIZ' AND c.nome = 'Comunicação' THEN 8.5
-        WHEN a.nome = 'ANA BEATRIZ' AND c.nome = 'Trabalho em Equipe' THEN 9.0
-        WHEN a.nome = 'CARLOS EDUARDO' AND c.nome = 'Raciocínio Lógico' THEN 3.0
-        WHEN a.nome = 'CARLOS EDUARDO' AND c.nome = 'Organização' THEN 4.0
-        WHEN a.nome = 'BEATRIZ SOUZA' AND c.nome = 'Liderança' THEN 8.0
-        WHEN a.nome = 'BEATRIZ SOUZA' AND c.nome = 'Comunicação' THEN 7.5
+SELECT 
+    (SELECT id FROM alunos WHERE nome = 'JOÃO PEDRO'),
+    c.id,
+    CASE c.nome
+        WHEN 'Raciocínio Lógico' THEN 6.0
+        WHEN 'Comunicação' THEN 7.5
+        WHEN 'Proatividade' THEN 7.0
+        WHEN 'Trabalho em Equipe' THEN 8.0
+        WHEN 'Organização' THEN 5.5
     END,
     'Avaliação inicial'
-FROM alunos a, competencias c
-WHERE 
-    (a.nome = 'LUCAS SILVA' AND c.nome IN ('Raciocínio Lógico', 'Comunicação', 'Liderança')) OR
-    (a.nome = 'MARIA OLIVEIRA' AND c.nome IN ('Raciocínio Lógico', 'Comunicação', 'Organização')) OR
-    (a.nome = 'JOÃO PEDRO' AND c.nome IN ('Raciocínio Lógico', 'Proatividade')) OR
-    (a.nome = 'ANA BEATRIZ' AND c.nome IN ('Comunicação', 'Trabalho em Equipe')) OR
-    (a.nome = 'CARLOS EDUARDO' AND c.nome IN ('Raciocínio Lógico', 'Organização')) OR
-    (a.nome = 'BEATRIZ SOUZA' AND c.nome IN ('Liderança', 'Comunicação'))
-ON CONFLICT DO NOTHING;
+FROM competencias c
+WHERE c.nome IN ('Raciocínio Lógico', 'Comunicação', 'Proatividade', 'Trabalho em Equipe', 'Organização');
