@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body class="dash-body">
     <%- include('../Partials/sidebar') %>
@@ -42,24 +43,21 @@
                     <i class="fas fa-filter"></i>
                 </button>
                 
-                
-                <button class="btn-icon btn-erase" onclick="openEraseModal()" title="Apagar Todos os Dados">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-                
                 <button class="btn-icon" onclick="openAddModal()" title="Adicionar Aluno">
                     <i class="fas fa-plus"></i>
                 </button>
 
-                <!--
-                    <button class="btn-icon-2" onclick="openImportModal()" title="Importar Planilha">
-                        <i class="fas fa-file-import"></i> IMPORTAR TABELA
-                    </button>
-                    -->
-                    <button class="btn-icon-2" onclick="exportarTabelaParaExcel()" title="Exportar Tabela">
-                        <i class="fas fa-file-export"></i> EXPORTAR TABELA
-                    </button>
-                    
+                <button class="btn-icon-2" onclick="openImportModal()" title="Importar Planilha">
+                    <i class="fas fa-file-import"></i> IMPORTAR TABELA
+                </button>
+                
+                <button class="btn-icon-2" onclick="exportarTabelaParaExcel()" title="Exportar Tabela">
+                    <i class="fas fa-file-export"></i> EXPORTAR TABELA
+                </button>
+
+                <button class="btn-icon btn-erase" onclick="openEraseModal()" title="Apagar Todos os Dados">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
             </div>
 
             <div class="search-container">
@@ -68,10 +66,94 @@
             </div>
         </div>
 
+        <div id="importModal" class="modal-overlay">
+            <div class="modal-content" style="max-width: 500px; border-color: var(--success-green); padding: 40px 30px;">
+                <button class="close-btn" onclick="closeImportModal()">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+                
+                <h2 class="section-title-2" style="text-align: center; margin-bottom: 15px; font-size: 1.2rem;">
+                    IMPORTAR PLANILHA
+                </h2>
+                
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <i class="fas fa-file-excel" style="font-size: 3rem; color: var(--success-green);"></i>
+                </div>
+
+                <a href="/baixar-modelo-importacao" class="btn-success-action" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px; margin-bottom: 15px; text-decoration: none;">
+                    <i class="fas fa-download"></i>
+                    BAIXAR MODELO
+                </a>
+
+                <div class="file-drop-area" onclick="document.getElementById('fileInput').click()" style="padding: 25px; margin: 15px 0;">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #555;"></i>
+                    <span class="file-msg" style="font-size: 0.8rem; color: #888;">Clique ou arraste</span>
+                    <span style="color: #666; font-size: 0.7rem;">.xlsx, .xls, .csv</span>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+                </div>
+                
+                <div id="fileName" class="file-name" style="font-size: 0.75rem; padding: 6px; text-align: center; color: var(--success-green); background: rgba(33,115,70,0.1); border-radius: 8px; margin-bottom: 10px;"></div>
+
+                <div style="margin: 15px 0; text-align: center;">
+                    <label style="display: inline-flex; align-items: center; gap: 5px; color: var(--text-white); cursor: pointer; font-size: 0.8rem;">
+                        <input type="checkbox" id="primeiraLinhaCabecalho" checked style="accent-color: var(--success-green); width: 16px; height: 16px;">
+                        1ª linha cabeçalho
+                    </label>
+                </div>
+
+                <button type="button" class="btn-success-action" onclick="importarPlanilha()" style="width: 100%; padding: 12px; font-size: 0.9rem; margin-top: 5px;">
+                    <i class="fas fa-file-import"></i> IMPORTAR
+                </button>
+
+                <p style="color: #666; font-size: 0.65rem; text-align: center; margin-top: 20px;">
+                    <i class="fas fa-info-circle" style="color: var(--success-green);"></i>
+                    Use o modelo para formato correto
+                </p>
+            </div>
+        </div>
+
+        <div id="previewImportModal" class="modal-overlay">
+            <div class="modal-content" style="max-width: 600px; border-color: var(--success-green);">
+                <button class="close-btn" onclick="closePreviewModal()">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+                
+                <h2 class="section-title-2" style="text-align: center; margin-bottom: 20px; color: #217346;">
+                    PRÉ-VISUALIZAÇÃO
+                </h2>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <i class="fas fa-check-circle" style="font-size: 3rem; color: #217346;"></i>
+                    <p style="color: #fff; font-size: 1.1rem; margin: 10px 0;" id="previewCount"></p>
+                </div>
+
+                <div style="background: #0c0c0c; border: 1px solid #217346; border-radius: 12px; padding: 15px; margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid #333;">
+                                <th style="padding: 8px; text-align: left; color: #888;">NOME</th>
+                                <th style="padding: 8px; text-align: left; color: #888;">ANO</th>
+                                <th style="padding: 8px; text-align: left; color: #888;">COMPETÊNCIAS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewList"></tbody>
+                    </table>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn-success-action" onclick="confirmarImportacao()" style="flex: 1; justify-content: center; background: #21734610; border-color: #217346; color: white;">
+                        <i class="fas fa-check"></i> CONFIRMAR
+                    </button>
+                    <button class="btn-action-2" onclick="closePreviewModal()" style="flex: 1; justify-content: center;">
+                        <i class="fas fa-times"></i> CANCELAR
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <main class="edit-content">
             <div class="table-container">
                 <table class="alunos-table" id="alunosTable">
-                    
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -222,7 +304,7 @@
                     </select>
                     <div style="display: flex; gap: 10px; margin-top: 25px;">
                         <button class="btn-action" onclick="applyFilter()" style="flex: 2; justify-content: center;">FILTRAR</button>
-                        <button class="btn-action-2" onclick="clearFilters()" style="flex: 1;  justify-content: center;">LIMPAR</button>
+                        <button class="btn-action-2" onclick="clearFilters()" style="flex: 1; justify-content: center;">LIMPAR</button>
                     </div>
                 </div>
             </div>
@@ -313,8 +395,8 @@
 
         <footer class="dash-footer">
             <a href="javascript:void(0)" onclick="exportarTabelaParaExcel()" class="btn-primary-dash-2">
-                    <i class="fas fa-file-export"></i> EXPORTAR PLANILHA COMPLETA
-                </a>
+                <i class="fas fa-file-export"></i> EXPORTAR PLANILHA COMPLETA
+            </a>
             <div class="footer-credits">
                 <p>© 2026 AnalisAI — SENAI Duque de Caxias.</p>
                 <a href="/dashboard/equipe"><p>Time de desenvolvedores</p></a>
@@ -322,33 +404,327 @@
         </footer>
     </div>
 
-
-        <div id="eraseAllModal" class="modal-overlay">
-            <div class="modal-content modal-small">
-                <button class="close-btn" onclick="closeEraseModal()"><i class="fas fa-times-circle"></i></button>
-                <div class="modal-icon-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <h2 class="modal-title-warning">APAGAR TUDO?</h2>
-                <p class="modal-text-warning">
-                    Esta ação irá remover <strong>TODOS</strong> os alunos, notas e competências atribuídas.<br>
-                    As competências padrão do sistema serão mantidas.<br>
-                    <span style="color: #ff0101; font-weight: bold;">Esta operação não pode ser desfeita.</span>
-                </p>
-                <div class="modal-actions">
-                    <form action="/dashboard/erase-all" method="POST">
-                        <button type="submit" class="btn-erase-confirm">
-                            <i class="fas fa-trash"></i> SIM, APAGAR TUDO
-                        </button>
-                    </form>
-                    <button onclick="closeEraseModal()" class="btn-cancel">
-                        CANCELAR
+    <div id="eraseAllModal" class="modal-overlay">
+        <div class="modal-content modal-small">
+            <button class="close-btn" onclick="closeEraseModal()"><i class="fas fa-times-circle"></i></button>
+            <div class="modal-icon-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2 class="modal-title-warning">APAGAR TUDO?</h2>
+            <p class="modal-text-warning">
+                Esta ação irá remover <strong>TODOS</strong> os alunos, notas e competências atribuídas.<br>
+                As competências padrão do sistema serão mantidas.<br>
+                <span style="color: #ff0101; font-weight: bold;">Esta operação não pode ser desfeita.</span>
+            </p>
+            <div class="modal-actions">
+                <form action="/dashboard/erase-all" method="POST">
+                    <button type="submit" class="btn-erase-confirm">
+                        <i class="fas fa-trash"></i> SIM, APAGAR TUDO
                     </button>
-                </div>
+                </form>
+                <button onclick="closeEraseModal()" class="btn-cancel">
+                    CANCELAR
+                </button>
             </div>
         </div>
+    </div>
 
+    <div id="errorModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 450px; border-color: #ff0101;">
+            <button class="close-btn" onclick="closeErrorModal()">
+                <i class="fas fa-times-circle"></i>
+            </button>
+            
+            <div style="text-align: center;">
+                <div style="font-size: 4rem; color: #ff0101; margin-bottom: 15px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                
+                <h2 class="section-title-2" style="color: #ff0101; margin-bottom: 15px;" id="errorTitulo">
+                    ERRO
+                </h2>
+                
+                <p style="color: #888; font-size: 1rem; margin-bottom: 10px;" id="errorMensagem">
+                    Ocorreu um erro
+                </p>
+                
+                <div style="background: #1a1a1a; border-radius: 8px; padding: 10px; margin: 15px 0;">
+                    <p style="color: #ff0101; font-size: 0.85rem; font-family: monospace;" id="errorDetalhe">
+                        
+                    </p>
+                </div>
+
+                <button class="btn-action" onclick="closeErrorModal()" style="width: 100%; justify-content: center; border-color: #ff0101; color: #ff0101;">
+                    <i class="fas fa-times"></i> FECHAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+<div id="loadingModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px; text-align: center; border-color: #217346;">
+        <div style="padding: 30px;">
+            <div class="loading-spinner" style="margin: 20px auto;">
+                <i class="fas fa-circle-notch fa-spin" style="font-size: 4rem; color: #217346;"></i>
+            </div>
+            <h3 style="color: #fff; margin-bottom: 15px;">IMPORTANDO DADOS</h3>
+            <p style="color: #888; margin-bottom: 20px;">Processando alunos e competências...</p>
+            <div style="width: 100%; height: 6px; background: #1a1a1a; border-radius: 10px; overflow: hidden;">
+                <div id="loadingBar" style="width: 0%; height: 100%; background: #217346; transition: width 0.3s ease;"></div>
+            </div>
+            <p id="loadingStatus" style="color: #888; font-size: 0.8rem; margin-top: 10px;">0% concluído</p>
+        </div>
+    </div>
+</div>
     <script>
+
+        function openLoadingModal() {
+    document.getElementById('loadingModal').style.display = 'flex';
+    document.getElementById('loadingBar').style.width = '0%';
+    document.getElementById('loadingStatus').innerText = '0% concluído';
+}
+
+function closeLoadingModal() {
+    document.getElementById('loadingModal').style.display = 'none';
+}
+
+function updateLoadingBar(percent, texto) {
+    document.getElementById('loadingBar').style.width = percent + '%';
+    document.getElementById('loadingStatus').innerText = texto || percent + '% concluído';
+}
+
+        function openErrorModal(titulo, mensagem, detalhe) {
+            document.getElementById('errorTitulo').innerText = titulo || 'ERRO';
+            document.getElementById('errorMensagem').innerText = mensagem || 'Ocorreu um erro inesperado';
+            document.getElementById('errorDetalhe').innerText = detalhe || '';
+            document.getElementById('errorModal').style.display = 'flex';
+        }
+
+        function closeErrorModal() {
+            document.getElementById('errorModal').style.display = 'none';
+        }
+        
+        function openImportModal() {
+            document.getElementById('importModal').style.display = 'flex';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileName').innerText = '';
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').style.display = 'none';
+        }
+
+        document.getElementById('fileInput')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            document.getElementById('fileName').innerText = file ? `📄 ${file.name}` : '';
+        });
+
+        const dropArea = document.querySelector('.file-drop-area');
+        if (dropArea) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            dropArea.addEventListener('drop', function(e) {
+                const file = e.dataTransfer.files[0];
+                document.getElementById('fileInput').files = e.dataTransfer.files;
+                document.getElementById('fileName').innerText = file ? `📄 ${file.name}` : '';
+            });
+        }
+
+        function openPreviewModal() {
+            document.getElementById('previewImportModal').style.display = 'flex';
+        }
+
+        function closePreviewModal() {
+            document.getElementById('previewImportModal').style.display = 'none';
+        }
+
+        document.getElementById('fileInput')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            document.getElementById('fileName').innerText = file ? `📄 ${file.name}` : '';
+        });
+
+        let alunosParaImportar = [];
+
+        async function importarPlanilha() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        openErrorModal('ERRO', 'Selecione um arquivo primeiro!', '');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const primeiraAba = workbook.SheetNames[0];
+            const planilha = workbook.Sheets[primeiraAba];
+            
+            const linhas = XLSX.utils.sheet_to_json(planilha, { header: 1 });
+            
+            let linhaAlunos = -1;
+            for (let i = 0; i < Math.min(30, linhas.length); i++) {
+                const linha = linhas[i];
+                if (linha && linha[0] === 'ID' && linha[1] === 'ALUNO') {
+                    linhaAlunos = i;
+                    break;
+                }
+            }
+            
+            if (linhaAlunos === -1) {
+                openErrorModal('FORMATO INVÁLIDO', 'Formato de planilha não reconhecido. Use o modelo baixado.', '');
+                return;
+            }
+            
+            alunosParaImportar = [];
+            const anosValidos = ['1º MÉDIO', '2º MÉDIO', '3º MÉDIO', '9º FUNDAMENTAL'];
+            
+            for (let i = linhaAlunos + 1; i < linhas.length; i++) {
+                const linha = linhas[i];
+                if (!linha || linha.length === 0) continue;
+                
+                const primeiraCelula = String(linha[0] || '').toUpperCase();
+                if (primeiraCelula.includes('HISTÓRICO') || primeiraCelula.includes('INSTRUÇÕES')) {
+                    break;
+                }
+                
+                const nome = String(linha[1] || '').trim().toUpperCase();
+                if (!nome || nome.length < 2 || nome === 'ALUNO') continue;
+                
+                const anoEscolar = String(linha[2] || '').trim();
+                
+                if (anoEscolar && !anosValidos.includes(anoEscolar)) {
+                    openErrorModal('ANO ESCOLAR INVÁLIDO', `"${anoEscolar}" não é permitido`, 'Use: 1º MÉDIO, 2º MÉDIO, 3º MÉDIO, 9º FUNDAMENTAL');
+                    return;
+                }
+                
+                const idade = parseInt(linha[3]) || 15;
+                if (idade < 10 || idade > 20) {
+                    openErrorModal('IDADE INVÁLIDA', `Idade ${idade} inválida`, 'A idade deve estar entre 10 e 20 anos');
+                    return;
+                }
+                
+                let presenca = 100;
+                if (linha[5]) {
+                    const presencaStr = String(linha[5]).replace('%', '').trim();
+                    presenca = parseInt(presencaStr) || 100;
+                    if (presenca < 0 || presenca > 100) {
+                        openErrorModal('PRESENÇA INVÁLIDA', `Presença ${presenca}% inválida`, 'A presença deve estar entre 0% e 100%');
+                        return;
+                    }
+                }
+                
+                const competenciasStr = String(linha[7] || '').trim();
+                const competencias = [];
+                
+                if (competenciasStr && competenciasStr !== 'Sem competências') {
+                    const partes = competenciasStr.split(';').slice(0, 10);
+                    for (const parte of partes) {
+                        const compParts = parte.split(':');
+                        if (compParts.length >= 2) {
+                            const nomeComp = compParts[0].trim().substring(0, 50);
+                            const notaComp = parseFloat(compParts[1].trim()) || 0;
+                            if (nomeComp && notaComp > 0 && notaComp <= 10) {
+                                competencias.push({
+                                    nome: nomeComp,
+                                    nota: Math.min(10, Math.max(0, notaComp))
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                if (competencias.length > 10) {
+                    competencias.length = 10;
+                }
+                
+                alunosParaImportar.push({
+                    nome: nome.substring(0, 100),
+                    ano_escolar: anoEscolar,
+                    idade: idade,
+                    presenca: presenca,
+                    competencias: competencias
+                });
+            }
+            
+            if (alunosParaImportar.length === 0) {
+                openErrorModal('NENHUM ALUNO', 'Nenhum aluno encontrado na planilha!', '');
+                return;
+            }
+            
+            if (alunosParaImportar.length > 100) {
+                alunosParaImportar.length = 100;
+            }
+            
+            let previewHtml = '';
+            alunosParaImportar.slice(0, 5).forEach(aluno => {
+                previewHtml += `<tr>
+                    <td style="padding: 8px; border-bottom: 1px solid #222; color: #fff;">${aluno.nome}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #222; color: #888;">${aluno.ano_escolar}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #222; color: #888;">${aluno.competencias.length}</td>
+                </tr>`;
+            });
+            
+            if (alunosParaImportar.length > 5) {
+                previewHtml += `<tr><td colspan="3" style="padding: 8px; text-align: center; color: #888;">... mais ${alunosParaImportar.length - 5} alunos</td></tr>`;
+            }
+            
+            document.getElementById('previewList').innerHTML = previewHtml;
+            document.getElementById('previewCount').innerHTML = `${alunosParaImportar.length} alunos encontrados`;
+            
+            closeImportModal();
+            openPreviewModal();
+            
+        } catch (erro) {
+            console.error('Erro detalhado:', erro);
+            openErrorModal('ERRO AO PROCESSAR', erro.message, '');
+        }
+    };
+    
+    reader.readAsArrayBuffer(file);
+}
+
+async function confirmarImportacao() {
+    if (alunosParaImportar.length === 0) return;
+    
+    closePreviewModal();
+    openLoadingModal();
+    
+    updateLoadingBar(10, 'Preparando dados...');
+    
+    const total = alunosParaImportar.length;
+    let processados = 0;
+    
+    const response = await fetch('/dashboard/importar-dados-completos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alunos: alunosParaImportar })
+    });
+    
+    updateLoadingBar(70, 'Salvando no banco de dados...');
+    
+    const resultado = await response.json();
+    
+    if (resultado.sucesso) {
+        updateLoadingBar(100, 'Importação concluída!');
+        
+        setTimeout(() => {
+            location.reload();
+        }, 500);
+    } else {
+        closeLoadingModal();
+        openErrorModal('ERRO NA IMPORTAÇÃO', resultado.erro, '');
+    }
+}
 
         function openEraseModal() {
             document.getElementById('eraseAllModal').style.display = 'flex';

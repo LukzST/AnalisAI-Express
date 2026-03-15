@@ -234,6 +234,15 @@ body.dash-body {
     color: #444;
 }
 
+.fa-spin {
+    animation: fa-spin 2s infinite linear;
+}
+
+@keyframes fa-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(359deg); }
+}
+
 .table-container {
     border: 1px solid #1a1a1a;
     border-radius: 25px;
@@ -1031,6 +1040,38 @@ select.filter-input option {
     color: var(--primary-red);
 }
 
+.btn-action-3 {
+    background: transparent;
+    border: 1px solid #222;
+    color: #888;
+    padding: 0 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 55px;
+}
+
+.btn-action-3:hover {
+    border-color: var(--success-green);
+    color: white;
+    background: #21734610;
+}
+
+.btn-action-3 i {
+    font-size: 1rem;
+    transition: inherit;
+}
+
+.btn-action-3:hover i {
+    color: white;
+}
+
 @media screen and (max-width: 768px) {
     .btn-icon-2 {
         height: 45px;
@@ -1048,3 +1089,64 @@ select.filter-input option {
 }
 
 
+#importModal .btn-action-2:hover {
+    background: #217346 !important;
+    color: white !important;
+}
+
+#importModal .btn-action:hover {
+    background: #1a5a37 !important;
+}
+
+#importModal input[type="file"]:hover {
+    border-color: #217346;
+}
+@media screen and (max-width: 768px) {
+    #importModal .modal-content {
+        padding: 30px 20px !important;
+    }
+}
+.file-drop-area {
+    border: 2px dashed #333;
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    background: #0a0a0a;
+    margin: 20px 0;
+}
+
+.file-drop-area:hover { 
+    border-color: #217346; 
+    background: rgba(33, 115, 70, 0.05); 
+}
+
+.file-drop-area i { 
+    font-size: 2.5rem; 
+    color: #555; 
+    transition: color 0.3s ease;
+}
+
+.file-drop-area:hover i {
+    color: #217346;
+}
+
+.file-msg { 
+    color: #888; 
+    font-size: 0.9rem; 
+}
+
+.file-name {
+    color: #217346; 
+    font-size: 0.85rem; 
+    margin-top: 10px; 
+    text-align: center; 
+    padding: 8px; 
+    background: rgba(33, 115, 70, 0.1); 
+    border-radius: 8px;
+}

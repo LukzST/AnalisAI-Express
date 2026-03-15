@@ -5,6 +5,7 @@ const app = express();
 const favicon = require('serve-favicon');
 const path = require('path');
 const flash = require('connect-flash');
+const fs = require('fs')
 
 app.use(favicon(path.join(__dirname, 'Public', 'favicon.ico')));
 
@@ -44,8 +45,193 @@ app.get('/login', (req, res) => {
   res.render('login', { erro: null });
 });
 
+app.post('/dashboard/importar-dados', checkAuth, async (req, res) => {
+    try {
+        const { alunos } = req.body;
+        
+        if (!alunos || !Array.isArray(alunos)) {
+            return res.json({ sucesso: false, erro: 'Dados inválidos' });
+        }
+        
+        let importados = 0;
+        
+        for (const aluno of alunos) {
+            await db.query(
+                'INSERT INTO alunos (nome, ano_escolar, idade, presenca, nivel) VALUES ($1, $2, $3, $4, $5)',
+                [aluno.nome, aluno.ano_escolar, aluno.idade, aluno.presenca, 'EM DESENVOLVIMENTO']
+            );
+            importados++;
+        }
+        
+        res.json({ sucesso: true, importados });
+        
+    } catch (err) {
+        console.error(err);
+        res.json({ sucesso: false, erro: err.message });
+    }
+});
+
 app.get('/termos', (req, res) => {
   res.render('termos');
+});
+
+app.get('/baixar-modelo-importacao', checkAuth, async (req, res) => {
+    try {
+        const ExcelJS = require('exceljs');
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Relatório AnalisAI');
+        
+        worksheet.columns = [
+            { key: 'A', width: 10 },
+            { key: 'B', width: 20 },
+            { key: 'C', width: 20 },
+            { key: 'D', width: 24 },
+            { key: 'E', width: 12 },
+            { key: 'F', width: 12 },
+            { key: 'G', width: 25 },
+            { key: 'H', width: 120 }
+        ];
+        
+        try {
+            const logoPath = path.join(process.cwd(), 'Public', 'IMG', 'xls-logo.png');
+            if (fs.existsSync(logoPath)) {
+                const logoBuffer = fs.readFileSync(logoPath);
+                const logoId = workbook.addImage({ buffer: logoBuffer, extension: 'png' });
+                worksheet.addImage(logoId, { tl: { col: 0, row: 0 }, br: { col: 3, row: 6 } });
+            }
+        } catch (e) {
+            console.log("Logo não encontrado", e);
+        }
+        
+        worksheet.mergeCells('D2:G4');
+        const titleCell = worksheet.getCell('D2');
+        titleCell.value = 'MODELO DE IMPORTAÇÃO - PREENCHA OS DADOS';
+        titleCell.font = { size: 16, bold: true, color: { argb: 'FFFF0101' } };
+        titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        
+        const headerRow = worksheet.getRow(8);
+        headerRow.values = ['ID', 'ALUNO', 'ANO ESCOLAR', 'IDADE', 'MÉDIA', 'PRESENÇA', 'NÍVEL', 'COMPETÊNCIAS'];
+        headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        headerRow.eachCell(cell => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0101' } };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        });
+        
+        worksheet.addRow(['', 'JOÃO SILVA', '1º MÉDIO', 15, '', '90%', '', 'Raciocínio Lógico: 8.5; Comunicação: 7.0']);
+        worksheet.addRow(['', 'MARIA OLIVEIRA', '2º MÉDIO', 16, '', '85%', '', 'Proatividade: 9.0; Organização: 6.5']);
+        worksheet.addRow(['', 'PEDRO SANTOS', '3º MÉDIO', 17, '', '95%', '', 'Liderança: 8.0; Trabalho em Equipe: 7.5']);
+        worksheet.addRow(['', 'ANA BEATRIZ', '9º FUNDAMENTAL', 14, '', '100%', '', 'Comunicação: 9.5; Criatividade: 8.0']);
+        
+        let currentRow = 8 + 5 + 2;
+        
+        const titleRow = worksheet.getRow(currentRow);
+        titleRow.getCell(1).value = 'INSTRUÇÕES DE PREENCHIMENTO:';
+        titleRow.getCell(1).font = { bold: true, color: { argb: 'FFFF0101' } };
+        worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+        currentRow++;
+        
+        const inst1 = worksheet.getRow(currentRow);
+        inst1.getCell(1).value = '1. ID: Deixe em branco (será gerado automaticamente)';
+        worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+        currentRow++;
+        
+        const inst2 = worksheet.getRow(currentRow);
+        inst2.getCell(1).value = '2. ALUNO: Nome completo (apenas letras)';
+        worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+        currentRow++;
+        
+        const inst3 = worksheet.getRow(currentRow);
+        inst3.getCell(1).value = '3. ANO ESCOLAR: Use 1º MÉDIO, 2º MÉDIO, 3º MÉDIO ou 9º FUNDAMENTAL';
+        worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+        currentRow++;
+        
+        const inst4 = worksheet.getRow(currentRow);
+        inst4.getCell(1).value = '4. IDADE: Número entre 10 e 20';
+        worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+        currentRow++;
+        
+        const inst5 = worksheet.getRow(currentRow);
+        inst5.getCell(1).value = '5. MÉDIA: Deixe em branco (calculada automaticamente)';
+        worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+        currentRow++;
+        
+        const inst6 = worksheet.getRow(currentRow);
+        inst6.getCell(1).value = '6. PRESENÇA: Número entre 0 e 100 (pode usar %)';
+        worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+        currentRow++;
+        
+        const inst7 = worksheet.getRow(currentRow);
+        inst7.getCell(1).value = '7. NÍVEL: Deixe em branco (calculado automaticamente)';
+        worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+        currentRow++;
+        
+        const inst8 = worksheet.getRow(currentRow);
+        inst8.getCell(1).value = '8. COMPETÊNCIAS: Formato "Competência: Nota; Competência: Nota"';
+        worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
+        currentRow++;
+        
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=modelo_importacao_analisai.xlsx');
+        
+        await workbook.xlsx.write(res);
+        res.end();
+        
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Erro ao gerar modelo');
+    }
+});
+
+app.post('/dashboard/importar-dados-completos', checkAuth, async (req, res) => {
+    try {
+        const { alunos } = req.body;
+        
+        if (!alunos || !Array.isArray(alunos)) {
+            return res.json({ sucesso: false, erro: 'Dados inválidos' });
+        }
+        
+        let importados = 0;
+        let totalCompetencias = 0;
+        
+        for (const aluno of alunos) {
+            const result = await db.query(
+                'INSERT INTO alunos (nome, ano_escolar, idade, presenca, nivel) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+                [aluno.nome, aluno.ano_escolar, aluno.idade, aluno.presenca, 'EM DESENVOLVIMENTO']
+            );
+            
+            const alunoId = result.rows[0].id;
+            importados++;
+            
+            if (aluno.competencias && aluno.competencias.length > 0) {
+                for (const comp of aluno.competencias) {
+                    const compResult = await db.query(
+                        'SELECT id FROM competencias WHERE nome = $1',
+                        [comp.nome]
+                    );
+                    
+                    if (compResult.rows.length > 0) {
+                        const competenciaId = compResult.rows[0].id;
+                        
+                        await db.query(
+                            'INSERT INTO aluno_competencias (aluno_id, competencia_id, nota, observacoes) VALUES ($1, $2, $3, $4)',
+                            [alunoId, competenciaId, comp.nota, 'Importado via planilha']
+                        );
+                        totalCompetencias++;
+                    }
+                }
+            }
+        }
+        
+        res.json({ 
+            sucesso: true, 
+            importados, 
+            totalCompetencias 
+        });
+        
+    } catch (err) {
+        console.error('Erro na importação:', err);
+        res.json({ sucesso: false, erro: err.message });
+    }
 });
 
 app.get('/cadastro', (req, res) => {
@@ -56,11 +242,13 @@ app.post('/cadastro', async (req, res) => {
   const { nome, usuario, senha, confirmar_senha } = req.body;
 
   if (senha !== confirmar_senha) {
-    return res.render('cadastro', { erro: 'As senhas não coincidem!' });
+    req.flash('error_msg', 'As senhas não coincidem!');
+    return res.redirect('/cadastro');
   }
 
   if (senha.length < 6) {
-    return res.render('cadastro', { erro: 'A senha deve ter no mínimo 6 caracteres!' });
+    req.flash('error_msg', 'A senha deve ter no mínimo 6 caracteres!');
+    return res.redirect('/cadastro');
   }
 
   try {
@@ -68,13 +256,15 @@ app.post('/cadastro', async (req, res) => {
       'INSERT INTO usuarios (nome, email, senha, status, cargo) VALUES ($1, $2, $3, $4, $5)',
       [nome, usuario, senha, 'ATIVO', 'Professor']
     );
+    req.flash('success_msg', 'Cadastro realizado com sucesso! Faça login.');
     res.redirect('/login');
   } catch (err) {
     if (err.code === '23505') {
-      res.render('cadastro', { erro: 'Este e-mail já está cadastrado!' });
+      req.flash('error_msg', 'Este e-mail já está cadastrado!');
     } else {
-      res.render('cadastro', { erro: 'Erro ao realizar cadastro.' });
+      req.flash('error_msg', 'Erro ao realizar cadastro.');
     }
+    res.redirect('/cadastro');
   }
 });
 
@@ -88,19 +278,23 @@ app.post('/login', async (req, res) => {
       const user = result.rows[0];
       
       if (user.status !== 'ATIVO') {
-        return res.render('login', { erro: 'Sua conta está inativa. Contate o administrador.' });
+        req.flash('error_msg', 'Sua conta está inativa. Contate o administrador.');
+        return res.redirect('/login');
       }
 
       if (senha === user.senha) {
         req.session.user = user.nome;
         req.session.userStatus = user.status;
         req.session.userId = user.id;
+        req.flash('success_msg', `Bem-vindo, ${user.nome}!`);
         return res.redirect('/dashboard');
       }
     }
-    res.render('login', { erro: 'Usuário ou senha inválidos!' });
+    req.flash('error_msg', 'Usuário ou senha inválidos!');
+    res.redirect('/login');
   } catch (err) {
-    res.render('login', { erro: 'Erro ao conectar ao banco de dados.' });
+    req.flash('error_msg', 'Erro ao conectar ao banco de dados.');
+    res.redirect('/login');
   }
 });
 
@@ -213,6 +407,7 @@ app.get('/dashboard', checkAuth, async (req, res) => {
 
     } catch (err) {
         console.error(err);
+        req.flash('error_msg', 'Erro ao carregar dados do dashboard');
         res.render('dashboard/main', { 
             user: req.session.user, 
             alunos: [],
@@ -282,10 +477,8 @@ app.get('/dashboard/edit', checkAuth, async (req, res) => {
 
     } catch (err) {
         console.error("ERRO NO DASHBOARD EDIT:", err);
-        res.status(500).render('error', { 
-            message: "Não foi possível carregar os dados do painel pedagógico.",
-            error: err 
-        });
+        req.flash('error_msg', 'Não foi possível carregar os dados');
+        res.redirect('/dashboard');
     }
 });
 
@@ -375,19 +568,13 @@ app.post('/dashboard/add-aluno', checkAuth, async (req, res) => {
     const anosPermitidos = ['1º MÉDIO', '2º MÉDIO', '3º MÉDIO', '9º FUNDAMENTAL'];
     
     if (!anosPermitidos.includes(ano_escolar)) {
-        return res.status(400).render('error', {
-            titulo: 'ANO ESCOLAR INVÁLIDO',
-            mensagem: `O ano escolar "${ano_escolar}" não é permitido.`,
-            erroDetalhe: 'Anos permitidos: 1º MÉDIO, 2º MÉDIO, 3º MÉDIO, 9º FUNDAMENTAL'
-        });
+        req.flash('error_msg', 'Ano escolar inválido. Use: 1º MÉDIO, 2º MÉDIO, 3º MÉDIO, 9º FUNDAMENTAL');
+        return res.redirect('/dashboard/edit');
     }
     
     if (idade < 10 || idade > 20) {
-        return res.status(400).render('error', {
-            titulo: 'IDADE INVÁLIDA',
-            mensagem: 'A idade deve estar entre 10 e 20 anos.',
-            erroDetalhe: `Idade informada: ${idade}`
-        });
+        req.flash('error_msg', 'A idade deve estar entre 10 e 20 anos');
+        return res.redirect('/dashboard/edit');
     }
     
     try {
@@ -400,20 +587,8 @@ app.post('/dashboard/add-aluno', checkAuth, async (req, res) => {
         res.redirect('/dashboard/edit');
     } catch (err) { 
         console.error(err);
-        
-        if (err.code === '23514') { 
-            return res.status(400).render('error', {
-                titulo: 'ANO ESCOLAR INVÁLIDO',
-                mensagem: 'O valor informado para ano escolar não é permitido.',
-                erroDetalhe: 'Use apenas: 1º MÉDIO, 2º MÉDIO, 3º MÉDIO, 9º FUNDAMENTAL'
-            });
-        }
-
-        res.status(500).render('error', {
-            titulo: 'ERRO NO SERVIDOR',
-            mensagem: 'Não foi possível cadastrar o aluno.',
-            erroDetalhe: err.message
-        });
+        req.flash('error_msg', 'Erro ao cadastrar aluno');
+        res.redirect('/dashboard/edit');
     }
 });
 
@@ -430,11 +605,11 @@ app.get('/dashboard/delete-aluno/:id', checkAuth, async (req, res) => {
             await db.query("SELECT setval('alunos_id_seq', (SELECT MAX(id) FROM alunos))");
         }
 
-        req.flash('success_msg', 'Aluno removido e IDs reajustados!');
+        req.flash('success_msg', 'Aluno removido com sucesso!');
         res.redirect('/dashboard/edit');
     } catch (err) {
         console.error(err);
-        req.flash('error_msg', 'Erro ao remover aluno.');
+        req.flash('error_msg', 'Erro ao remover aluno');
         res.redirect('/dashboard/edit');
     }
 });
@@ -445,7 +620,7 @@ app.post('/dashboard/erase-all', checkAuth, async (req, res) => {
         await db.query('TRUNCATE TABLE notas_detalhadas RESTART IDENTITY CASCADE');
         await db.query('TRUNCATE TABLE alunos RESTART IDENTITY CASCADE');
         
-        req.flash('success_msg', 'Todos os dados foram apagados e os IDs foram resetados!');
+        req.flash('success_msg', 'Todos os dados foram apagados com sucesso!');
         res.redirect('/dashboard/edit');
     } catch (err) {
         console.error(err);
@@ -520,6 +695,7 @@ app.get('/dashboard/graficos', checkAuth, async (req, res) => {
 
     } catch (err) {
         console.error(err);
+        req.flash('error_msg', 'Erro ao carregar gráficos');
         res.render('dashboard/graficos', { 
             stats: {
                 total: 0,
@@ -545,11 +721,10 @@ app.get('/dashboard/usuarios', checkAuth, async (req, res) => {
         const result = await db.query('SELECT id, nome, email, cargo, status FROM usuarios ORDER BY nome ASC');
         res.render('dashboard/usuarios', { usuarios: result.rows });
     } catch (err) {
-        res.status(500).send("Erro ao carregar usuários");
+        req.flash('error_msg', 'Erro ao carregar usuários');
+        res.redirect('/dashboard');
     }
 });
-
-
 
 app.post('/dashboard/usuarios/add', checkAuth, async (req, res) => {
     const { nome, email, senha, cargo } = req.body;
@@ -558,9 +733,11 @@ app.post('/dashboard/usuarios/add', checkAuth, async (req, res) => {
             'INSERT INTO usuarios (nome, email, senha, cargo, status) VALUES ($1, $2, $3, $4, $5)',
             [nome, email, senha, cargo, 'ATIVO']
         );
+        req.flash('success_msg', 'Usuário cadastrado com sucesso!');
         res.redirect('/dashboard/usuarios');
     } catch (err) {
-        res.status(500).send("Erro ao cadastrar usuário");
+        req.flash('error_msg', 'Erro ao cadastrar usuário');
+        res.redirect('/dashboard/usuarios');
     }
 });
 
@@ -571,18 +748,22 @@ app.post('/dashboard/usuarios/update', checkAuth, async (req, res) => {
             'UPDATE usuarios SET nome=$1, email=$2, cargo=$3, status=$4 WHERE id=$5',
             [nome, email, cargo, status, id]
         );
+        req.flash('success_msg', 'Usuário atualizado com sucesso!');
         res.redirect('/dashboard/usuarios');
     } catch (err) {
-        res.status(500).send("Erro ao atualizar usuário");
+        req.flash('error_msg', 'Erro ao atualizar usuário');
+        res.redirect('/dashboard/usuarios');
     }
 });
 
 app.get('/dashboard/usuarios/delete/:id', checkAuth, async (req, res) => {
     try {
         await db.query('DELETE FROM usuarios WHERE id = $1', [req.params.id]);
+        req.flash('success_msg', 'Usuário removido com sucesso!');
         res.redirect('/dashboard/usuarios');
     } catch (err) {
-        res.status(500).send("Erro ao excluir usuário");
+        req.flash('error_msg', 'Erro ao excluir usuário');
+        res.redirect('/dashboard/usuarios');
     }
 });
 
@@ -590,7 +771,6 @@ app.get('/logout', (req, res) => {
   req.session.destroy();
   res.redirect('/');
 });
-
 
 app.use((req, res) => {
     res.status(404).render('error', {
@@ -600,23 +780,17 @@ app.use((req, res) => {
     });
 });
 
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     
     if (err.code === '23514') {
-        return res.status(400).render('error', {
-            titulo: 'ERRO DE VALIDAÇÃO',
-            mensagem: 'Um valor inválido foi enviado para o banco de dados.',
-            erroDetalhe: err.detail || err.message
-        });
+        req.flash('error_msg', err.detail || 'Erro de validação');
+        return res.redirect(req.get('referer') || '/dashboard');
     }
     
-    res.status(500).render('error', {
-        titulo: 'ERRO NO SERVIDOR',
-        mensagem: 'Ocorreu um erro interno no servidor.',
-        erroDetalhe: process.env.NODE_ENV === 'development' ? err.message : null
-    });
+    req.flash('error_msg', 'Erro interno no servidor');
+    res.redirect('/dashboard');
 });
 
-console.log('Conectando ao banco:', 'postgresql://neondb_owner:npg_gbhV9DuMyCm8@ep-misty-rice-acbl3x03-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require' ? 'Render ✅' : 'Local ❌');
 app.listen(3000, () => console.log('Servidor rodando em http://localhost:3000'));
