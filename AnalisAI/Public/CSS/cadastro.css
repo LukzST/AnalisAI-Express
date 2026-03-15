@@ -117,6 +117,7 @@ body {
     outline: none;
     transition: 0.3s;
     letter-spacing: 1px;
+    transition: all 0.3s ease;
 }
 
 .input-group input:focus {
