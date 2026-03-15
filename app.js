@@ -103,7 +103,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.get('/dashboard', checkAuth, async (req, res) => {
+app.get('/dashboard', async (req, res) => {
     try {
         const alunosResult = await db.query(`
             SELECT 

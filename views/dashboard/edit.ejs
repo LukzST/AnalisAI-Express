@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AnalisAI - Editor de Notas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="/css/sidebar.css">
-    <link rel="stylesheet" href="/css/dashboard.css">
-    <link rel="stylesheet" href="/css/edit.css">
+    <link rel="stylesheet" href="/CSS/sidebar.css">
+    <link rel="stylesheet" href="/CSS/dashboard.css">
+    <link rel="stylesheet" href="/CSS/edit.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="dash-body">
-    <%- include('../partials/sidebar') %>
+    <%- include('../Partials/sidebar') %>
 
     <div class="main-layout">
         <header class="dash-header">
             <div class="logo">
-                <img src="/img/logo3-white.png" alt="AnalisAI">
+                <img src="/IMG/logo3-white.png" alt="AnalisAI">
             </div>
             <h2 class="page-title">EDITOR DE NOTAS</h2>
         </header>
@@ -538,7 +538,7 @@
             ];
 
             try {
-                const response = await fetch('/img/xls-logo.png');
+                const response = await fetch('/IMG/xls-logo.png');
                 const blob = await response.blob();
                 const arrayBuffer = await blob.arrayBuffer();
                 const logoId = workbook.addImage({ buffer: arrayBuffer, extension: 'png' });
