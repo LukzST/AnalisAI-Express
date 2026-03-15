@@ -6,7 +6,7 @@ const favicon = require('serve-favicon');
 const path = require('path');
 const flash = require('connect-flash');
 
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(__dirname, 'Public', 'favicon.ico')));
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
