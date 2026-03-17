@@ -343,17 +343,36 @@ app.post('/dashboard/importar-dados', checkAuth, async (req, res) => {
         let importados = 0;
         
         for (const aluno of alunos) {
-            await db.query(
-                'INSERT INTO alunos (nome, ano_escolar, idade, presenca, nivel) VALUES ($1, $2, $3, $4, $5)',
-                [aluno.nome, aluno.ano_escolar, aluno.idade, aluno.presenca, 'EM DESENVOLVIMENTO']
+            const result = await db.query(
+                `INSERT INTO alunos (nome, ano_escolar, idade, presenca, nivel) 
+                 VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+                [aluno.nome, aluno.ano_escolar, aluno.idade, aluno.presenca || 100, 'EM DESENVOLVIMENTO']
             );
+            
+            const alunoId = result.rows[0].id;
+
+            const nomeLower = aluno.nome.toLowerCase().replace(/\s+/g, '.');
+            const email = `${nomeLower}@aluno.analisai.com`;
+            const senha = 'aluno123';
+            const matricula = `ALU${Date.now().toString().slice(-8)}${importados}`;
+            
+            await db.query(
+                `INSERT INTO alunos_login (nome, email, senha, matricula, aluno_id, status) 
+                 VALUES ($1, $2, $3, $4, $5, 'ATIVO')`,
+                [aluno.nome, email, senha, matricula, alunoId]
+            );
+            
             importados++;
         }
         
-        res.json({ sucesso: true, importados });
+        res.json({ 
+            sucesso: true, 
+            importados,
+            mensagem: `${importados} alunos importados com sucesso! Login: nome.sobrenome@aluno.analisai.com / Senha: aluno123`
+        });
         
     } catch (err) {
-        console.error(err);
+        console.error('Erro na importação:', err);
         res.json({ sucesso: false, erro: err.message });
     }
 });
@@ -482,11 +501,24 @@ app.post('/dashboard/importar-dados-completos', checkAuth, async (req, res) => {
         
         for (const aluno of alunos) {
             const result = await db.query(
-                'INSERT INTO alunos (nome, ano_escolar, idade, presenca, nivel) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-                [aluno.nome, aluno.ano_escolar, aluno.idade, aluno.presenca, 'EM DESENVOLVIMENTO']
+                `INSERT INTO alunos (nome, ano_escolar, idade, presenca, nivel) 
+                 VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+                [aluno.nome, aluno.ano_escolar, aluno.idade, aluno.presenca || 100, 'EM DESENVOLVIMENTO']
             );
             
             const alunoId = result.rows[0].id;
+            
+            const nomeLower = aluno.nome.toLowerCase().replace(/\s+/g, '.');
+            const email = `${nomeLower}@aluno.analisai.com`;
+            const senha = 'aluno123';
+            const matricula = `ALU${Date.now().toString().slice(-8)}${importados}`;
+
+            await db.query(
+                `INSERT INTO alunos_login (nome, email, senha, matricula, aluno_id, status) 
+                 VALUES ($1, $2, $3, $4, $5, 'ATIVO')`,
+                [aluno.nome, email, senha, matricula, alunoId]
+            );
+            
             importados++;
             
             if (aluno.competencias && aluno.competencias.length > 0) {
@@ -512,7 +544,8 @@ app.post('/dashboard/importar-dados-completos', checkAuth, async (req, res) => {
         res.json({ 
             sucesso: true, 
             importados, 
-            totalCompetencias 
+            totalCompetencias,
+            mensagem: `${importados} alunos importados com ${totalCompetencias} competências!`
         });
         
     } catch (err) {

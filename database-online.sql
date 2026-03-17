@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 CREATE TABLE IF NOT EXISTS alunos (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    ano_escolar VARCHAR(50) NOT NULL,
+    ano_escolar VARCHAR(50) NOT NULL CHECK (ano_escolar IN ('1º MÉDIO', '2º MÉDIO', '3º MÉDIO', '9º FUNDAMENTAL')),
     idade INTEGER NOT NULL,
     nota DECIMAL(3,1) DEFAULT 0.0,
     presenca INTEGER DEFAULT 100,
