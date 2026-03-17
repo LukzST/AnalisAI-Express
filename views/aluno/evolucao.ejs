@@ -223,6 +223,7 @@
 
     <% if (historico && historico.length > 0) { %>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <% } %>
     <script>
         var historicoData = <%- JSON.stringify(historico) %>;
         
@@ -335,6 +336,5 @@
             chart.update();
         }
     </script>
-    <% } %>
 </body>
 </html>
