@@ -100,7 +100,6 @@
         </main>
     </div>
 
-    <!-- Modal de Usuário -->
     <div id="userModal" class="modal-overlay">
         <div class="modal-content">
             <button class="close-btn" onclick="closeUserModal()"><i class="fas fa-times-circle"></i></button>
@@ -139,7 +138,6 @@
         </div>
     </div>
 
-    <!-- Modal de Permissão Negada -->
     <div id="permissionModal" class="modal-overlay">
         <div class="modal-content" style="max-width: 400px; border-color: #ff0101;">
             <button class="close-btn" onclick="closePermissionModal()">
@@ -167,7 +165,6 @@
     </div>
 
     <script>
-        // Verificar se é admin
         const isAdmin = <%= isAdmin %>;
         
         function openAddUserModal() {

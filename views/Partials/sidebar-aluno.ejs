@@ -1,0 +1,111 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<aside class="sidebar">
+    <div class="sidebar-top">
+        <a href="/aluno/dashboard" title="Dashboard" class="side-link">
+            <i class="fas fa-home"></i>
+        </a>
+        <a href="/aluno/competencias" title="Minhas Competências" class="side-link">
+            <i class="fa-solid fa-medal"></i>
+        </a>
+        <a href="/aluno/tarefas" title="Minhas tarefas" class="side-link">
+            <i class="fa-solid fa-tasks"></i>
+        </a>
+        <a href="/aluno/evolucao" title="Minha Evolução" class="side-link">
+            <i class="fas fa-chart-line"></i>
+        </a>
+        <a href="/aluno/perfil" title="Meu Perfil" class="side-link">
+            <i class="fas fa-user"></i>
+        </a>
+    </div>
+    
+    <div class="sidebar-bottom">
+        <a href="/aluno/equipe" title="Equipe de desenvolvedores" class="side-link">
+            <i class="fas fa-code"></i>
+        </a>
+        <a href="javascript:void(0)" title="Sobre o site" class="side-link" onclick="openModal()">
+            <i class="fas fa-info-circle"></i>
+        </a>
+        <a href="/logout" title="Sair" class="side-link">
+            <i class="fas fa-sign-out-alt"></i>
+        </a>
+    </div>
+</aside>
+
+<div id="infoModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()">
+            <i class="fas fa-times-circle"></i>
+        </button>
+        <div class="modal-body">
+            <img src="/IMG/logo3-green.png" alt="AnalisAI" class="modal-logo">
+            <h3 class="version-text">VERSÃO 1.0</h3>
+            <p class="copyright-text">© SENAI - Serviço Nacional de Aprendizagem Industrial</p>
+            <p class="copyright-text" style="margin-top: 10px; color: #217346;">ÁREA DO ALUNO</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar .side-link i {
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar .side-link:hover i {
+        transform: scale(1.1);
+    }
+    
+    .sidebar .side-link.active {
+        background-color: rgba(33, 115, 70, 0.1);
+        color: #217346;
+        border-color: rgba(33, 115, 70, 0.3);
+    }
+    
+    
+    .modal-content .version-text {
+        color: #217346;
+    }
+    
+    .sidebar-bottom .side-link:last-child {
+        color: #217346;
+    }
+    
+    .sidebar-bottom .side-link:last-child:hover {
+        background-color: #21734627;
+        border-color: #21734650;
+        color: #217346;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const currentPath = window.location.pathname;
+        const links = document.querySelectorAll('.side-link');
+        
+        links.forEach(link => {
+            const linkPath = link.getAttribute('href');
+            if (linkPath && !linkPath.includes('logout') && currentPath === linkPath) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+    });
+
+    function openModal() {
+        const modal = document.getElementById('infoModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('infoModal');
+        modal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('infoModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>

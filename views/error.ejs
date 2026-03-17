@@ -32,6 +32,7 @@
                     <%= titulo || 'OPS! ALGO DEU ERRADO' %>
                 </h2>
                 
+                
                 <p class="modal-text-warning" style="color: #888; font-size: 1rem; line-height: 1.6; margin-bottom: 30px;">
                     <%= mensagem || 'Ocorreu um erro inesperado. Tente novamente.' %>
                 </p>
@@ -43,13 +44,16 @@
                     </div>
                 <% } %>
                 
-                <div class="modal-actions" style="display: flex; gap: 15px; justify-content: center;">
+                <div class="modal-actions" style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
                     <a href="javascript:history.back()" class="btn-action" style="padding: 12px 25px; text-decoration: none;">
                         <i class="fas fa-arrow-left"></i> VOLTAR
                     </a>
-                    <a href="javascript:void()" onclick="openEraseModal()" class="btn-action" style="padding: 12px 25px; text-decoration: none;">
-                        <i class="fas fa-database"></i> LIMPAR BASE DE DADOS (ALUNOS)
-                    </a>
+                    
+                    <% if (isAdmin) { %>
+                        <a href="javascript:void()" onclick="openEraseModal()" class="btn-action" style="padding: 12px 25px; text-decoration: none; border-color: #ff0101; color: #ff0101;">
+                            <i class="fas fa-database"></i> LIMPAR BASE DE DADOS (ALUNOS)
+                        </a>
+                    <% } %>
                 </div>
             </div>
         </main>
@@ -61,30 +65,33 @@
         </footer>
     </div>
 
+    <% if (isAdmin) { %>
     <div id="eraseAllModal" class="modal-overlay">
-            <div class="modal-content modal-small">
-                <button class="close-btn" onclick="closeEraseModal()"><i class="fas fa-times-circle"></i></button>
-                <div class="modal-icon-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <h2 class="modal-title-warning">APAGAR TUDO?</h2>
-                <p class="modal-text-warning">
-                    Esta ação irá remover <strong>TODOS</strong> os alunos, notas e competências atribuídas.<br>
-                    As competências padrão do sistema serão mantidas.<br>
-                    <span style="color: #ff0101; font-weight: bold;">Esta operação não pode ser desfeita.</span>
-                </p>
-                <div class="modal-actions">
-                    <form action="/dashboard/erase-all" method="POST">
-                        <button type="submit" class="btn-erase-confirm">
-                            <i class="fas fa-trash"></i> SIM, APAGAR TUDO
-                        </button>
-                    </form>
-                    <button onclick="closeEraseModal()" class="btn-cancel">
-                        CANCELAR
+        <div class="modal-content modal-small">
+            
+            <button class="close-btn" onclick="closeEraseModal()"><i class="fas fa-times-circle"></i></button>
+            <div class="modal-icon-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2 class="modal-title-warning">APAGAR TUDO?</h2>
+            <p class="modal-text-warning">
+                Esta ação irá remover <strong>TODOS</strong> os alunos, notas e competências atribuídas.<br>
+                As competências padrão do sistema serão mantidas.<br>
+                <span style="color: #ff0101; font-weight: bold;">Esta operação não pode ser desfeita.</span>
+            </p>
+            <div class="modal-actions">
+                <form action="/dashboard/erase-all" method="POST">
+                    <button type="submit" class="btn-erase-confirm">
+                        <i class="fas fa-trash"></i> SIM, APAGAR TUDO
                     </button>
-                </div>
+                </form>
+                <button onclick="closeEraseModal()" class="btn-cancel">
+                    CANCELAR
+                </button>
             </div>
         </div>
+    </div>
+    <% } %>
 
     <script>
         function openEraseModal() {

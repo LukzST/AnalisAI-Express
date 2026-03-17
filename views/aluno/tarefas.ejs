@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnalisAI - Minhas Tarefas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/CSS/aluno.css">
+    <link rel="stylesheet" href="/CSS/sidebar.css">
+    <link rel="stylesheet" href="/CSS/dashboard.css">
+    <link rel="stylesheet" href="/CSS/edit.css">
+    <link rel="stylesheet" href="/CSS/tarefas-alunos.css">
+</head>
+<body class="dash-body">
+    <%- include('../Partials/sidebar-aluno') %>
+
+    <div class="main-layout">
+        <header class="dash-header">
+            <div class="logo">
+                <img src="/IMG/logo3-green.png" alt="AnalisAI">
+            </div>
+            <div class="header-user">
+                <span>Bem-vindo, <strong><%= aluno.nome %></strong></span>
+                <a href="/logout" class="logout-icon-1" title="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </header>
+
+        <main class="dash-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-tasks"></i> MINHAS TAREFAS</h1>
+            </div>
+
+            <% if (success_msg && success_msg.length > 0) { %>
+                <div class="alert alert-success">
+                    <%= success_msg %>
+                    <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+                </div>
+            <% } %>
+            
+            <% if (error_msg && error_msg.length > 0) { %>
+                <div class="alert alert-error">
+                    <%= error_msg %>
+                    <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+                </div>
+            <% } %>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value"><%= stats.total || 0 %></div>
+                    <div class="stat-label">TOTAL</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"><%= stats.pendentes || 0 %></div>
+                    <div class="stat-label">PENDENTES</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"><%= stats.aguardando || 0 %></div>
+                    <div class="stat-label">AGUARDANDO</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"><%= stats.concluidas || 0 %></div>
+                    <div class="stat-label">CONCLUÍDAS</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"><%= stats.atrasadas || 0 %></div>
+                    <div class="stat-label">ATRASADAS</div>
+                </div>
+            </div>
+
+            <% if (tarefas && tarefas.length > 0) { %>
+                <div class="tarefas-grid">
+                    <% tarefas.forEach(tarefa => { 
+                        let statusClass = 'pendente';
+                        let podeEntregar = false;
+                        let statusTexto = tarefa.status_texto;
+                        
+                        if (tarefa.status_real === 'ATRASADA') {
+                            statusClass = 'atrasada';
+                            statusTexto = 'ATRASADA';
+                            podeEntregar = true;
+                        } else if (tarefa.status === 'DEVOLVIDA') {
+                            statusClass = 'devolvida';
+                            statusTexto = 'DEVOLVIDA';
+                            podeEntregar = true;
+                        } else if (tarefa.status === 'ENTREGUE') {
+                            statusClass = 'aguardando';
+                            statusTexto = 'AGUARDANDO';
+                        } else if (tarefa.status === 'CONCLUIDA') {
+                            statusClass = 'corrigida';
+                            statusTexto = 'CORRIGIDA';
+                        } else if (tarefa.status === 'PENDENTE') {
+                            podeEntregar = true;
+                            statusTexto = 'PENDENTE';
+                        }
+                        
+                        const hoje = new Date();
+                        const dataLimite = new Date(tarefa.data_limite);
+                        const isUrgente = tarefa.data_limite && dataLimite < hoje && tarefa.status === 'PENDENTE';
+                    %>
+                        <div class="tarefa-card">
+                            <div class="tarefa-status-badge <%= statusClass %>">
+                                <%= statusTexto %>
+                            </div>
+                            
+                            <div class="tarefa-header">
+                                <h3 class="tarefa-titulo"><%= tarefa.titulo %></h3>
+                                <% if (tarefa.competencia_nome) { %>
+                                    <div class="tarefa-competencia">
+                                        <i class="fas fa-tag"></i> <%= tarefa.competencia_nome %>
+                                    </div>
+                                <% } %>
+                            </div>
+                            
+                            <% if (tarefa.descricao) { %>
+                                <div class="tarefa-descricao">
+                                    <%= tarefa.descricao %>
+                                </div>
+                            <% } %>
+                            
+                            <div class="tarefa-meta">
+                                <div class="tarefa-data <%= isUrgente ? 'urgente' : '' %>">
+                                    <i class="far fa-calendar-alt"></i> 
+                                    <span>Entregar até: <strong><%= tarefa.data_limite_formatada || 'Sem data' %></strong></span>
+                                </div>
+                            </div>
+                            
+                            <% if (tarefa.status === 'DEVOLVIDA' && tarefa.feedback) { %>
+                                <div class="tarefa-feedback">
+                                    <p><i class="fas fa-undo-alt"></i> <%= tarefa.feedback %></p>
+                                </div>
+                            <% } %>
+                            
+                            <% if (tarefa.status === 'CONCLUIDA' && tarefa.nota) { %>
+                                <div class="tarefa-nota-container">
+                                    <span class="tarefa-nota"><%= parseFloat(tarefa.nota).toFixed(1) %></span>
+                                    <% if (tarefa.feedback) { %>
+                                        <div class="tarefa-feedback-correcao">
+                                            <i class="fas fa-comment" style="color: #217346; margin-right: 5px;"></i>
+                                            <%= tarefa.feedback %>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% } %>
+                            
+                            <div class="tarefa-footer">
+                                <% if (tarefa.status === 'ENTREGUE') { %>
+                                    <div class="info-entrega">
+                                        <i class="fas fa-clock"></i>
+                                        Entregue em: <%= tarefa.data_entrega_formatada %>
+                                    </div>
+                                <% } else if (tarefa.status === 'CONCLUIDA' && tarefa.data_avaliacao_formatada) { %>
+                                    <div class="info-entrega">
+                                        <i class="fas fa-check-circle"></i>
+                                        Avaliado em: <%= tarefa.data_avaliacao_formatada %>
+                                    </div>
+                                <% } else if (podeEntregar) { %>
+                                    <form action="/aluno/tarefas/entregar/<%= tarefa.tarefa_aluno_id %>" method="POST" style="width: 100%;">
+                                            <button type="button" class="btn-entregar" onclick="abrirModalEnvio(<%= tarefa.tarefa_aluno_id %>, '<%= tarefa.titulo.replace(/'/g, "\\'") %>')">
+                                                <i class="fas fa-upload"></i> 
+                                                <% if (tarefa.status === 'DEVOLVIDA') { %>
+                                                    REENVIAR TAREFA
+                                                <% } else { %>
+                                                    ENVIAR TAREFA
+                                                <% } %>
+                                            </button>
+                                    </form>
+                                <% } else { %>
+                                    <div class="info-entrega">
+                                        <i class="fas fa-info-circle"></i>
+                                        Aguardando correção do professor
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-tasks"></i>
+                    <h3>Nenhuma tarefa encontrada</h3>
+                    <p>Você ainda não possui tarefas atribuídas.</p>
+                </div>
+            <% } %>
+        </main>
+
+        <footer class="dash-footer">
+            <div class="footer-actions">
+                <a href="/aluno/dashboard" class="b">
+                    <i class="fas fa-arrow-left"></i> VOLTAR
+                </a>
+            </div>
+            <div class="footer-credits">
+                <p>© 2026 AnalisAI — SENAI Duque de Caxias.</p>
+                <a href="/aluno/equipe"><p>Time de desenvolvedores</p></a>
+            </div>
+        </footer>
+    </div>
+
+<div id="modalEnvioTarefa" class="modal-overlay">
+    <div class="modal-content" style="max-width: 500px; border-color: #217346;">
+        <button class="close-btn" onclick="fecharModalEnvio()">
+            <i class="fas fa-times-circle"></i>
+        </button>
+        
+        <h2 class="section-title-2" style="color: #217346; margin-bottom: 20px;">
+            ENVIAR TAREFA
+        </h2>
+        
+        <div id="tarefaTituloEnvio" style="color: #fff; font-size: 1.1rem; margin-bottom: 20px; text-align: center;"></div>
+        
+        <form id="formEnvioTarefa" method="POST" enctype="multipart/form-data">
+            <div class="filter-options">
+                <label style="color: #888;">RESPOSTA (texto)</label>
+                <textarea name="resposta_texto" class="filter-input" rows="6" placeholder="Digite sua resposta aqui..." style="resize: vertical;"></textarea>
+                
+                <div style="margin: 20px 0; text-align: center; color: #666;">
+                    <i class="fas fa-minus"></i> OU <i class="fas fa-minus"></i>
+                </div>
+                
+                <label style="color: #888;">ANEXAR ARQUIVO</label>
+                <div class="file-drop-area" style="padding: 20px; margin: 10px 0;" onclick="document.getElementById('arquivoInput').click()">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #555;"></i>
+                    <span class="file-msg" style="font-size: 0.8rem; color: #888;">Clique para selecionar um arquivo</span>
+                    <span style="color: #666; font-size: 0.7rem;">PDF, DOC, DOCX, JPG, PNG (max 10MB)</span>
+                    <input type="file" id="arquivoInput" name="arquivo" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display: none;">
+                </div>
+                <div id="nomeArquivo" class="file-name" style="font-size: 0.75rem; padding: 6px; text-align: center; color: #217346; background: rgba(33,115,70,0.1); border-radius: 8px; margin-bottom: 10px;"></div>
+                
+                <button type="submit" class="btn-success-action" style="margin-top: 20px; width: 100%; background: #217346; border-color: #217346;">
+                    <i class="fas fa-paper-plane"></i> ENVIAR TAREFA
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let tarefaIdEnvio = null;
+    
+    function abrirModalEnvio(tarefaAlunoId, titulo) {
+        tarefaIdEnvio = tarefaAlunoId;
+        document.getElementById('tarefaTituloEnvio').innerHTML = `<i class="fas fa-tasks" style="color: #217346;"></i> ${titulo}`;
+        document.getElementById('formEnvioTarefa').action = `/aluno/tarefas/enviar/${tarefaAlunoId}`;
+        document.getElementById('modalEnvioTarefa').style.display = 'flex';
+    }
+    
+    function fecharModalEnvio() {
+        document.getElementById('modalEnvioTarefa').style.display = 'none';
+        document.getElementById('formEnvioTarefa').reset();
+        document.getElementById('nomeArquivo').innerHTML = '';
+    }
+    
+    document.getElementById('arquivoInput')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            document.getElementById('nomeArquivo').innerHTML = `📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        } else {
+            document.getElementById('nomeArquivo').innerHTML = '';
+        }
+    });
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('modalEnvioTarefa');
+        if (event.target == modal) {
+            fecharModalEnvio();
+        }
+    }
+</script>
+</body>
+</html>

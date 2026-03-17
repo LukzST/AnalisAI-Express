@@ -18,7 +18,7 @@
 
     <div class="page">
         <div class="logo-analisai">
-            <img src="/IMG/logo3-white.png" alt="AnalisAI">
+            <img src="/IMG/logo3-white.png" alt="AnalisAI" id="logoimg">
         </div>
 
         <div class="login-container">
@@ -35,17 +35,46 @@
                 </div>
             <% } %>
 
-            <form action="/login" method="POST">
-                <div class="input-group">
-                    <input type="text" name="usuario" placeholder="USUÁRIO" required>
+            <div class="login-tabs">
+                <div class="login-tab professor active" onclick="switchTab('professor')">
+                    <i class="fas fa-chalkboard-teacher"></i> PROFESSOR
                 </div>
-                
-                <div class="input-group">
-                    <input type="password" name="senha" placeholder="SENHA" required>
+                <div class="login-tab aluno" onclick="switchTab('aluno')">
+                    <i class="fas fa-user-graduate"></i> ALUNO
                 </div>
-                
-                <button type="submit">ENTRAR</button>
-            </form>
+            </div>
+
+            <div class="login-form professor active" id="professorForm">
+                <form action="/login/professor" method="POST">
+                    <div class="input-group">
+                        <input type="text" name="usuario" placeholder="E-MAIL" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" name="senha" placeholder="SENHA" required>
+                    </div>
+                    <button type="submit">ENTRAR</button>
+                </form>
+            </div>
+
+            <div class="login-form aluno" id="alunoForm">
+                <form action="/login/aluno" method="POST">
+                    <div class="info-box">
+                        <i class="fas fa-info-circle"></i>
+                        Use matrícula ou e-mail
+                    </div>
+                    <div class="input-group-2">
+                        <input type="text" name="matricula" placeholder="MATRÍCULA">
+                    </div>
+                    <div class="input-group-2">
+                        <input type="email" name="email" placeholder="E-MAIL">
+                    </div>
+                    <div class="input-group-2">
+                        <input type="password" name="senha" placeholder="SENHA" required>
+                    </div>
+                    <button type="submit" class="aluno-btn">ENTRAR COMO ALUNO</button>
+                </form>
+            </div>
+
         </div>
 
         <div class="signup-link">
@@ -59,6 +88,32 @@
             </a>
         </footer>
     </div>
+
+    <script>
+        function switchTab(tipo) {
+            const tabs = document.querySelectorAll('.login-tab');
+            const forms = document.querySelectorAll('.login-form');
+            const logo = document.getElementById('logoimg');
+            
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            forms.forEach(form => {
+                form.classList.remove('active');
+            });
+            
+            if (tipo === 'professor') {
+                document.querySelector('.login-tab.professor').classList.add('active');
+                document.getElementById('professorForm').classList.add('active');
+                logo.src = '/IMG/logo3-white.png';
+            } else {
+                document.querySelector('.login-tab.aluno').classList.add('active');
+                document.getElementById('alunoForm').classList.add('active');
+                logo.src = '/IMG/logo3-green.png';
+            }
+        }
+    </script>
 
 </body>
 </html>

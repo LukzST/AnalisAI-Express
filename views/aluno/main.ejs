@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnalisAI - Painel do Aluno</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/CSS/aluno.css">
+    <link rel="stylesheet" href="/CSS/sidebar.css">
+    <link rel="stylesheet" href="/CSS/dashboard.css">
+    <link rel="stylesheet" href="/CSS/main-aluno.css">
+</head>
+<body class="dash-body">
+
+    <%- include('../Partials/sidebar-aluno') %>
+
+    <div class="main-layout">
+        <header class="dash-header">
+            <div class="logo">
+                <img src="/IMG/logo3-green.png" alt="AnalisAI">
+            </div>
+            <div class="header-user">
+                <span>Bem-vindo, <strong><%= aluno.nome %></strong></span>
+                <a href="/logout" class="logout-icon-1" title="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </header>
+
+        <main class="dash-content">
+            <div class="aluno-header">
+                <h1 class="aluno-nome"><%= aluno.nome %></h1>
+                <div class="aluno-turma"><%= aluno.ano_escolar %></div>
+                
+                <div class="aluno-meta">
+                    <div class="aluno-meta-item">
+                        <span class="meta-label">MATRÍCULA</span>
+                        <span class="meta-value"><%= aluno.matricula %></span>
+                    </div>
+                    <div class="aluno-meta-item">
+                        <span class="meta-label">MÉDIA GERAL</span>
+                        <% 
+                            let mediaGeralNum = parseFloat(mediaGeral) || 0;
+                            let mediaClass = mediaGeralNum >= 7 ? 'apto' : (mediaGeralNum >= 5 ? 'desenvolvimento' : 'inapto');
+                        %>
+                        <span class="meta-value <%= mediaClass %>">
+                            <%= mediaGeralNum.toFixed(1) %>
+                        </span>
+                    </div>
+                    <div class="aluno-meta-item">
+                        <span class="meta-label">PRESENÇA</span>
+                        <span class="meta-value"><%= aluno.presenca %>% <small>/ 100%</small></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="aluno-stats">
+                <div class="stat-card">
+                    <i class="fas fa-tasks" style="color: #217346; font-size: 2rem;"></i>
+                    <div class="stat-value"><%= competencias.length %></div>
+                    <div class="stat-label">COMPETÊNCIAS AVALIADAS</div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-star" style="color: #d4a017; font-size: 2rem;"></i>
+                    <div class="stat-value">
+                        <% 
+                            let aptas = competencias.filter(c => parseFloat(c.nota) >= 7).length;
+                        %>
+                        <%= aptas %>
+                    </div>
+                    <div class="stat-label">COMPETÊNCIAS APTAS</div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-chart-line" style="color: #ff0101; font-size: 2rem;"></i>
+                    <div class="stat-value">
+                        <% 
+                            let inaptas = competencias.filter(c => parseFloat(c.nota) < 5).length;
+                        %>
+                        <%= inaptas %>
+                    </div>
+                    <div class="stat-label">PRECISA MELHORAR</div>
+                </div>
+            </div>
+
+            <% if (competencias && competencias.length > 0) { %>
+            <section class="section-container">
+                <h2 class="section-title-2"><i class="fas fa-chart-pie"></i> VISÃO GERAL DAS COMPETÊNCIAS</h2>
+                <div class="grafico-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </section>
+            <% } %>
+
+            <section class="section-container">
+                <h2 class="section-title-2"><i class="fas fa-clipboard-list"></i> MINHAS COMPETÊNCIAS</h2>
+                
+                <% if (competencias && competencias.length > 0) { %>
+                    <div class="dash-grid">
+                        <% competencias.forEach(comp => { 
+                            let notaNum = parseFloat(comp.nota) || 0;
+                            let nivelClass = 'desenvolvimento';
+                            if (notaNum >= 7) nivelClass = 'apto';
+                            else if (notaNum < 5) nivelClass = 'inapto';
+                        %>
+                            <div class="competencia-card <%= nivelClass %>">
+                                <div class="competencia-header">
+                                    <h3 class="competencia-nome"><%= comp.nome %></h3>
+                                    <span class="competencia-nota <%= nivelClass %>"><%= notaNum.toFixed(1) %></span>
+                                </div>
+                                
+                                <% if (comp.descricao) { %>
+                                    <p class="competencia-desc"><%= comp.descricao %></p>
+                                <% } %>
+                                
+                                <% if (comp.observacoes) { %>
+                                    <div style="background: #1a1a1a; padding: 12px; border-radius: 10px; margin: 15px 0;">
+                                        <p style="color: #888; font-style: italic; font-size: 0.85rem;">
+                                            <i class="fas fa-quote-left" style="margin-right: 5px;"></i>
+                                            <%= comp.observacoes %>
+                                        </p>
+                                    </div>
+                                <% } %>
+                                
+                                <div class="competencia-data">
+                                    <i class="far fa-calendar-alt"></i>
+                                    Avaliado em: <%= comp.data_formatada %>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <div class="empty-ranking" style="padding: 80px 20px;">
+                        <i class="fas fa-clipboard-list" style="font-size: 4rem;"></i>
+                        <p style="margin-top: 20px;">Nenhuma competência avaliada ainda</p>
+                    </div>
+                <% } %>
+            </section>
+
+            <% if (categorias && categorias.length > 0) { %>
+            <section class="section-container">
+                <h2 class="section-title-2"><i class="fas fa-chart-bar"></i> PROGRESSO POR CATEGORIA</h2>
+                <div class="progresso-container">
+                    <% categorias.forEach(cat => { %>
+                        <div class="progresso-item">
+                            <div class="progresso-header">
+                                <span class="progresso-nome"><%= cat.categoria %></span>
+                                <span class="progresso-percent"><%= cat.media.toFixed(1) %>%</span>
+                            </div>
+                            <div class="progresso-bar">
+                                <div class="progresso-fill" style="width: <%= cat.media %>%"></div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </section>
+            <% } %>
+        </main>
+
+        <footer class="dash-footer">
+            <div class="footer-actions">
+                <a href="/aluno/competencias" class="b">
+                    <i class="fas fa-sync-alt"></i> ATUALIZAR
+                </a>
+                <a href="/manual-do-aluno" class="b">
+                    <i class="fas fa-book-open"></i> MANUAL
+                </a>
+            </div>
+            <div class="footer-credits">
+                <p>© 2026 AnalisAI — SENAI Duque de Caxias.</p>
+                <a href="/aluno/equipe"><p>Time de desenvolvedores</p></a>
+            </div>
+        </footer>
+    </div>
+
+    <% if (competencias && competencias.length > 0) { %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    setTimeout(function() {
+        const canvas = document.getElementById('radarChart');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        
+        const labels = <%- JSON.stringify(competencias.map(c => c.nome)) %>;
+        const valores = <%- JSON.stringify(competencias.map(c => parseFloat(c.nota) || 0)) %>;
+        
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Nota',
+                    data: valores,
+                    backgroundColor: 'rgba(33, 115, 70, 0.15)',
+                    borderColor: '#217346',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: valores.map(v => 
+                        v >= 7 ? '#217346' : (v >= 5 ? '#d4a017' : '#ff0101')
+                    ),
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1a1a1a',
+                        titleColor: '#fff',
+                        bodyColor: '#ccc',
+                        borderColor: '#217346',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `Nota: ${context.raw.toFixed(1)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 10,
+                        min: 0,
+                        ticks: {
+                            stepSize: 2,
+                            color: '#666',
+                            backdropColor: 'transparent'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)',
+                            circular: true
+                        },
+                        pointLabels: {
+                            color: '#aaa',
+                            font: {
+                                size: 11,
+                                family: 'Inter-Medium, sans-serif'
+                            }
+                        },
+                        angleLines: {
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        }
+                    }
+                },
+                elements: {
+                    line: {
+                        borderWidth: 2
+                    }
+                }
+            }
+        });
+    }, 100);
+});
+</script>
+<% } %>
+</body>
+</html>

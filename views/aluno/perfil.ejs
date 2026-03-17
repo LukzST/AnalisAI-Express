@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnalisAI - Meu Perfil</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/CSS/sidebar.css">
+    <link rel="stylesheet" href="/CSS/dashboard.css">
+    <link rel="stylesheet" href="/CSS/aluno.css">
+    <link rel="stylesheet" href="/CSS/perfil.css">
+</head>
+<body class="dash-body">
+
+    <%- include('../Partials/sidebar-aluno') %>
+
+    <div class="main-layout">
+        <header class="dash-header">
+            <div class="logo">
+                <img src="/IMG/logo3-green.png" alt="AnalisAI">
+            </div>
+            <div class="header-user">
+                <span>Bem-vindo, <strong><%= aluno.nome %></strong></span>
+                <a href="/logout" class="logout-icon-1" title="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </header>
+
+        <main class="dash-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-user"></i> MEU PERFIL</h1>
+            </div>
+
+            <% if (success_msg && success_msg.length > 0) { %>
+                <div class="mensagem-sucesso">
+                    <i class="fas fa-check-circle"></i>
+                    <%= success_msg %>
+                </div>
+            <% } %>
+            
+            <% if (error_msg && error_msg.length > 0) { %>
+                <div class="mensagem-erro">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <%= error_msg %>
+                </div>
+            <% } %>
+
+            <div class="perfil-grid">
+                <div class="perfil-sidebar">
+                    <div class="avatar-container">
+                        <div class="avatar">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div class="avatar-status <%= aluno.status && aluno.status.toLowerCase() === 'ativo' ? '' : 'inativo' %>"></div>
+                    </div>
+                    
+                    <h2 class="perfil-nome"><%= aluno.nome %></h2>
+                    <p class="perfil-turma"><%= aluno.ano_escolar %></p>
+                    
+                    <span class="perfil-badge">
+                        <i class="fas fa-id-card"></i> <%= aluno.matricula %>
+                    </span>
+                    
+                    <div class="perfil-stats">
+                        <div class="perfil-stat-item">
+                            <div class="perfil-stat-value"><%= competencias.length %></div>
+                            <div class="perfil-stat-label">COMPETÊNCIAS</div>
+                        </div>
+                        <div class="perfil-stat-item">
+                            <div class="perfil-stat-value"><%= aluno.presenca %>%</div>
+                            <div class="perfil-stat-label">PRESENÇA</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-adicional">
+                        <div class="info-adicional-title">
+                            <i class="fas fa-info-circle"></i> INFORMAÇÕES
+                        </div>
+                        <div class="info-adicional-grid">
+                            <div class="info-adicional-item">
+                                <div class="info-adicional-label">STATUS</div>
+                                <div class="info-adicional-value">
+                                    <span class="badge-status <%= (aluno.status && aluno.status.toLowerCase() === 'ativo') ? 'ativo' : 'inativo' %>">
+                                        <%= aluno.status || 'ATIVO' %>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="info-adicional-item">
+                                <div class="info-adicional-label">CADASTRO</div>
+                                <div class="info-adicional-value"><%= aluno.data_cadastro || '---' %></div>
+                            </div>
+                            <div class="info-adicional-item">
+                                <div class="info-adicional-label">ÚLTIMO ACESSO</div>
+                                <div class="info-adicional-value"><%= aluno.ultimo_acesso || '---' %></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="perfil-main">
+                    <div class="perfil-tabs">
+                        <button class="perfil-tab active" onclick="mudarAba('dados')">DADOS PESSOAIS</button>
+                        <button class="perfil-tab" onclick="mudarAba('senha')">ALTERAR SENHA</button>
+                    </div>
+
+                    <div id="abaDados" class="tab-content active">
+                        <div class="info-grid">
+                            <div class="info-group">
+                                <div class="info-label">NOME COMPLETO</div>
+                                <div class="info-value">
+                                    <i class="fas fa-user"></i> <%= aluno.nome %>
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <div class="info-label">E-MAIL</div>
+                                <div class="info-value">
+                                    <i class="fas fa-envelope"></i> <%= aluno.email %>
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <div class="info-label">MATRÍCULA</div>
+                                <div class="info-value">
+                                    <i class="fas fa-id-card"></i> <%= aluno.matricula %>
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <div class="info-label">TURMA</div>
+                                <div class="info-value">
+                                    <i class="fas fa-users"></i> <%= aluno.ano_escolar %>
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <div class="info-label">IDADE</div>
+                                <div class="info-value">
+                                    <i class="fas fa-calendar-alt"></i> <%= aluno.idade %> anos
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <div class="info-label">PRESENÇA</div>
+                                <div class="info-value">
+                                    <i class="fas fa-check-circle"></i> <%= aluno.presenca %>%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="abaSenha" class="tab-content">
+                        <form class="senha-form" action="/aluno/alterar-senha" method="POST">
+                            <div class="form-group">
+                                <label class="form-label">SENHA ATUAL</label>
+                                <input type="password" name="senha_atual" class="form-input" placeholder="Digite sua senha atual" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">NOVA SENHA</label>
+                                <input type="password" name="nova_senha" class="form-input" placeholder="Digite a nova senha" required minlength="6">
+                                <small style="color: #666; display: block; margin-top: 5px;">Mínimo de 6 caracteres</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">CONFIRMAR NOVA SENHA</label>
+                                <input type="password" name="confirmar_senha" class="form-input" placeholder="Confirme a nova senha" required>
+                            </div>
+                            
+                            <button type="submit" class="b">
+                                <i class="fas fa-save"></i> ALTERAR SENHA
+                            </button>
+                        </form>
+                        
+                        <div style="margin-top: 30px; padding: 20px; background: #1a1a1a; border-radius: 10px;">
+                            <p style="color: #888; font-size: 0.9rem;">
+                                <i class="fas fa-shield-alt" style="color: #217346; margin-right: 10px;"></i>
+                                Sua senha é pessoal e intransferível. Não compartilhe com ninguém.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="dash-footer">
+            <div class="footer-actions">
+                <a href="/aluno/dashboard" class="b">
+                    <i class="fas fa-arrow-left"></i> VOLTAR
+                </a>
+            </div>
+            <div class="footer-credits">
+                <p>© 2026 AnalisAI — SENAI Duque de Caxias.</p>
+                <a href="/aluno/equipe"><p>Time de desenvolvedores</p></a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function mudarAba(aba) {
+            document.querySelectorAll('.perfil-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            if (aba === 'dados') {
+                document.querySelectorAll('.perfil-tab')[0].classList.add('active');
+                document.getElementById('abaDados').classList.add('active');
+            } else {
+                document.querySelectorAll('.perfil-tab')[1].classList.add('active');
+                document.getElementById('abaSenha').classList.add('active');
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const formSenha = document.querySelector('.senha-form');
+            if (formSenha) {
+                formSenha.addEventListener('submit', function(e) {
+                    const novaSenha = document.querySelector('input[name="nova_senha"]').value;
+                    const confirmarSenha = document.querySelector('input[name="confirmar_senha"]').value;
+                    
+                    if (novaSenha !== confirmarSenha) {
+                        e.preventDefault();
+                        alert('As senhas não coincidem!');
+                    }
+                    
+                    if (novaSenha.length < 6) {
+                        e.preventDefault();
+                        alert('A senha deve ter no mínimo 6 caracteres!');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnalisAI - Minha Evolução</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/CSS/sidebar.css">
+    <link rel="stylesheet" href="/CSS/dashboard.css">
+    <link rel="stylesheet" href="/CSS/aluno.css">
+    <link rel="stylesheet" href="/CSS/evolucao.css">
+</head>
+<body class="dash-body">
+
+    <%- include('../Partials/sidebar-aluno') %>
+
+    <div class="main-layout">
+        <header class="dash-header">
+            <div class="logo">
+                <img src="/IMG/logo3-green.png" alt="AnalisAI">
+            </div>
+            <div class="header-user">
+                <span>Bem-vindo, <strong><%= aluno.nome %></strong></span>
+                <a href="/logout" class="logout-icon-1" title="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </header>
+
+        <main class="dash-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-chart-line"></i> MINHA EVOLUÇÃO</h1>
+                
+                <div class="periodo-selector">
+                    <button class="periodo-btn active" onclick="mudarPeriodo('7d', this)">7 DIAS</button>
+                    <button class="periodo-btn" onclick="mudarPeriodo('30d', this)">30 DIAS</button>
+                    <button class="periodo-btn" onclick="mudarPeriodo('90d', this)">90 DIAS</button>
+                    <button class="periodo-btn" onclick="mudarPeriodo('all', this)">TUDO</button>
+                </div>
+            </div>
+
+            <% if (competencias && competencias.length > 0) { %>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><i class="fas fa-star"></i></div>
+                            <div>
+                                <div class="stat-title">MELHOR NOTA</div>
+                                <div class="stat-value">
+                                    <% 
+                                        let melhor = 0;
+                                        if (competencias.length > 0) {
+                                            melhor = Math.max(...competencias.map(c => parseFloat(c.nota) || 0));
+                                        }
+                                    %>
+                                    <%= melhor.toFixed(1) %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up"></i> Recorde pessoal
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                            <div>
+                                <div class="stat-title">MÉDIA ATUAL</div>
+                                <div class="stat-value">
+                                    <% 
+                                        let media = 0;
+                                        if (competencias.length > 0) {
+                                            const soma = competencias.reduce((acc, comp) => acc + (parseFloat(comp.nota) || 0), 0);
+                                            media = soma / competencias.length;
+                                        }
+                                    %>
+                                    <%= media.toFixed(1) %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-trend">
+                            <i class="fas fa-minus"></i> <%= competencias.length %> avaliações
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div>
+                                <div class="stat-title">PRIMEIRA AVALIAÇÃO</div>
+                                <div class="stat-value" style="font-size: 1.2rem;">
+                                    <%= historico && historico.length > 0 ? historico[historico.length - 1].data : '---' %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><i class="fas fa-rocket"></i></div>
+                            <div>
+                                <div class="stat-title">EVOLUÇÃO</div>
+                                <div class="stat-value">
+                                    <% 
+                                        let primeira = competencias.length > 0 ? parseFloat(competencias[competencias.length - 1]?.nota) || 0 : 0;
+                                        let ultima = competencias.length > 0 ? parseFloat(competencias[0]?.nota) || 0 : 0;
+                                        let evolucao = ultima - primeira;
+                                    %>
+                                    <%= evolucao > 0 ? '+' : '' %><%= evolucao.toFixed(1) %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-trend <%= evolucao >= 0 ? 'trend-up' : 'trend-down' %>">
+                            <i class="fas fa-arrow-<%= evolucao >= 0 ? 'up' : 'down' %>"></i>
+                            Desde o início
+                        </div>
+                    </div>
+                </div>
+
+                <% if (historico && historico.length > 0) { %>
+                <div class="grafico-container">
+                    <div class="grafico-header">
+                        <h3 class="grafico-title">EVOLUÇÃO DAS NOTAS AO LONGO DO TEMPO</h3>
+                        <div class="legenda-container">
+                            <div class="legenda-item">
+                                <div class="legenda-cor apto"></div>
+                                <span style="color: #888;">Apto (≥7)</span>
+                            </div>
+                            <div class="legenda-item">
+                                <div class="legenda-cor desenvolvimento"></div>
+                                <span style="color: #888;">Desenvolvimento (5-6.9)</span>
+                            </div>
+                            <div class="legenda-item">
+                                <div class="legenda-cor inapto"></div>
+                                <span style="color: #888;">Inapto (<5)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <canvas id="evolucaoChart"></canvas>
+                </div>
+                <% } %>
+
+                <% if (categorias && categorias.length > 0) { %>
+                <div class="evolucao-grid">
+                    <% categorias.forEach(cat => { 
+                        let mediaCat = cat.media / 10;
+                        let catClass = mediaCat >= 7 ? 'apto' : (mediaCat >= 5 ? 'desenvolvimento' : 'inapto');
+                    %>
+                        <div class="evolucao-card">
+                            <div class="evolucao-header">
+                                <span class="evolucao-categoria"><%= cat.categoria %></span>
+                                <span class="evolucao-media <%= catClass %>"><%= mediaCat.toFixed(1) %></span>
+                            </div>
+                            
+                            <div class="evolucao-barras">
+                                <div class="evolucao-barra-item">
+                                    <div class="evolucao-barra-header">
+                                        <span>Média da categoria</span>
+                                        <span><%= cat.media.toFixed(0) %>%</span>
+                                    </div>
+                                    <div class="evolucao-barra-container">
+                                        <div class="evolucao-barra-fill <%= catClass %>" style="width: <%= cat.media %>%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+                <% } %>
+
+                <div class="timeline-container">
+                    <div class="timeline-header">
+                        <h3 class="timeline-title">HISTÓRICO DE AVALIAÇÕES</h3>
+                    </div>
+                    
+                    <div class="timeline-list">
+                        <% competencias.forEach(comp => { 
+                            let notaNum = parseFloat(comp.nota) || 0;
+                            let nivelClass = notaNum >= 7 ? 'apto' : (notaNum >= 5 ? 'desenvolvimento' : 'inapto');
+                        %>
+                            <div class="timeline-item">
+                                <div class="timeline-data">
+                                    <i class="far fa-calendar-alt"></i> <%= comp.data_formatada %>
+                                </div>
+                                <div class="timeline-conteudo">
+                                    <div>
+                                        <strong class="timeline-competencia"><%= comp.nome %></strong>
+                                        <span class="timeline-nota <%= nivelClass %>"><%= notaNum.toFixed(1) %></span>
+                                    </div>
+                                    <% if (comp.observacoes) { %>
+                                        <div class="timeline-obs">
+                                            <i class="fas fa-quote-left"></i> <%= comp.observacoes %>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Nenhum dado disponível</h3>
+                    <p>Você ainda não possui avaliações para ver sua evolução.</p>
+                </div>
+            <% } %>
+        </main>
+
+        <footer class="dash-footer">
+            <div class="footer-actions">
+                <a href="/aluno/dashboard" class="b">
+                    <i class="fas fa-arrow-left"></i> VOLTAR
+                </a>
+            </div>
+            <div class="footer-credits">
+                <p>© 2026 AnalisAI — SENAI Duque de Caxias.</p>
+                <a href="/aluno/equipe"><p>Time de desenvolvedores</p></a>
+            </div>
+        </footer>
+    </div>
+
+    <% if (historico && historico.length > 0) { %>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var historicoData = <%- JSON.stringify(historico) %>;
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            var ctx = document.getElementById('evolucaoChart').getContext('2d');
+            
+            var labels = historicoData.map(function(item) { return item.data; });
+            var medias = historicoData.map(function(item) { return parseFloat(item.media_dia) || 0; });
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Média do dia',
+                        data: medias,
+                        borderColor: '#217346',
+                        backgroundColor: 'rgba(33, 115, 70, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: medias.map(function(v) {
+                            return v >= 7 ? '#217346' : (v >= 5 ? '#d4a017' : '#ff0101');
+                        }),
+                        pointBorderColor: '#fff',
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#888' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { 
+                                color: '#888',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        });
+
+        function mudarPeriodo(periodo, botao) {
+            document.querySelectorAll('.periodo-btn').forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            
+            botao.classList.add('active');
+            
+            var chartCanvas = document.getElementById('evolucaoChart');
+            if (!chartCanvas) return;
+            
+            var chart = Chart.getChart(chartCanvas);
+            if (!chart) return;
+            
+            var dadosFiltrados = [];
+            var labelsFiltradas = [];
+            
+            var hoje = new Date();
+            
+            if (periodo === '7d') {
+                var dataLimite = new Date(hoje.setDate(hoje.getDate() - 7));
+                dadosFiltrados = historicoData.filter(function(item) {
+                    var partes = item.data.split('/');
+                    var dataItem = new Date(partes[2], partes[1] - 1, partes[0]);
+                    return dataItem >= dataLimite;
+                });
+            } 
+            else if (periodo === '30d') {
+                var dataLimite = new Date(hoje.setDate(hoje.getDate() - 30));
+                dadosFiltrados = historicoData.filter(function(item) {
+                    var partes = item.data.split('/');
+                    var dataItem = new Date(partes[2], partes[1] - 1, partes[0]);
+                    return dataItem >= dataLimite;
+                });
+            } 
+            else if (periodo === '90d') {
+                var dataLimite = new Date(hoje.setDate(hoje.getDate() - 90));
+                dadosFiltrados = historicoData.filter(function(item) {
+                    var partes = item.data.split('/');
+                    var dataItem = new Date(partes[2], partes[1] - 1, partes[0]);
+                    return dataItem >= dataLimite;
+                });
+            } 
+            else {
+                dadosFiltrados = historicoData;
+            }
+            
+            labelsFiltradas = dadosFiltrados.map(function(item) { return item.data; });
+            var mediasFiltradas = dadosFiltrados.map(function(item) { return parseFloat(item.media_dia) || 0; });
+            
+            chart.data.labels = labelsFiltradas;
+            chart.data.datasets[0].data = mediasFiltradas;
+            chart.data.datasets[0].pointBackgroundColor = mediasFiltradas.map(function(v) {
+                return v >= 7 ? '#217346' : (v >= 5 ? '#d4a017' : '#ff0101');
+            });
+            chart.update();
+        }
+    </script>
+    <% } %>
+</body>
+</html>

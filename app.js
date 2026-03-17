@@ -6,10 +6,41 @@ const favicon = require('serve-favicon');
 const path = require('path');
 const flash = require('connect-flash');
 const fs = require('fs')
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = path.join(__dirname, 'uploads');
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, 'tarefa-' + uniqueSuffix + ext);
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 10 * 1024 * 1024 }, 
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowedTypes.includes(ext)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Tipo de arquivo não permitido'));
+        }
+    }
+});
 
 app.use(favicon(path.join(__dirname, 'Public', 'favicon.ico')));
 
 app.set('view engine', 'ejs');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static('Public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -46,12 +77,259 @@ function checkAdmin(req, res, next) {
   }
 }
 
+function checkAlunoAuth(req, res, next) {
+  if (req.session.aluno) {
+    next();
+  } else {
+    res.redirect('/login');
+  }
+}
+
 app.get('/', (req, res) => {
   res.render('index');
 });
 
 app.get('/login', (req, res) => {
-  res.render('login', { erro: null });
+    res.render('login', {
+        error_msg: req.flash('error_msg')[0],
+        success_msg: req.flash('success_msg')[0]
+    });
+});
+
+app.post('/login/professor', async (req, res) => {
+    const { usuario, senha } = req.body;
+
+    try {
+        const result = await db.query('SELECT * FROM usuarios WHERE email = $1', [usuario]);
+
+        if (result.rows.length === 0) {
+            req.flash('error_msg', 'E-mail não encontrado');
+            return res.render('login', {
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null
+            });
+        }
+
+        const user = result.rows[0];
+        
+        if (user.status !== 'ATIVO') {
+            req.flash('error_msg', 'Sua conta está inativa. Contate o administrador.');
+            return res.render('login', {
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null
+            });
+        }
+
+        if (senha !== user.senha) {
+            req.flash('error_msg', 'Senha incorreta');
+            return res.render('login', {
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null
+            });
+        }
+
+        req.session.user = user.nome;
+        req.session.userStatus = user.status;
+        req.session.userId = user.id;
+        req.session.userCargo = user.cargo;
+        req.flash('success_msg', `Bem-vindo, ${user.nome}!`);
+        return res.redirect('/dashboard');
+
+    } catch (err) {
+        console.error(err);
+        req.flash('error_msg', 'Erro ao conectar ao banco de dados.');
+        return res.render('login', {
+            error_msg: req.flash('error_msg')[0],
+            success_msg: null
+        });
+    }
+});
+
+app.post('/login/aluno', async (req, res) => {
+    const { matricula, email, senha } = req.body;
+    
+    console.log('Tentativa de login do aluno:', { matricula, email });
+    
+    if (!matricula && !email) {
+        req.flash('error_msg', 'Informe matrícula ou e-mail');
+        return res.redirect('/login');
+    }
+
+    try {
+        let query;
+        let params;
+        
+        if (matricula) {
+            query = 'SELECT * FROM alunos_login WHERE matricula = $1';
+            params = [matricula];
+        } else {
+            query = 'SELECT * FROM alunos_login WHERE email = $1';
+            params = [email];
+        }
+        
+        console.log('Query:', query, params); 
+        
+        const result = await db.query(query, params);
+
+        if (result.rows.length === 0) {
+            console.log('Aluno não encontrado');
+            req.flash('error_msg', 'Matrícula/E-mail não encontrado');
+            return res.redirect('/login');
+        }
+
+        const aluno = result.rows[0];
+        console.log('Aluno encontrado:', aluno.nome); 
+        
+        if (aluno.status !== 'ATIVO') {
+            console.log('Aluno inativo'); 
+            req.flash('error_msg', 'Acesso bloqueado. Contate a secretaria.');
+            return res.redirect('/login');
+        }
+
+        if (senha !== aluno.senha) {
+            console.log('Senha incorreta');
+            req.flash('error_msg', 'Senha incorreta');
+            return res.redirect('/login');
+        }
+
+        const alunoDados = await db.query(
+            'SELECT id, nome, ano_escolar, presenca FROM alunos WHERE id = $1',
+            [aluno.aluno_id]
+        );
+
+        if (alunoDados.rows.length === 0) {
+            console.log('Dados do aluno não encontrados na tabela alunos');
+            req.flash('error_msg', 'Erro ao carregar dados do aluno');
+            return res.redirect('/login');
+        }
+
+        const dados = alunoDados.rows[0];
+
+        req.session.aluno = {
+            id: aluno.aluno_id,
+            nome: aluno.nome,
+            matricula: aluno.matricula,
+            ano_escolar: dados.ano_escolar,
+            login_id: aluno.id
+        };
+
+        console.log('Sessão criada:', req.session.aluno);
+        console.log('Redirecionando para /aluno/dashboard');
+        
+        req.flash('success_msg', `Bem-vindo, ${aluno.nome}!`);
+        return res.redirect('/aluno/dashboard');
+
+    } catch (err) {
+        console.error('ERRO NO LOGIN DO ALUNO:', err);
+        req.flash('error_msg', 'Erro ao conectar ao banco de dados.');
+        return res.redirect('/login');
+    }
+});
+
+function checkAlunoAuth(req, res, next) {
+    console.log('Verificando autenticação do aluno:', req.session.aluno);
+    
+    if (req.session.aluno && req.session.aluno.id) {
+        console.log('Aluno autenticado, prosseguindo...');
+        next();
+    } else {
+        console.log('Aluno não autenticado, redirecionando para login');
+        req.flash('error_msg', 'Faça login para acessar o painel do aluno');
+        res.redirect('/login');
+    }
+}
+
+app.get('/aluno/dashboard', checkAlunoAuth, async (req, res) => {
+    try {
+        const alunoId = req.session.aluno.id;
+        console.log('Carregando dashboard do aluno ID:', alunoId);
+        
+        const alunoResult = await db.query(`
+            SELECT 
+                a.*,
+                al.matricula,
+                al.email,
+                al.status,
+                TO_CHAR(al.data_criacao, 'DD/MM/YYYY') as data_cadastro
+            FROM alunos a
+            JOIN alunos_login al ON a.id = al.aluno_id
+            WHERE a.id = $1
+        `, [alunoId]);
+        
+        if (alunoResult.rows.length === 0) {
+            console.log('Aluno não encontrado no banco');
+            req.flash('error_msg', 'Aluno não encontrado');
+            return res.redirect('/logout');
+        }
+        
+        const aluno = alunoResult.rows[0];
+        console.log('Aluno carregado:', aluno.nome);
+
+        const competenciasResult = await db.query(`
+            SELECT 
+                ac.*,
+                c.nome,
+                c.descricao,
+                c.categoria,
+                TO_CHAR(ac.data_registro, 'DD/MM/YYYY') as data_formatada
+            FROM aluno_competencias ac
+            JOIN competencias c ON ac.competencia_id = c.id
+            WHERE ac.aluno_id = $1
+            ORDER BY ac.data_registro DESC
+        `, [alunoId]);
+        
+        const competencias = competenciasResult.rows;
+        console.log('Competências encontradas:', competencias.length);
+        
+        let mediaGeral = 0;
+        if (competencias.length > 0) {
+            const soma = competencias.reduce((acc, comp) => acc + parseFloat(comp.nota), 0);
+            mediaGeral = soma / competencias.length;
+        }
+        
+        const categoriasMap = new Map();
+        competencias.forEach(comp => {
+            if (!categoriasMap.has(comp.categoria)) {
+                categoriasMap.set(comp.categoria, {
+                    categoria: comp.categoria,
+                    soma: 0,
+                    count: 0,
+                    media: 0
+                });
+            }
+            const cat = categoriasMap.get(comp.categoria);
+            cat.soma += parseFloat(comp.nota);
+            cat.count++;
+            cat.media = (cat.soma / cat.count) * 10;
+        });
+        
+        const categorias = Array.from(categoriasMap.values());
+        
+        try {
+            await db.query(
+                'UPDATE alunos_login SET ultimo_acesso = CURRENT_TIMESTAMP WHERE aluno_id = $1',
+                [alunoId]
+            );
+        } catch (updateErr) {
+            console.log('Erro ao atualizar último acesso (ignorado):', updateErr.message);
+        }
+        
+        console.log('Renderizando template aluno/main');
+        
+        res.render('aluno/main', {
+            aluno,
+            competencias,
+            mediaGeral,
+            categorias,
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg')
+        });
+        
+    } catch (err) {
+        console.error('ERRO NO DASHBOARD DO ALUNO:', err);
+        req.flash('error_msg', 'Erro ao carregar dashboard');
+        res.redirect('/logout');
+    }
 });
 
 app.post('/dashboard/importar-dados', checkAuth, async (req, res) => {
@@ -277,37 +555,6 @@ app.post('/cadastro', async (req, res) => {
   }
 });
 
-app.post('/login', async (req, res) => {
-  const { usuario, senha } = req.body;
-
-  try {
-    const result = await db.query('SELECT * FROM usuarios WHERE email = $1', [usuario]);
-
-    if (result.rows.length > 0) {
-      const user = result.rows[0];
-      
-      if (user.status !== 'ATIVO') {
-        req.flash('error_msg', 'Sua conta está inativa. Contate o administrador.');
-        return res.redirect('/login');
-      }
-
-      if (senha === user.senha) {
-        req.session.user = user.nome;
-        req.session.userStatus = user.status;
-        req.session.userId = user.id;
-        req.session.userCargo = user.cargo;
-        req.flash('success_msg', `Bem-vindo, ${user.nome}!`);
-        return res.redirect('/dashboard');
-      }
-    }
-    req.flash('error_msg', 'Usuário ou senha inválidos!');
-    res.redirect('/login');
-  } catch (err) {
-    req.flash('error_msg', 'Erro ao conectar ao banco de dados.');
-    res.redirect('/login');
-  }
-});
-
 app.get('/dashboard', checkAuth, async (req, res) => {
     try {
         const alunosResult = await db.query(`
@@ -330,7 +577,6 @@ app.get('/dashboard', checkAuth, async (req, res) => {
         `);
 
         const alunos = alunosResult.rows;
-        
 
         const alunosComNivel = alunos.map(aluno => {
             let mediaCompetencias = 0;
@@ -573,32 +819,47 @@ app.post('/dashboard/atualizar-presenca', checkAuth, async (req, res) => {
     }
 });
 
+
 app.post('/dashboard/add-aluno', checkAuth, async (req, res) => {
     const { nome, ano_escolar, idade } = req.body;
     
-    const anosPermitidos = ['1º MÉDIO', '2º MÉDIO', '3º MÉDIO', '9º FUNDAMENTAL'];
-    
-    if (!anosPermitidos.includes(ano_escolar)) {
-        req.flash('error_msg', 'Ano escolar inválido. Use: 1º MÉDIO, 2º MÉDIO, 3º MÉDIO, 9º FUNDAMENTAL');
-        return res.redirect('/dashboard/edit');
-    }
-    
-    if (idade < 10 || idade > 20) {
-        req.flash('error_msg', 'A idade deve estar entre 10 e 20 anos');
+    if (!nome || !ano_escolar || !idade) {
+        req.flash('error_msg', 'Todos os campos são obrigatórios');
         return res.redirect('/dashboard/edit');
     }
     
     try {
+        const nomeLower = nome.toLowerCase().replace(/\s+/g, '.');
+        const email = `${nomeLower}@aluno.analisai.com`;
+        const senha = 'aluno123';
+        const matricula = `ALU${Date.now().toString().slice(-8)}`;
+        
+        const alunoResult = await db.query(
+            `INSERT INTO alunos (nome, ano_escolar, idade, nota, presenca, nivel) 
+             VALUES ($1, $2, $3, 0, 100, 'EM DESENVOLVIMENTO') RETURNING id`,
+            [nome, ano_escolar, idade]
+        );
+        
+        const alunoId = alunoResult.rows[0].id;
+
         await db.query(
-            'INSERT INTO alunos (nome, ano_escolar, idade, nota, presenca, nivel) VALUES ($1, $2, $3, $4, $5, $6)', 
-            [nome, ano_escolar, idade, 0, 100, 'EM DESENVOLVIMENTO']
+            `INSERT INTO alunos_login (nome, email, senha, matricula, aluno_id, status) 
+             VALUES ($1, $2, $3, $4, $5, 'ATIVO')`,
+            [nome, email, senha, matricula, alunoId]
         );
 
-        req.flash('success_msg', 'Aluno cadastrado com sucesso!');
+        req.flash('success_msg', `Aluno cadastrado com sucesso! Login: ${email} / Senha: ${senha}`);
         res.redirect('/dashboard/edit');
+        
     } catch (err) { 
-        console.error(err);
-        req.flash('error_msg', 'Erro ao cadastrar aluno');
+        console.error('Erro ao adicionar aluno:', err);
+        
+        if (err.code === '23505') {
+            req.flash('error_msg', 'Email ou matrícula já existente. Tente novamente.');
+        } else {
+            req.flash('error_msg', 'Erro ao adicionar aluno');
+        }
+        
         res.redirect('/dashboard/edit');
     }
 });
@@ -627,8 +888,11 @@ app.get('/dashboard/delete-aluno/:id', checkAuth, async (req, res) => {
 
 app.post('/dashboard/erase-all', checkAuth, async (req, res) => {
     try {
+        await db.query('TRUNCATE TABLE tarefas_alunos RESTART IDENTITY CASCADE');
+        await db.query('TRUNCATE TABLE tarefas RESTART IDENTITY CASCADE');
         await db.query('TRUNCATE TABLE aluno_competencias RESTART IDENTITY CASCADE');
         await db.query('TRUNCATE TABLE notas_detalhadas RESTART IDENTITY CASCADE');
+        await db.query('TRUNCATE TABLE alunos_login RESTART IDENTITY CASCADE');
         await db.query('TRUNCATE TABLE alunos RESTART IDENTITY CASCADE');
         
         req.flash('success_msg', 'Todos os dados foram apagados com sucesso!');
@@ -722,9 +986,16 @@ app.get('/dashboard/graficos', checkAuth, async (req, res) => {
 app.get('/dashboard/equipe', checkAuth, (req, res) => {
   res.render('dashboard/equipe');
 });
+app.get('/aluno/equipe', checkAlunoAuth, (req, res) => {
+  res.render('dashboard/equipe');
+});
 
 app.get('/manual-de-uso', (req, res) => {
   res.render('manual-de-uso');
+});
+
+app.get('/manual-do-aluno', (req, res) => {
+  res.render('manual-do-aluno');
 });
 
 app.get('/dashboard/usuarios', checkAuth, async (req, res) => {
@@ -793,6 +1064,931 @@ app.get('/dashboard/usuarios/delete/:id', checkAuth, checkAdmin, async (req, res
     }
 });
 
+app.get('/aluno/dashboard', checkAlunoAuth, async (req, res) => {
+    try {
+        const alunoId = req.session.aluno.id;
+        
+        const alunoResult = await db.query(`
+            SELECT 
+                a.*,
+                al.matricula,
+                al.email,
+                al.status,
+                TO_CHAR(al.data_criacao, 'DD/MM/YYYY') as data_cadastro
+            FROM alunos a
+            JOIN alunos_login al ON a.id = al.aluno_id
+            WHERE a.id = $1
+        `, [alunoId]);
+        
+        if (alunoResult.rows.length === 0) {
+            req.flash('error_msg', 'Aluno não encontrado');
+            return res.redirect('/logout');
+        }
+        
+        const aluno = alunoResult.rows[0];
+        
+        const competenciasResult = await db.query(`
+            SELECT 
+                ac.*,
+                c.nome,
+                c.descricao,
+                c.categoria,
+                TO_CHAR(ac.data_registro, 'DD/MM/YYYY') as data_formatada
+            FROM aluno_competencias ac
+            JOIN competencias c ON ac.competencia_id = c.id
+            WHERE ac.aluno_id = $1
+            ORDER BY ac.data_registro DESC
+        `, [alunoId]);
+        
+        const competencias = competenciasResult.rows;
+        
+        let mediaGeral = 0;
+        if (competencias.length > 0) {
+            const soma = competencias.reduce((acc, comp) => acc + parseFloat(comp.nota), 0);
+            mediaGeral = soma / competencias.length;
+        }
+        
+        const categoriasMap = new Map();
+        competencias.forEach(comp => {
+            if (!categoriasMap.has(comp.categoria)) {
+                categoriasMap.set(comp.categoria, {
+                    categoria: comp.categoria,
+                    soma: 0,
+                    count: 0,
+                    media: 0
+                });
+            }
+            const cat = categoriasMap.get(comp.categoria);
+            cat.soma += parseFloat(comp.nota);
+            cat.count++;
+            cat.media = (cat.soma / cat.count) * 10;
+        });
+        
+        const categorias = Array.from(categoriasMap.values());
+        
+        await db.query(
+            'UPDATE alunos_login SET ultimo_acesso = CURRENT_TIMESTAMP WHERE aluno_id = $1',
+            [alunoId]
+        );
+        
+        res.render('aluno/main', {
+            aluno,
+            competencias,
+            mediaGeral,
+            categorias,
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg')
+        });
+        
+    } catch (err) {
+        console.error('Erro no dashboard do aluno:', err);
+        req.flash('error_msg', 'Erro ao carregar dashboard');
+        res.redirect('/logout');
+    }
+});
+
+app.get('/aluno/competencias', checkAlunoAuth, async (req, res) => {
+    try {
+        const alunoId = req.session.aluno.id;
+        
+        const alunoResult = await db.query(
+            'SELECT nome, ano_escolar FROM alunos WHERE id = $1',
+            [alunoId]
+        );
+        
+        const aluno = alunoResult.rows[0];
+        
+        const competenciasResult = await db.query(`
+            SELECT 
+                ac.*,
+                c.nome,
+                c.descricao,
+                c.categoria,
+                TO_CHAR(ac.data_registro, 'DD/MM/YYYY') as data_formatada,
+                TO_CHAR(ac.data_registro, 'HH24:MI') as hora_formatada
+            FROM aluno_competencias ac
+            JOIN competencias c ON ac.competencia_id = c.id
+            WHERE ac.aluno_id = $1
+            ORDER BY ac.data_registro DESC
+        `, [alunoId]);
+        
+        const stats = await db.query(`
+            SELECT 
+                COUNT(*) as total,
+                COUNT(*) FILTER (WHERE nota >= 7) as aptas,
+                COUNT(*) FILTER (WHERE nota >= 5 AND nota < 7) as desenvolvimento,
+                COUNT(*) FILTER (WHERE nota < 5) as inaptas,
+                COALESCE(AVG(nota), 0) as media_geral
+            FROM aluno_competencias
+            WHERE aluno_id = $1
+        `, [alunoId]);
+        
+        res.render('aluno/competencias', {
+            aluno,
+            competencias: competenciasResult.rows,
+            stats: stats.rows[0],
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg')
+        });
+        
+    } catch (err) {
+        console.error('Erro ao carregar competências do aluno:', err);
+        req.flash('error_msg', 'Erro ao carregar competências');
+        res.redirect('/aluno/dashboard');
+    }
+});
+
+app.get('/aluno/evolucao', checkAlunoAuth, async (req, res) => {
+    try {
+        const alunoId = req.session.aluno.id;
+        
+        const alunoResult = await db.query(
+            'SELECT nome, ano_escolar, presenca FROM alunos WHERE id = $1',
+            [alunoId]
+        );
+        
+        const aluno = alunoResult.rows[0];
+
+        const competenciasResult = await db.query(`
+            SELECT 
+                ac.*,
+                c.nome,
+                c.descricao,
+                c.categoria,
+                TO_CHAR(ac.data_registro, 'DD/MM/YYYY') as data_formatada
+            FROM aluno_competencias ac
+            JOIN competencias c ON ac.competencia_id = c.id
+            WHERE ac.aluno_id = $1
+            ORDER BY ac.data_registro DESC
+        `, [alunoId]);
+        
+        const competencias = competenciasResult.rows;
+        
+        const historicoResult = await db.query(`
+            SELECT 
+                TO_CHAR(ac.data_registro, 'DD/MM/YYYY') as data,
+                COUNT(*) as total_avaliacoes,
+                COALESCE(AVG(ac.nota), 0) as media_dia
+            FROM aluno_competencias ac
+            WHERE ac.aluno_id = $1
+            GROUP BY TO_CHAR(ac.data_registro, 'DD/MM/YYYY')
+            ORDER BY data DESC
+        `, [alunoId]);
+        
+        const historico = historicoResult.rows;
+        
+        const categoriasMap = new Map();
+        competencias.forEach(comp => {
+            if (!categoriasMap.has(comp.categoria)) {
+                categoriasMap.set(comp.categoria, {
+                    categoria: comp.categoria,
+                    soma: 0,
+                    count: 0,
+                    media: 0
+                });
+            }
+            const cat = categoriasMap.get(comp.categoria);
+            cat.soma += parseFloat(comp.nota);
+            cat.count++;
+            cat.media = (cat.soma / cat.count) * 10; 
+        });
+        
+        const categorias = Array.from(categoriasMap.values());
+        
+        res.render('aluno/evolucao', {
+            aluno,
+            competencias,
+            historico,
+            categorias,
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg')
+        });
+        
+    } catch (err) {
+        console.error('Erro ao carregar evolução:', err);
+        req.flash('error_msg', 'Erro ao carregar evolução');
+        res.redirect('/aluno/dashboard');
+    }
+});
+
+app.get('/aluno/perfil', checkAlunoAuth, async (req, res) => {
+    try {
+        const alunoId = req.session.aluno.id;
+        
+        const result = await db.query(`
+            SELECT 
+                a.*,
+                al.email,
+                al.matricula,
+                al.status,
+                TO_CHAR(al.data_criacao, 'DD/MM/YYYY') as data_cadastro,
+                TO_CHAR(al.ultimo_acesso, 'DD/MM/YYYY HH24:MI') as ultimo_acesso
+            FROM alunos a
+            JOIN alunos_login al ON a.id = al.aluno_id
+            WHERE a.id = $1
+        `, [alunoId]);
+        
+        const aluno = result.rows[0];
+        
+        const competenciasResult = await db.query(`
+            SELECT COUNT(*) as total
+            FROM aluno_competencias
+            WHERE aluno_id = $1
+        `, [alunoId]);
+        
+        const competencias = {
+            length: parseInt(competenciasResult.rows[0].total) || 0
+        };
+        
+        res.render('aluno/perfil', {
+            aluno,
+            competencias,
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg')
+        });
+        
+    } catch (err) {
+        console.error('Erro ao carregar perfil:', err);
+        req.flash('error_msg', 'Erro ao carregar perfil');
+        res.redirect('/aluno/dashboard');
+    }
+});
+
+app.post('/aluno/alterar-senha', checkAlunoAuth, async (req, res) => {
+    const { senha_atual, nova_senha, confirmar_senha } = req.body;
+    const alunoId = req.session.aluno.id;
+    
+    try {
+        const result = await db.query(
+            'SELECT senha FROM alunos_login WHERE aluno_id = $1',
+            [alunoId]
+        );
+        
+        if (result.rows.length === 0) {
+            req.flash('error_msg', 'Aluno não encontrado');
+            return res.redirect('/aluno/perfil');
+        }
+        
+        const aluno = result.rows[0];
+
+        if (senha_atual !== aluno.senha) {
+            req.flash('error_msg', 'Senha atual incorreta');
+            return res.redirect('/aluno/perfil');
+        }
+
+        if (nova_senha.length < 6) {
+            req.flash('error_msg', 'A nova senha deve ter no mínimo 6 caracteres');
+            return res.redirect('/aluno/perfil');
+        }
+        
+        if (nova_senha !== confirmar_senha) {
+            req.flash('error_msg', 'As senhas não coincidem');
+            return res.redirect('/aluno/perfil');
+        }
+
+        await db.query(
+            'UPDATE alunos_login SET senha = $1 WHERE aluno_id = $2',
+            [nova_senha, alunoId]
+        );
+        
+        req.flash('success_msg', 'Senha alterada com sucesso!');
+        res.redirect('/aluno/perfil');
+        
+    } catch (err) {
+        console.error('Erro ao alterar senha:', err);
+        req.flash('error_msg', 'Erro ao alterar senha');
+        res.redirect('/aluno/perfil');
+    }
+});
+
+app.get('/aluno/api/dados-grafico', checkAlunoAuth, async (req, res) => {
+    try {
+        const alunoId = req.session.aluno.id;
+        
+        const result = await db.query(`
+            SELECT 
+                c.nome,
+                ac.nota,
+                c.categoria
+            FROM aluno_competencias ac
+            JOIN competencias c ON ac.competencia_id = c.id
+            WHERE ac.aluno_id = $1
+            ORDER BY c.categoria, ac.nota DESC
+        `, [alunoId]);
+        
+        res.json(result.rows);
+        
+    } catch (err) {
+        console.error('Erro ao buscar dados do gráfico:', err);
+        res.status(500).json({ error: 'Erro ao carregar dados' });
+    }
+});
+
+app.get('/aluno/api/ranking-comparativo', checkAlunoAuth, async (req, res) => {
+    try {
+        const alunoId = req.session.aluno.id;
+        const aluno = req.session.aluno;
+
+        const alunoMedia = await db.query(`
+            SELECT COALESCE(AVG(nota), 0) as media
+            FROM aluno_competencias
+            WHERE aluno_id = $1
+        `, [alunoId]);
+
+        const turmaMedia = await db.query(`
+            SELECT COALESCE(AVG(ac.nota), 0) as media
+            FROM aluno_competencias ac
+            JOIN alunos a ON ac.aluno_id = a.id
+            WHERE a.ano_escolar = $1
+        `, [aluno.ano_escolar]);
+
+        const geralMedia = await db.query(`
+            SELECT COALESCE(AVG(nota), 0) as media
+            FROM aluno_competencias
+        `);
+        
+        res.json({
+            aluno: parseFloat(alunoMedia.rows[0].media).toFixed(1),
+            turma: parseFloat(turmaMedia.rows[0].media).toFixed(1),
+            geral: parseFloat(geralMedia.rows[0].media).toFixed(1)
+        });
+        
+    } catch (err) {
+        console.error('Erro ao buscar ranking comparativo:', err);
+        res.status(500).json({ error: 'Erro ao carregar dados' });
+    }
+});
+
+
+app.get('/dashboard/tarefas', checkAuth, async (req, res) => {
+    try {
+        const turmaFilter = req.query.turma || '';
+        const statusFilter = req.query.status || '';
+        
+        let query = `
+            SELECT 
+                t.*,
+                u.nome as professor_nome,
+                COUNT(ta.id) as total_alunos,
+                COUNT(CASE WHEN ta.status = 'CONCLUIDA' THEN 1 END) as concluidas,
+                COUNT(CASE WHEN ta.status = 'ENTREGUE' THEN 1 END) as entregues,
+                COUNT(CASE WHEN ta.status = 'DEVOLVIDA' THEN 1 END) as devolvidas,
+                COUNT(CASE WHEN ta.status = 'PENDENTE' AND t.data_entrega < CURRENT_DATE THEN 1 END) as atrasadas,
+                COUNT(CASE WHEN ta.status = 'PENDENTE' AND t.data_entrega >= CURRENT_DATE THEN 1 END) as pendentes
+            FROM tarefas t
+            LEFT JOIN usuarios u ON t.criado_por = u.id
+            LEFT JOIN tarefas_alunos ta ON t.id = ta.tarefa_id
+            WHERE 1=1
+        `;
+        
+        const params = [];
+        
+        if (turmaFilter) {
+            params.push(turmaFilter);
+            query += ` AND t.turma = $${params.length}`;
+        }
+        
+        if (statusFilter) {
+            params.push(statusFilter);
+            query += ` AND t.status = $${params.length}`;
+        }
+        
+        query += ` GROUP BY t.id, u.nome ORDER BY 
+                    CASE 
+                        WHEN t.status = 'ATIVA' THEN 1
+                        ELSE 2
+                    END,
+                    t.data_criacao DESC`;
+        
+        const tarefasResult = await db.query(query, params);
+        
+        const alunosResult = await db.query(`
+            SELECT id, nome, ano_escolar 
+            FROM alunos 
+            ORDER BY nome ASC
+        `);
+        
+        const statsResult = await db.query(`
+            SELECT 
+                COUNT(*) as total,
+                COUNT(CASE WHEN status = 'ATIVA' THEN 1 END) as ativas,
+                COUNT(CASE WHEN data_entrega < CURRENT_DATE AND status = 'ATIVA' THEN 1 END) as atrasadas,
+                (
+                    SELECT COUNT(*) 
+                    FROM tarefas_alunos 
+                    WHERE status = 'ENTREGUE'
+                ) as aguardando_correcao
+            FROM tarefas
+        `);
+        
+        const competenciasResult = await db.query(
+            'SELECT id, nome FROM competencias ORDER BY nome ASC'
+        );
+        
+        res.render('dashboard/tarefas', {
+            tarefas: tarefasResult.rows,
+            alunos: alunosResult.rows,
+            stats: statsResult.rows[0],
+            user: req.session.user,
+            userCargo: req.session.userCargo,
+            listaCompetencias: competenciasResult.rows,
+            filtros: { turma: turmaFilter, status: statusFilter }
+        });
+
+    } catch (err) {
+        console.error('Erro ao carregar tarefas:', err);
+        req.flash('error_msg', 'Erro ao carregar tarefas');
+        res.redirect('/dashboard');
+    }
+});
+
+app.post('/dashboard/tarefas/criar', checkAuth, async (req, res) => {
+    const { titulo, descricao, turma, data_entrega, prioridade, alunos, competencia_id } = req.body;
+    
+    if (!titulo || !turma) {
+        req.flash('error_msg', 'Título e turma são obrigatórios');
+        return res.redirect('/dashboard/tarefas');
+    }
+    
+    const client = await db.connect();
+    
+    try {
+        await client.query('BEGIN');
+        
+        const tarefaResult = await client.query(
+            `INSERT INTO tarefas (titulo, descricao, turma, data_entrega, prioridade, competencia_id, criado_por, data_atualizacao) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP) RETURNING id`,
+            [titulo, descricao, turma, data_entrega || null, prioridade || 'MEDIA', competencia_id || null, req.session.userId]
+        );
+        
+        const tarefaId = tarefaResult.rows[0].id;
+        
+        if (alunos && alunos.length > 0) {
+            for (const alunoId of alunos) {
+                await client.query(
+                    `INSERT INTO tarefas_alunos (tarefa_id, aluno_id, status) VALUES ($1, $2, 'PENDENTE')`,
+                    [tarefaId, alunoId]
+                );
+            }
+        } else {
+            const alunosTurma = await client.query(
+                'SELECT id FROM alunos WHERE ano_escolar = $1',
+                [turma]
+            );
+            
+            for (const aluno of alunosTurma.rows) {
+                await client.query(
+                    `INSERT INTO tarefas_alunos (tarefa_id, aluno_id, status) VALUES ($1, $2, 'PENDENTE')`,
+                    [tarefaId, aluno.id]
+                );
+            }
+        }
+        
+        await client.query('COMMIT');
+        
+        req.flash('success_msg', 'Tarefa criada com sucesso!');
+        res.redirect('/dashboard/tarefas');
+        
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('Erro ao criar tarefa:', err);
+        req.flash('error_msg', 'Erro ao criar tarefa');
+        res.redirect('/dashboard/tarefas');
+    } finally {
+        client.release();
+    }
+});
+
+app.post('/dashboard/tarefas/avaliar-aluno', checkAuth, async (req, res) => {
+    const { tarefa_id, aluno_id, nota, feedback } = req.body;
+    
+    const client = await db.connect();
+    
+    try {
+        await client.query('BEGIN');
+
+        await client.query(
+            `UPDATE tarefas_alunos 
+             SET nota = $1, feedback = $2, status = 'CONCLUIDA', data_avaliacao = CURRENT_TIMESTAMP
+             WHERE tarefa_id = $3 AND aluno_id = $4`,
+            [nota, feedback, tarefa_id, aluno_id]
+        );
+
+        const tarefa = await client.query(
+            'SELECT competencia_id FROM tarefas WHERE id = $1',
+            [tarefa_id]
+        );
+        
+        let virouCompetencia = false;
+
+        if (tarefa.rows[0].competencia_id) {
+            await client.query(
+                `INSERT INTO aluno_competencias (aluno_id, competencia_id, nota, observacoes)
+                 VALUES ($1, $2, $3, $4)`,
+                [aluno_id, tarefa.rows[0].competencia_id, nota, `Avaliado via tarefa ID ${tarefa_id}`]
+            );
+            virouCompetencia = true;
+
+            const media = await client.query(
+                'SELECT AVG(nota) as media FROM aluno_competencias WHERE aluno_id = $1',
+                [aluno_id]
+            );
+            
+            if (media.rows[0].media) {
+                await client.query(
+                    'UPDATE alunos SET nota = $1 WHERE id = $2',
+                    [media.rows[0].media, aluno_id]
+                );
+            }
+        }
+        
+        await client.query('COMMIT');
+        
+        res.json({ 
+            success: true, 
+            virouCompetencia: virouCompetencia 
+        });
+        
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('Erro ao avaliar tarefa:', err);
+        res.status(500).json({ success: false, error: err.message });
+    } finally {
+        client.release();
+    }
+});
+
+app.get('/dashboard/tarefas/:id', checkAuth, async (req, res) => {
+    try {
+        const tarefaId = req.params.id;
+        
+        const tarefaResult = await db.query(`
+            SELECT 
+                t.*,
+                c.nome as competencia_nome,
+                u.nome as professor_nome
+            FROM tarefas t
+            LEFT JOIN competencias c ON t.competencia_id = c.id
+            LEFT JOIN usuarios u ON t.criado_por = u.id
+            WHERE t.id = $1
+        `, [tarefaId]);
+        
+        if (tarefaResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Tarefa não encontrada' });
+        }
+        
+        const alunosResult = await db.query(`
+            SELECT 
+                a.id,
+                a.nome,
+                a.ano_escolar,
+                COALESCE(ta.status, 'PENDENTE') as status_tarefa,
+                ta.nota,
+                ta.feedback,
+                ta.resposta_texto,
+                ta.resposta_arquivo,
+                ta.data_entrega as data_entrega_aluno,
+                ta.data_avaliacao,
+                TO_CHAR(ta.data_entrega, 'DD/MM/YYYY HH24:MI') as data_entrega_formatada
+            FROM alunos a
+            LEFT JOIN tarefas_alunos ta ON a.id = ta.aluno_id AND ta.tarefa_id = $1
+            WHERE a.ano_escolar = $2
+            ORDER BY 
+                CASE 
+                    WHEN ta.status = 'ENTREGUE' THEN 1
+                    WHEN ta.status = 'DEVOLVIDA' THEN 2
+                    WHEN ta.status = 'PENDENTE' THEN 3
+                    ELSE 4
+                END,
+                a.nome ASC
+        `, [tarefaId, tarefaResult.rows[0].turma]);
+        
+        res.json({
+            tarefa: tarefaResult.rows[0],
+            alunos: alunosResult.rows
+        });
+        
+    } catch (err) {
+        console.error('Erro ao buscar tarefa:', err);
+        res.status(500).json({ error: 'Erro ao buscar tarefa' });
+    }
+});
+
+app.post('/dashboard/tarefas/editar/:id', checkAuth, async (req, res) => {
+    const tarefaId = req.params.id;
+    const { titulo, descricao, data_entrega, prioridade, status } = req.body;
+    
+    try {
+        await db.query(
+            `UPDATE tarefas 
+             SET titulo = $1, descricao = $2, data_entrega = $3, prioridade = $4, status = $5, data_atualizacao = CURRENT_TIMESTAMP
+             WHERE id = $6`,
+            [titulo, descricao, data_entrega || null, prioridade, status, tarefaId]
+        );
+        
+        req.flash('success_msg', 'Tarefa atualizada com sucesso!');
+        res.redirect('/dashboard/tarefas');
+        
+    } catch (err) {
+        console.error('Erro ao editar tarefa:', err);
+        req.flash('error_msg', 'Erro ao editar tarefa');
+        res.redirect('/dashboard/tarefas');
+    }
+});
+
+app.post('/dashboard/tarefas/excluir/:id', checkAuth, async (req, res) => {
+    try {
+        await db.query('DELETE FROM tarefas WHERE id = $1', [req.params.id]);
+        req.flash('success_msg', 'Tarefa excluída com sucesso!');
+        res.redirect('/dashboard/tarefas');
+    } catch (err) {
+        console.error('Erro ao excluir tarefa:', err);
+        req.flash('error_msg', 'Erro ao excluir tarefa');
+        res.redirect('/dashboard/tarefas');
+    }
+});
+
+app.post('/dashboard/tarefas/atualizar-status-aluno', checkAuth, async (req, res) => {
+    const { tarefa_id, aluno_id, status, observacoes } = req.body;
+    
+    try {
+        await db.query(
+            `UPDATE tarefas_alunos 
+             SET status = $1, observacoes = $2, data_entrega = CASE WHEN $1 = 'CONCLUIDA' THEN CURRENT_TIMESTAMP ELSE data_entrega END
+             WHERE tarefa_id = $3 AND aluno_id = $4`,
+            [status, observacoes, tarefa_id, aluno_id]
+        );
+        
+        res.json({ success: true });
+        
+    } catch (err) {
+        console.error('Erro ao atualizar status:', err);
+        res.status(500).json({ error: 'Erro ao atualizar status' });
+    }
+});
+
+app.get('/dashboard/api/tarefas-stats', checkAuth, async (req, res) => {
+    try {
+        const result = await db.query(`
+            SELECT 
+                COUNT(*) as total,
+                COUNT(CASE WHEN status = 'ATIVA' THEN 1 END) as ativas,
+                COUNT(CASE WHEN data_entrega < CURRENT_DATE AND status = 'ATIVA' THEN 1 END) as atrasadas,
+                COUNT(CASE WHEN prioridade = 'ALTA' AND status = 'ATIVA' THEN 1 END) as prioridade_alta
+            FROM tarefas
+        `);
+        
+        res.json(result.rows[0]);
+        
+    } catch (err) {
+        console.error('Erro ao buscar estatísticas:', err);
+        res.status(500).json({ error: 'Erro ao buscar estatísticas' });
+    }
+});
+
+app.post('/dashboard/tarefas/devolver-aluno', checkAuth, async (req, res) => {
+    const { tarefa_id, aluno_id } = req.body;
+    
+    try {
+        await db.query(
+            `UPDATE tarefas_alunos 
+             SET status = 'DEVOLVIDA', nota = NULL, feedback = NULL, data_avaliacao = NULL
+             WHERE tarefa_id = $1 AND aluno_id = $2`,
+            [tarefa_id, aluno_id]
+        );
+        
+        res.json({ success: true });
+        
+    } catch (err) {
+        console.error('Erro ao devolver tarefa:', err);
+        res.status(500).json({ success: false });
+    }
+});
+
+
+app.get('/aluno/tarefas', checkAlunoAuth, async (req, res) => {
+    try {
+        const alunoId = req.session.aluno.id;
+        
+        const tarefasResult = await db.query(`
+            SELECT 
+                ta.id as tarefa_aluno_id,
+                t.id as tarefa_id,
+                t.titulo,
+                t.descricao,
+                t.turma,
+                t.data_entrega as data_limite,
+                c.nome as competencia_nome,
+                ta.status,
+                ta.nota,
+                ta.feedback,
+                ta.data_entrega as data_entrega_aluno,
+                ta.data_avaliacao,
+                TO_CHAR(t.data_entrega, 'DD/MM/YYYY') as data_limite_formatada,
+                TO_CHAR(ta.data_entrega, 'DD/MM/YYYY HH24:MI') as data_entrega_formatada,
+                TO_CHAR(ta.data_avaliacao, 'DD/MM/YYYY') as data_avaliacao_formatada,
+                CASE 
+                    WHEN ta.status = 'ENTREGUE' THEN 'Aguardando correção'
+                    WHEN ta.status = 'CONCLUIDA' THEN 'Corrigida'
+                    WHEN ta.status = 'DEVOLVIDA' THEN 'Devolvida para correção'
+                    WHEN ta.status = 'ATRASADA' THEN 'Atrasada'
+                    ELSE 'Pendente'
+                END as status_texto,
+                CASE
+                    WHEN ta.status = 'PENDENTE' AND t.data_entrega < CURRENT_DATE THEN 'ATRASADA'
+                    ELSE ta.status
+                END as status_real
+            FROM tarefas t
+            JOIN tarefas_alunos ta ON t.id = ta.tarefa_id
+            LEFT JOIN competencias c ON t.competencia_id = c.id
+            WHERE ta.aluno_id = $1
+            ORDER BY 
+                CASE 
+                    WHEN ta.status = 'PENDENTE' AND t.data_entrega < CURRENT_DATE THEN 1
+                    WHEN ta.status = 'PENDENTE' THEN 2
+                    WHEN ta.status = 'DEVOLVIDA' THEN 3
+                    WHEN ta.status = 'ENTREGUE' THEN 4
+                    WHEN ta.status = 'CONCLUIDA' THEN 5
+                    ELSE 6
+                END,
+                t.data_entrega ASC NULLS LAST
+        `, [alunoId]);
+        
+        for (const tarefa of tarefasResult.rows) {
+            if (tarefa.status_real === 'ATRASADA' && tarefa.status !== 'ATRASADA') {
+                await db.query(
+                    `UPDATE tarefas_alunos SET status = 'ATRASADA' WHERE id = $1`,
+                    [tarefa.tarefa_aluno_id]
+                );
+            }
+        }
+        
+        const statsResult = await db.query(`
+            SELECT 
+                COUNT(*) as total,
+                COUNT(CASE WHEN status = 'PENDENTE' AND data_entrega >= CURRENT_DATE THEN 1 END) as pendentes,
+                COUNT(CASE WHEN status = 'ENTREGUE' THEN 1 END) as aguardando,
+                COUNT(CASE WHEN status = 'CONCLUIDA' THEN 1 END) as concluidas,
+                COUNT(CASE WHEN status = 'DEVOLVIDA' THEN 1 END) as devolvidas,
+                COUNT(CASE WHEN status = 'ATRASADA' OR (status = 'PENDENTE' AND data_entrega < CURRENT_DATE) THEN 1 END) as atrasadas
+            FROM tarefas_alunos
+            WHERE aluno_id = $1
+        `, [alunoId]);
+        
+        res.render('aluno/tarefas', {
+            aluno: req.session.aluno,
+            tarefas: tarefasResult.rows,
+            stats: statsResult.rows[0] || {
+                total: 0,
+                pendentes: 0,
+                aguardando: 0,
+                concluidas: 0,
+                devolvidas: 0,
+                atrasadas: 0
+            },
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg')
+        });
+        
+    } catch (err) {
+        console.error('Erro ao carregar tarefas do aluno:', err);
+        req.flash('error_msg', 'Erro ao carregar tarefas');
+        res.redirect('/aluno/dashboard');
+    }
+});
+
+app.post('/aluno/tarefas/entregar/:id', checkAlunoAuth, async (req, res) => {
+    const tarefaAlunoId = req.params.id;
+    const alunoId = req.session.aluno.id;
+    
+    try {
+        const result = await db.query(
+            `UPDATE tarefas_alunos 
+             SET status = 'ENTREGUE', data_entrega = CURRENT_TIMESTAMP
+             WHERE id = $1 AND aluno_id = $2 AND status IN ('PENDENTE', 'DEVOLVIDA')
+             RETURNING id`,
+            [tarefaAlunoId, alunoId]
+        );
+        
+        if (result.rows.length > 0) {
+            req.flash('success_msg', 'Tarefa entregue com sucesso!');
+        } else {
+            req.flash('error_msg', 'Não foi possível entregar esta tarefa');
+        }
+        
+        res.redirect('/aluno/tarefas');
+        
+    } catch (err) {
+        console.error('Erro ao entregar tarefa:', err);
+        req.flash('error_msg', 'Erro ao entregar tarefa');
+        res.redirect('/aluno/tarefas');
+    }
+});
+
+app.post('/aluno/tarefas/enviar/:id', checkAlunoAuth, upload.single('arquivo'), async (req, res) => {
+    const tarefaAlunoId = req.params.id;
+    const alunoId = req.session.aluno.id;
+    const { resposta_texto } = req.body;
+    const arquivo = req.file;
+    
+    console.log('Enviando tarefa:', { tarefaAlunoId, alunoId, resposta_texto, arquivo: arquivo?.filename });
+    
+    try {
+        let query = `UPDATE tarefas_alunos 
+                     SET status = 'ENTREGUE', 
+                         data_entrega = CURRENT_TIMESTAMP`;
+        let params = [];
+        let paramIndex = 1;
+        
+        if (resposta_texto && resposta_texto.trim() !== '') {
+            query += `, resposta_texto = $${paramIndex}`;
+            params.push(resposta_texto.trim());
+            paramIndex++;
+        }
+        
+        if (arquivo) {
+            query += `, resposta_arquivo = $${paramIndex}`;
+            params.push(arquivo.filename);
+            paramIndex++;
+        }
+        
+        query += ` WHERE id = $${paramIndex} AND aluno_id = $${paramIndex + 1} 
+                   AND status IN ('PENDENTE', 'DEVOLVIDA', 'ATRASADA') RETURNING id`;
+        params.push(tarefaAlunoId, alunoId);
+        
+        console.log('Query:', query, params);
+        
+        const result = await db.query(query, params);
+        
+        console.log('Resultado:', result.rows);
+        
+        if (result.rows.length > 0) {
+            req.flash('success_msg', 'Tarefa enviada com sucesso!');
+        } else {
+            req.flash('error_msg', 'Não foi possível enviar esta tarefa');
+        }
+        
+        res.redirect('/aluno/tarefas');
+        
+    } catch (err) {
+        console.error('Erro ao enviar tarefa:', err);
+        req.flash('error_msg', 'Erro ao enviar tarefa');
+        res.redirect('/aluno/tarefas');
+    }
+});
+
+app.get('/aluno/tarefas/detalhes/:id', checkAlunoAuth, async (req, res) => {
+    const tarefaAlunoId = req.params.id;
+    const alunoId = req.session.aluno.id;
+    
+    try {
+        const result = await db.query(`
+            SELECT 
+                ta.*,
+                t.titulo,
+                t.descricao,
+                t.turma,
+                t.data_entrega as data_limite,
+                c.nome as competencia_nome,
+                TO_CHAR(t.data_entrega, 'DD/MM/YYYY') as data_limite_formatada,
+                TO_CHAR(ta.data_entrega, 'DD/MM/YYYY HH24:MI') as data_entrega_formatada,
+                TO_CHAR(ta.data_avaliacao, 'DD/MM/YYYY') as data_avaliacao_formatada
+            FROM tarefas_alunos ta
+            JOIN tarefas t ON ta.tarefa_id = t.id
+            LEFT JOIN competencias c ON t.competencia_id = c.id
+            WHERE ta.id = $1 AND ta.aluno_id = $2
+        `, [tarefaAlunoId, alunoId]);
+
+            const alunosResult = await db.query(`
+                SELECT 
+                    a.id,
+                    a.nome,
+                    a.ano_escolar,
+                    COALESCE(ta.status, 'PENDENTE') as status_tarefa,
+                    ta.nota,
+                    ta.feedback,
+                    ta.resposta_texto,
+                    ta.resposta_arquivo,
+                    ta.data_entrega as data_entrega_aluno,
+                    ta.data_avaliacao
+                FROM alunos a
+                LEFT JOIN tarefas_alunos ta ON a.id = ta.aluno_id AND ta.tarefa_id = $1
+                WHERE a.ano_escolar = $2
+                ORDER BY a.nome ASC
+            `, [tarefaId, tarefaResult.rows[0].turma]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Tarefa não encontrada' });
+        }
+        
+        res.json(result.rows[0]);
+        
+    } catch (err) {
+        console.error('Erro ao buscar detalhes da tarefa:', err);
+        res.status(500).json({ error: 'Erro ao buscar detalhes' });
+    }
+});
+
 app.get('/logout', (req, res) => {
   req.session.destroy();
   res.redirect('/');
@@ -802,10 +1998,12 @@ app.use((req, res) => {
     res.status(404).render('error', {
         titulo: 'PÁGINA NÃO ENCONTRADA',
         mensagem: 'A página que você está procurando não existe.',
-        erroDetalhe: null
+        erroDetalhe: null,
+        user: req.session?.user,
+        userCargo: req.session?.userCargo,
+        isAdmin: req.session?.userCargo === 'Admin'
     });
 });
-
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
@@ -815,8 +2013,14 @@ app.use((err, req, res, next) => {
         return res.redirect(req.get('referer') || '/dashboard');
     }
     
-    req.flash('error_msg', 'Erro interno no servidor');
-    res.redirect('/dashboard');
+    return res.status(500).render('error', {
+        titulo: 'ERRO NO SERVIDOR',
+        mensagem: 'Ocorreu um erro interno no servidor.',
+        erroDetalhe: process.env.NODE_ENV === 'development' ? err.message : null,
+        user: req.session?.user,
+        userCargo: req.session?.userCargo,
+        isAdmin: req.session?.userCargo === 'Admin'
+    });
 });
 
 app.listen(3000, () => console.log('Servidor rodando em http://localhost:3000'));
