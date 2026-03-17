@@ -43,53 +43,51 @@ body.termos-body {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 680px; 
+    max-width: 580px;
 }
 
 .logo-termos {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .logo-termos img {
-    width: 220px;
+    width: 180px;
     height: auto;
 }
 
 .logo-termos h2 {
-    font-size: 0.8rem;
-    letter-spacing: 5px;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
     color: var(--text-muted);
     text-transform: uppercase;
-    margin-top: 15px;
-    font-weight: normal;
+    margin-top: 10px;
 }
 
 .termos-container {
     background-color: var(--card-bg);
-    border: 2px solid var(--border-color);
-    border-radius: 25px;
-    padding: 50px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 30px;
     width: 100%;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-    transition: border-color 0.4s ease;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
 
 .termos-content {
     display: flex;
     flex-direction: column;
-    gap: 25px;
-    margin-bottom: 40px;
-    max-height: 50vh;
+    gap: 18px;
+    margin-bottom: 25px;
+    max-height: 40vh;
     overflow-y: auto;
-    padding-right: 20px;
+    padding-right: 15px;
     scrollbar-width: thin;
     scrollbar-color: #333 transparent;
 }
 
 .termos-content p {
-    line-height: 1.8;
-    font-size: 0.95rem;
+    line-height: 1.6;
+    font-size: 0.85rem;
     color: var(--text-description);
     text-align: justify;
 }
@@ -97,28 +95,27 @@ body.termos-body {
 .termos-content strong {
     color: var(--primary-red);
     letter-spacing: 0.5px;
-    font-weight: normal;
 }
 
 .button-area {
     display: flex;
     justify-content: center;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding-top: 30px;
+    padding-top: 20px;
 }
 
 .btn-voltar {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     text-decoration: none;
     color: var(--text-muted);
     border: 1px solid #222;
-    border-radius: 12px;
-    padding: 14px 50px;
-    font-size: 0.8rem;
-    letter-spacing: 2px;
-    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border-radius: 10px;
+    padding: 10px 35px;
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    transition: all 0.4s ease;
     background: transparent;
     text-transform: uppercase;
 }
@@ -128,11 +125,10 @@ body.termos-body {
     color: var(--text-white);
     background: rgba(255, 1, 1, 0.05);
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
 .termos-content::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
 }
 
 .termos-content::-webkit-scrollbar-track {
@@ -142,7 +138,6 @@ body.termos-body {
 .termos-content::-webkit-scrollbar-thumb {
     background: #222;
     border-radius: 10px;
-    transition: background 0.3s;
 }
 
 .termos-content::-webkit-scrollbar-thumb:hover {
@@ -151,12 +146,12 @@ body.termos-body {
 
 @media (max-width: 600px) {
     .termos-container {
-        padding: 35px 25px;
+        padding: 25px 20px;
     }
     .logo-termos img {
-        width: 180px;
+        width: 150px;
     }
     .termos-content p {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 }
