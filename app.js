@@ -152,7 +152,10 @@ app.post('/login/aluno', async (req, res) => {
     
     if (!matricula && !email) {
         req.flash('error_msg', 'Informe matrícula ou e-mail');
-        return res.redirect('/login');
+        return res.render('/login', {
+            error_msg: req.flash('error_msg')[0],
+            success_msg: null
+        });
     }
 
     try {
@@ -174,7 +177,10 @@ app.post('/login/aluno', async (req, res) => {
         if (result.rows.length === 0) {
             console.log('Aluno não encontrado');
             req.flash('error_msg', 'Matrícula/E-mail não encontrado');
-            return res.redirect('/login');
+            return res.render('/login', {
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null
+            });
         }
 
         const aluno = result.rows[0];
@@ -183,13 +189,19 @@ app.post('/login/aluno', async (req, res) => {
         if (aluno.status !== 'ATIVO') {
             console.log('Aluno inativo'); 
             req.flash('error_msg', 'Acesso bloqueado. Contate a secretaria.');
-            return res.redirect('/login');
+            return res.render('/login', {
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null
+            });
         }
 
         if (senha !== aluno.senha) {
             console.log('Senha incorreta');
             req.flash('error_msg', 'Senha incorreta');
-            return res.redirect('/login');
+            return res.render('/login', {
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null
+            });
         }
 
         const alunoDados = await db.query(
@@ -200,7 +212,10 @@ app.post('/login/aluno', async (req, res) => {
         if (alunoDados.rows.length === 0) {
             console.log('Dados do aluno não encontrados na tabela alunos');
             req.flash('error_msg', 'Erro ao carregar dados do aluno');
-            return res.redirect('/login');
+            return res.render('/login', {
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null
+            });
         }
 
         const dados = alunoDados.rows[0];
