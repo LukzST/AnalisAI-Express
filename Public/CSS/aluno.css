@@ -678,27 +678,21 @@ body.dash-body {
 }
 
 .footer-credits {
-    text-align: center;
-    color: #444;
-    font-size: 0.75rem;
-    letter-spacing: 1px;
-    width: 100%;
-}
-
-.footer-credits p {
-    margin: 5px 0;
+    text-align: right;
+    font-size: 0.85rem;
+    color: #333;
 }
 
 .footer-credits a {
     color: #444;
+    gap: 10px;
     text-decoration: none;
     transition: 0.3s;
 }
 
 .footer-credits a:hover {
-    color: var(--aluno-green);
+    color: #666;
 }
-
 @media screen and (max-width: 1200px) {
     .main-layout {
         margin-left: 85px;
