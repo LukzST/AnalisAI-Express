@@ -192,19 +192,13 @@
                             <button class="btn-tarefa" onclick="verTarefa(<%= tarefa.id %>)" title="Ver detalhes">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            
-                            <% 
-                            const podeEditar = (entregues === 0 && concluidas === 0);
-                            %>
 
-                            <% if (podeEditar) { %>
                                 <button class="btn-tarefa" onclick="editarTarefa(<%= tarefa.id %>)" title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button class="btn-tarefa excluir" onclick="excluirTarefa(<%= tarefa.id %>)" title="Excluir">
                                     <i class="fas fa-trash"></i>
                                 </button>
-                            <% } %>
                             
                             <% if (entregues > 0 && concluidas < entregues) { %>
                                 <button class="btn-tarefa" onclick="avaliarTarefa(<%= tarefa.id %>)" title="Avaliar tarefas" style="border-color: #217346; color: #217346;">
