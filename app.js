@@ -824,6 +824,34 @@ app.post('/dashboard/adicionar-competencia', checkAuth, async (req, res) => {
     }
 });
 
+app.get('/dashboard/aluno-dados/:id', checkAuth, async (req, res) => {
+    try {
+        const alunoId = req.params.id;
+        
+        const result = await db.query(`
+            SELECT 
+                a.id,
+                a.nome,
+                a.presenca,
+                al.email,
+                al.senha
+            FROM alunos a
+            LEFT JOIN alunos_login al ON a.id = al.aluno_id
+            WHERE a.id = $1
+        `, [alunoId]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Aluno não encontrado' });
+        }
+        
+        res.json(result.rows[0]);
+        
+    } catch (err) {
+        console.error('Erro ao buscar dados do aluno:', err);
+        res.status(500).json({ error: 'Erro ao buscar dados' });
+    }
+});
+
 app.get('/dashboard/deletar-competencia/:id', checkAuth, async (req, res) => {
     const compId = req.params.id;
     

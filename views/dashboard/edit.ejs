@@ -335,7 +335,9 @@
         <div id="editAlunoModal" class="modal-overlay">
             <div class="modal-content modal-lg">
                 <button class="close-btn" onclick="closeEditModal()"><i class="fas fa-times-circle"></i></button>
-                <h2 class="section-title-2">EDITAR ALUNO: <span id="editNomeAluno" style="color: var(--primary-color);"></span></h2>
+                <h2 class="section-title-2">EDITAR ALUNO: <span id="editNomeAluno" style="color: var(--primary-red);"></span></h2>
+                
+                <div id="loginInfo" style="margin-bottom: 20px;"></div>
                 
                 <div class="edit-tabs">
                     <button class="tab-btn active" onclick="showEditTab('competencias')">COMPETÊNCIAS</button>
@@ -758,14 +760,40 @@ async function confirmarImportacao() {
         function closeAddModal() { document.getElementById('addAlunoModal').style.display = 'none'; }
         
         function openEditModal(id, nome, presenca) {
-            document.getElementById('editAlunoId').value = id;
-            document.getElementById('editAlunoIdComp').value = id;
-            document.getElementById('editNomeAluno').innerText = nome.toUpperCase();
-            document.getElementById('editPresencaInput').value = presenca;
-            carregarCompetencias(id);
-            document.getElementById('editAlunoModal').style.display = 'flex';
-            showEditTab('competencias');
-        }
+        fetch(`/dashboard/aluno-dados/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('editAlunoId').value = id;
+                document.getElementById('editAlunoIdComp').value = id;
+                document.getElementById('editNomeAluno').innerText = nome.toUpperCase();
+                document.getElementById('editPresencaInput').value = presenca;
+                
+                const loginInfo = document.getElementById('loginInfo');
+                if (loginInfo) {
+                    loginInfo.innerHTML = `
+                        <div style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #217346;">
+                            <h4 style="color: #fff; margin-bottom: 10px;">DADOS DE ACESSO DO ALUNO</h4>
+                            <p style="color: #888; margin-bottom: 5px;">
+                                <i class="fas fa-envelope" style="color: #217346; width: 20px;"></i> 
+                                <strong>Email:</strong> ${data.email}
+                            </p>
+                            <p style="color: #888; margin-bottom: 5px;">
+                                <i class="fas fa-lock" style="color: #217346; width: 20px;"></i> 
+                                <strong>Senha:</strong> ${data.senha}
+                            </p>
+                            <p style="color: #888; font-size: 0.8rem; margin-top: 10px;">
+                                <i class="fas fa-info-circle" style="color: #217346;"></i>
+                                A senha só pode ser alterada pelo aluno no painel dele.
+                            </p>
+                        </div>
+                    `;
+                }
+                
+                carregarCompetencias(id);
+                document.getElementById('editAlunoModal').style.display = 'flex';
+                showEditTab('competencias');
+            });
+    }
 
         function closeEditModal() { 
             document.getElementById('editAlunoModal').style.display = 'none'; 
