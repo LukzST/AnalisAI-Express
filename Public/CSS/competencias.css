@@ -42,7 +42,6 @@
         
         .stat-value {
             font-size: 2.5rem;
-            font-weight: bold;
             color: #fff;
             margin-bottom: 5px;
         }
@@ -103,7 +102,6 @@
             border: none;
             border-radius: 10px;
             color: white;
-            font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
             display: flex;
@@ -178,7 +176,6 @@
             padding: 5px 12px;
             border-radius: 20px;
             font-size: 0.7rem;
-            font-weight: bold;
             text-transform: uppercase;
         }
         
@@ -234,7 +231,6 @@
         
         .competencia-nota {
             font-size: 3rem;
-            font-weight: bold;
         }
         
         .competencia-nota.apto { color: #217346; }

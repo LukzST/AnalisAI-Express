@@ -92,7 +92,6 @@
         .stat-value {
             color: #fff;
             font-size: 2.2rem;
-            font-weight: bold;
         }
         
         .stat-trend {
@@ -185,7 +184,6 @@
         
         .evolucao-media {
             font-size: 1.5rem;
-            font-weight: bold;
         }
         
         .evolucao-media.apto { color: #217346; }
@@ -268,7 +266,6 @@
         .timeline-data {
             min-width: 100px;
             color: #217346;
-            font-weight: bold;
         }
         
         .timeline-conteudo {
@@ -286,7 +283,6 @@
             padding: 3px 10px;
             border-radius: 20px;
             font-size: 0.85rem;
-            font-weight: bold;
             margin-right: 10px;
         }
         

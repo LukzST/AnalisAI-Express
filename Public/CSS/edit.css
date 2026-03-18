@@ -477,7 +477,6 @@ body.dash-body {
 
 .competencia-nota {
     font-size: 1rem;
-    font-weight: bold;
     padding: 5px 12px;
     border-radius: 20px;
     min-width: 50px;
@@ -703,7 +702,6 @@ body.dash-body {
 
 .competencia-edit-nota {
     font-size: 1rem;
-    font-weight: bold;
     padding: 5px 12px;
     border-radius: 20px;
     margin-right: 10px;
@@ -1150,4 +1148,117 @@ select.filter-input option {
     padding: 8px; 
     background: rgba(33, 115, 70, 0.1); 
     border-radius: 8px;
+}
+
+
+.modal-icon-warning {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.modal-icon-warning i {
+    font-size: 4rem;
+    color: var(--primary-red);
+    animation: pulseWarning 2s infinite;
+}
+
+@keyframes pulseWarning {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+.modal-title-warning {
+    text-align: center;
+    color: var(--primary-red);
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    font-weight: normal;
+}
+
+.modal-text-warning {
+    text-align: center;
+    color: #888;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.modal-text-warning strong {
+    color: #fff;
+}
+
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-danger-action {
+    width: 100%;
+    background: transparent;
+    color: var(--text-white);
+    border: 2px solid var(--primary-red);
+    border-radius: 12px;
+    padding: 15px;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-danger-action:hover {
+    border-color: var(--primary-red);
+    color: var(--text-white);
+    background: rgba(255, 1, 1, 0.05);
+}
+
+.btn-danger-action:active {
+    transform: translateY(0);
+}
+
+.btn-danger-action::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.5s ease;
+}
+
+.btn-danger-action:active::after {
+    transform: translate(-50%, -50%) scale(2);
+}
+
+.btn-cancel {
+    width: 100%;
+    background: transparent;
+    color: #666;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 15px;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.btn-cancel:hover {
+    border-color: #888;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
 }

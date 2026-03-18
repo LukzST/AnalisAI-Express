@@ -191,7 +191,6 @@ body.dash-body {
 }
 
 .status {
-    font-weight: bold;
     padding: 5px 12px;
     border-radius: 20px;
     display: inline-block;

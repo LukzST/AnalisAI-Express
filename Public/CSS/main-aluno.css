@@ -63,7 +63,6 @@
         .meta-value {
             color: #fff;
             font-size: 2rem;
-            font-weight: bold;
         }
         
         .meta-value small {
@@ -105,7 +104,6 @@
         
         .competencia-nota {
             font-size: 2rem;
-            font-weight: bold;
         }
         
         .competencia-nota.apto { color: #217346; }
@@ -151,7 +149,6 @@
         
         .progresso-percent {
             color: #217346;
-            font-weight: bold;
         }
         
         .progresso-bar {
@@ -196,7 +193,6 @@
         
         .stat-value {
             font-size: 2.5rem;
-            font-weight: bold;
             color: #217346;
             margin: 10px 0;
         }
