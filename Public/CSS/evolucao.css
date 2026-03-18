@@ -3,7 +3,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
         }
         
         .page-title {
@@ -47,7 +46,6 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
-            margin-bottom: 40px;
         }
         
         .stat-card {
