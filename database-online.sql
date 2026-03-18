@@ -157,6 +157,8 @@ CREATE INDEX IF NOT EXISTS idx_tarefas_status ON tarefas(status);
 CREATE INDEX IF NOT EXISTS idx_tarefas_alunos_aluno ON tarefas_alunos(aluno_id);
 CREATE INDEX IF NOT EXISTS idx_tarefas_alunos_tarefa ON tarefas_alunos(tarefa_id);
 
+UPDATE alunos_login SET ultimo_acesso = CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo' WHERE aluno_id = $1
+
 INSERT INTO usuarios (nome, email, senha, cargo, status) 
 VALUES ('Lucas Eduardo', 'lucaseduarte6@gmail.com', 'Lucas2018', 'Admin', 'ATIVO')
 ON CONFLICT (email) DO NOTHING;
