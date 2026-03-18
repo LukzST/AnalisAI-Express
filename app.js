@@ -182,13 +182,20 @@ app.post('/login/professor', async (req, res) => {
 
 app.post('/login/aluno', async (req, res) => {
     const { matricula, email, senha } = req.body;
+    
     if (!matricula && !email) {
         req.flash('error_msg', 'Informe matrícula ou e-mail');
-        return res.redirect('/login');
+        return res.render('login', {
+            error_msg: req.flash('error_msg')[0],
+            success_msg: null,
+            tipo: 'aluno'
+        });
     }
+
     try {
         let query;
         let params;
+        
         if (matricula) {
             query = 'SELECT * FROM alunos_login WHERE matricula = $1';
             params = [matricula];
@@ -196,29 +203,54 @@ app.post('/login/aluno', async (req, res) => {
             query = 'SELECT * FROM alunos_login WHERE email = $1';
             params = [email];
         }
+        
         const result = await db.query(query, params);
+
         if (result.rows.length === 0) {
             req.flash('error_msg', 'Matrícula/E-mail não encontrado');
-            return res.redirect('/login');
+            return res.render('login', {
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null,
+                tipo: 'aluno'
+            });
         }
+
         const aluno = result.rows[0];
+        
         if (aluno.status !== 'ATIVO') {
             req.flash('error_msg', 'Acesso bloqueado. Contate a secretaria.');
-            return res.redirect('/login');
+            return res.render('login', {
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null,
+                tipo: 'aluno'
+            });
         }
+
         if (senha !== aluno.senha) {
             req.flash('error_msg', 'Senha incorreta');
-            return res.redirect('/login');
+            return res.render('login', {
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null,
+                tipo: 'aluno'
+            });
         }
+
         const alunoDados = await db.query(
             'SELECT id, nome, ano_escolar, presenca FROM alunos WHERE id = $1',
             [aluno.aluno_id]
         );
+
         if (alunoDados.rows.length === 0) {
             req.flash('error_msg', 'Erro ao carregar dados do aluno');
-            return res.redirect('/login');
+            return res.render('login', {
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null,
+                tipo: 'aluno'
+            });
         }
+
         const dados = alunoDados.rows[0];
+
         req.session.aluno = {
             id: aluno.aluno_id,
             nome: aluno.nome,
@@ -226,12 +258,18 @@ app.post('/login/aluno', async (req, res) => {
             ano_escolar: dados.ano_escolar,
             login_id: aluno.id
         };
+
         req.flash('success_msg', `Bem-vindo, ${aluno.nome}!`);
         return res.redirect('/aluno/dashboard');
+
     } catch (err) {
         console.error('ERRO NO LOGIN DO ALUNO:', err);
         req.flash('error_msg', 'Erro ao conectar ao banco de dados.');
-        return res.redirect('/login');
+        return res.render('login', {
+            error_msg: req.flash('error_msg')[0],
+            success_msg: null,
+            tipo: 'aluno'
+        });
     }
 });
 
