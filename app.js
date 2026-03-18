@@ -144,9 +144,11 @@ app.post('/cadastro', async (req, res) => {
 });
 
 app.get('/login', (req, res) => {
+    const tipo = req.query.tipo || 'professor';
     res.render('login', {
         error_msg: req.flash('error_msg')[0],
-        success_msg: req.flash('success_msg')[0]
+        success_msg: req.flash('success_msg')[0],
+        tipo: tipo
     });
 });
 
@@ -156,16 +158,16 @@ app.post('/login/professor', async (req, res) => {
         const result = await db.query('SELECT * FROM usuarios WHERE email = $1', [usuario]);
         if (result.rows.length === 0) {
             req.flash('error_msg', 'E-mail não encontrado');
-            return res.render('login', { error_msg: req.flash('error_msg')[0], success_msg: null });
+            return res.render('login', { error_msg: req.flash('error_msg')[0], success_msg: null, tipo: 'professor' });
         }
         const user = result.rows[0];
         if (user.status !== 'ATIVO') {
             req.flash('error_msg', 'Sua conta está inativa. Contate o administrador.');
-            return res.render('login', { error_msg: req.flash('error_msg')[0], success_msg: null });
+            return res.render('login', { error_msg: req.flash('error_msg')[0], success_msg: null, tipo: 'professor' });
         }
         if (senha !== user.senha) {
             req.flash('error_msg', 'Senha incorreta');
-            return res.render('login', { error_msg: req.flash('error_msg')[0], success_msg: null });
+            return res.render('login', { error_msg: req.flash('error_msg')[0], success_msg: null, tipo: 'professor' });
         }
         req.session.user = user.nome;
         req.session.userStatus = user.status;
@@ -176,19 +178,20 @@ app.post('/login/professor', async (req, res) => {
     } catch (err) {
         console.error(err);
         req.flash('error_msg', 'Erro ao conectar ao banco de dados.');
-        return res.render('login', { error_msg: req.flash('error_msg')[0], success_msg: null });
+        return res.render('login', { error_msg: req.flash('error_msg')[0], success_msg: null, tipo: 'professor' });
     }
 });
 
 app.post('/login/aluno', async (req, res) => {
     const { matricula, email, senha } = req.body;
+    const tipo = 'aluno';
     
     if (!matricula && !email) {
         req.flash('error_msg', 'Informe matrícula ou e-mail');
         return res.render('login', {
             error_msg: req.flash('error_msg')[0],
             success_msg: null,
-            tipo: 'aluno'
+            tipo: tipo
         });
     }
 
@@ -211,7 +214,7 @@ app.post('/login/aluno', async (req, res) => {
             return res.render('login', {
                 error_msg: req.flash('error_msg')[0],
                 success_msg: null,
-                tipo: 'aluno'
+                tipo: tipo
             });
         }
 
@@ -222,7 +225,7 @@ app.post('/login/aluno', async (req, res) => {
             return res.render('login', {
                 error_msg: req.flash('error_msg')[0],
                 success_msg: null,
-                tipo: 'aluno'
+                tipo: tipo
             });
         }
 
@@ -231,7 +234,7 @@ app.post('/login/aluno', async (req, res) => {
             return res.render('login', {
                 error_msg: req.flash('error_msg')[0],
                 success_msg: null,
-                tipo: 'aluno'
+                tipo: tipo
             });
         }
 
@@ -245,7 +248,7 @@ app.post('/login/aluno', async (req, res) => {
             return res.render('login', {
                 error_msg: req.flash('error_msg')[0],
                 success_msg: null,
-                tipo: 'aluno'
+                tipo: tipo
             });
         }
 
@@ -268,7 +271,7 @@ app.post('/login/aluno', async (req, res) => {
         return res.render('login', {
             error_msg: req.flash('error_msg')[0],
             success_msg: null,
-            tipo: 'aluno'
+            tipo: tipo
         });
     }
 });
@@ -921,10 +924,13 @@ app.get('/dashboard/api/tarefas-stats', checkAuth, async (req, res) => {
 
 app.get('/dashboard/config', checkAuth, async (req, res) => {
     try {
+        const aba = req.query.aba || 'dados';
+        
         const configResult = await db.query(
             `SELECT * FROM configuracoes_notificacoes WHERE usuario_id = $1`,
             [req.session.userId]
         );
+        
         const config = configResult.rows[0] || {
             notificacoes_ativas: true,
             notificacoes_email: false,
@@ -932,14 +938,79 @@ app.get('/dashboard/config', checkAuth, async (req, res) => {
             notificacoes_avaliacoes: true,
             notificacoes_competencias: true
         };
+        
+        const userResult = await db.query(
+            'SELECT nome, email, cargo, data_criacao FROM usuarios WHERE id = $1',
+            [req.session.userId]
+        );
+        
+        const statsResult = await db.query(`
+            SELECT 
+                (SELECT COUNT(*) FROM tarefas WHERE criado_por = $1) as tarefas,
+                (SELECT COUNT(DISTINCT aluno_id) FROM tarefas_alunos WHERE tarefa_id IN (SELECT id FROM tarefas WHERE criado_por = $1)) as alunos
+        `, [req.session.userId]);
+        
         res.render('dashboard/config', {
             config,
-            user: req.session.user
+            nome: userResult.rows[0].nome,
+            email: userResult.rows[0].email,
+            cargo: userResult.rows[0].cargo,
+            dataCadastro: new Date(userResult.rows[0].data_criacao).toLocaleDateString('pt-BR'),
+            ultimoAcesso: req.session.ultimoAcesso || '---',
+            stats: statsResult.rows[0],
+            abaAtiva: aba
         });
     } catch (err) {
         console.error('Erro ao carregar configurações:', err);
         req.flash('error_msg', 'Erro ao carregar configurações');
         res.redirect('/dashboard');
+    }
+});
+
+
+app.post('/dashboard/alterar-senha', checkAuth, async (req, res) => {
+    const { senha_atual, nova_senha, confirmar_senha } = req.body;
+    
+    try {
+        const result = await db.query(
+            'SELECT senha FROM usuarios WHERE id = $1',
+            [req.session.userId]
+        );
+        
+        if (result.rows.length === 0) {
+            req.flash('error_msg', 'Usuário não encontrado');
+            return res.redirect('/dashboard/config?aba=senha');
+        }
+        
+        const user = result.rows[0];
+        
+        if (senha_atual !== user.senha) {
+            req.flash('error_msg', 'Senha atual incorreta');
+            return res.redirect('/dashboard/config?aba=senha');
+        }
+        
+        if (nova_senha.length < 6) {
+            req.flash('error_msg', 'A nova senha deve ter no mínimo 6 caracteres');
+            return res.redirect('/dashboard/config?aba=senha');
+        }
+        
+        if (nova_senha !== confirmar_senha) {
+            req.flash('error_msg', 'As senhas não coincidem');
+            return res.redirect('/dashboard/config?aba=senha');
+        }
+        
+        await db.query(
+            'UPDATE usuarios SET senha = $1 WHERE id = $2',
+            [nova_senha, req.session.userId]
+        );
+        
+        req.flash('success_msg', 'Senha alterada com sucesso!');
+        res.redirect('/dashboard/config?aba=senha');
+        
+    } catch (err) {
+        console.error('Erro ao alterar senha:', err);
+        req.flash('error_msg', 'Erro ao alterar senha');
+        res.redirect('/dashboard/config?aba=senha');
     }
 });
 
@@ -1049,6 +1120,7 @@ app.post('/dashboard/atualizar-presenca', checkAuth, async (req, res) => {
     }
 });
 
+
 app.post('/dashboard/add-aluno', checkAuth, async (req, res) => {
     const { nome, ano_escolar, idade } = req.body;
     if (!nome || !ano_escolar || !idade) {
@@ -1057,26 +1129,41 @@ app.post('/dashboard/add-aluno', checkAuth, async (req, res) => {
     }
     try {
         const nomeLower = nome.toLowerCase().replace(/\s+/g, '.');
-        const email = `${nomeLower}@aluno.analisai.com`;
+        const numeroAleatorio = Math.floor(Math.random() * 90 + 10);
+        const email = `${nomeLower}${numeroAleatorio}@aluno.analisai.com`;
         const senha = 'aluno123';
         const matricula = `ALU${Date.now().toString().slice(-8)}`;
+        
         const alunoResult = await db.query(
             `INSERT INTO alunos (nome, ano_escolar, idade, nota, presenca, nivel) 
              VALUES ($1, $2, $3, 0, 100, 'EM DESENVOLVIMENTO') RETURNING id`,
             [nome, ano_escolar, idade]
         );
+        
         const alunoId = alunoResult.rows[0].id;
+        
         await db.query(
             `INSERT INTO alunos_login (nome, email, senha, matricula, aluno_id, status) 
              VALUES ($1, $2, $3, $4, $5, 'ATIVO')`,
             [nome, email, senha, matricula, alunoId]
         );
+        
         req.flash('success_msg', `Aluno cadastrado com sucesso! Login: ${email} / Senha: ${senha}`);
         res.redirect('/dashboard/edit');
+        
     } catch (err) { 
         console.error('Erro ao adicionar aluno:', err);
         if (err.code === '23505') {
-            req.flash('error_msg', 'Email ou matrícula já existente. Tente novamente.');
+            if (err.constraint === 'alunos_login_email_key') {
+                const nomeLower = nome.toLowerCase().replace(/\s+/g, '.');
+                const timestamp = Date.now().toString().slice(-6);
+                const emailAlternativo = `${nomeLower}.${timestamp}@aluno.analisai.com`;
+                req.flash('error_msg', `Email já existente. Tente novamente ou use: ${emailAlternativo}`);
+            } else if (err.constraint === 'alunos_login_matricula_key') {
+                req.flash('error_msg', 'Matrícula já existente. Tente novamente.');
+            } else {
+                req.flash('error_msg', 'Email ou matrícula já existente. Tente novamente.');
+            }
         } else {
             req.flash('error_msg', 'Erro ao adicionar aluno');
         }
@@ -1127,7 +1214,16 @@ app.post('/dashboard/importar-dados', checkAuth, async (req, res) => {
             return res.json({ sucesso: false, erro: 'Dados inválidos' });
         }
         let importados = 0;
+        let duplicados = 0;
         for (const aluno of alunos) {
+            const existe = await db.query(
+                'SELECT id FROM alunos WHERE nome = $1',
+                [aluno.nome]
+            );
+            if (existe.rows.length > 0) {
+                duplicados++;
+                continue;
+            }
             const result = await db.query(
                 `INSERT INTO alunos (nome, ano_escolar, idade, presenca, nivel) 
                  VALUES ($1, $2, $3, $4, $5) RETURNING id`,
@@ -1135,7 +1231,8 @@ app.post('/dashboard/importar-dados', checkAuth, async (req, res) => {
             );
             const alunoId = result.rows[0].id;
             const nomeLower = aluno.nome.toLowerCase().replace(/\s+/g, '.');
-            const email = `${nomeLower}@aluno.analisai.com`;
+            const numeroAleatorio = Math.floor(Math.random() * 90 + 10);
+            const email = `${nomeLower}${numeroAleatorio}@aluno.analisai.com`;
             const senha = 'aluno123';
             const matricula = `ALU${Date.now().toString().slice(-8)}${importados}`;
             await db.query(
@@ -1148,7 +1245,8 @@ app.post('/dashboard/importar-dados', checkAuth, async (req, res) => {
         res.json({ 
             sucesso: true, 
             importados,
-            mensagem: `${importados} alunos importados com sucesso! Login: nome.sobrenome@aluno.analisai.com / Senha: aluno123`
+            duplicados,
+            mensagem: `${importados} alunos importados com sucesso! ${duplicados} duplicados ignorados.`
         });
     } catch (err) {
         console.error('Erro na importação:', err);
@@ -1163,8 +1261,17 @@ app.post('/dashboard/importar-dados-completos', checkAuth, async (req, res) => {
             return res.json({ sucesso: false, erro: 'Dados inválidos' });
         }
         let importados = 0;
+        let duplicados = 0;
         let totalCompetencias = 0;
         for (const aluno of alunos) {
+            const existe = await db.query(
+                'SELECT id FROM alunos WHERE nome = $1',
+                [aluno.nome]
+            );
+            if (existe.rows.length > 0) {
+                duplicados++;
+                continue;
+            }
             const result = await db.query(
                 `INSERT INTO alunos (nome, ano_escolar, idade, presenca, nivel) 
                  VALUES ($1, $2, $3, $4, $5) RETURNING id`,
@@ -1172,7 +1279,8 @@ app.post('/dashboard/importar-dados-completos', checkAuth, async (req, res) => {
             );
             const alunoId = result.rows[0].id;
             const nomeLower = aluno.nome.toLowerCase().replace(/\s+/g, '.');
-            const email = `${nomeLower}@aluno.analisai.com`;
+            const numeroAleatorio = Math.floor(Math.random() * 90 + 10);
+            const email = `${nomeLower}${numeroAleatorio}@aluno.analisai.com`;
             const senha = 'aluno123';
             const matricula = `ALU${Date.now().toString().slice(-8)}${importados}`;
             await db.query(
@@ -1201,8 +1309,9 @@ app.post('/dashboard/importar-dados-completos', checkAuth, async (req, res) => {
         res.json({ 
             sucesso: true, 
             importados, 
+            duplicados,
             totalCompetencias,
-            mensagem: `${importados} alunos importados com ${totalCompetencias} competências!`
+            mensagem: `${importados} alunos importados com ${totalCompetencias} competências! ${duplicados} duplicados ignorados.`
         });
     } catch (err) {
         console.error('Erro na importação:', err);
@@ -1353,7 +1462,7 @@ app.get('/aluno/dashboard', checkAlunoAuth, async (req, res) => {
         });
         const categorias = Array.from(categoriasMap.values());
         await db.query(
-            'UPDATE alunos_login SET ultimo_acesso = CURRENT_TIMESTAMP WHERE aluno_id = $1',
+            "UPDATE alunos_login SET ultimo_acesso = CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo' WHERE aluno_id = $1",
             [alunoId]
         );
         res.render('aluno/main', {
@@ -1479,8 +1588,9 @@ app.get('/aluno/evolucao', checkAlunoAuth, async (req, res) => {
     }
 });
 
-app.get('/aluno/perfil', checkAlunoAuth, async (req, res) => {
+app.get('/aluno/config', checkAlunoAuth, async (req, res) => {
     try {
+        const aba = req.query.aba || 'dados';
         const alunoId = req.session.aluno.id;
         const result = await db.query(`
             SELECT 
@@ -1489,26 +1599,45 @@ app.get('/aluno/perfil', checkAlunoAuth, async (req, res) => {
                 al.matricula,
                 al.status,
                 TO_CHAR(al.data_criacao, 'DD/MM/YYYY') as data_cadastro,
-                TO_CHAR(al.ultimo_acesso, 'DD/MM/YYYY HH24:MI') as ultimo_acesso
+                al.ultimo_acesso
             FROM alunos a
             JOIN alunos_login al ON a.id = al.aluno_id
             WHERE a.id = $1
         `, [alunoId]);
+        
         const aluno = result.rows[0];
+        
+        const ultimoAcesso = aluno.ultimo_acesso ? 
+            new Date(aluno.ultimo_acesso).toLocaleString('pt-BR', { 
+                timeZone: 'America/Sao_Paulo',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false 
+            }) : '---';
+        
+        aluno.ultimo_acesso_formatado = ultimoAcesso;
+        
         const competenciasResult = await db.query(`
             SELECT COUNT(*) as total
             FROM aluno_competencias
             WHERE aluno_id = $1
         `, [alunoId]);
+        
         const competencias = {
             length: parseInt(competenciasResult.rows[0].total) || 0
         };
+        
         res.render('aluno/perfil', {
             aluno,
             competencias,
             success_msg: req.flash('success_msg'),
-            error_msg: req.flash('error_msg')
+            error_msg: req.flash('error_msg'),
+            abaAtiva: aba
         });
+        
     } catch (err) {
         console.error('Erro ao carregar perfil:', err);
         req.flash('error_msg', 'Erro ao carregar perfil');
@@ -1526,31 +1655,31 @@ app.post('/aluno/alterar-senha', checkAlunoAuth, async (req, res) => {
         );
         if (result.rows.length === 0) {
             req.flash('error_msg', 'Aluno não encontrado');
-            return res.redirect('/aluno/perfil');
+            return res.redirect('/aluno/config?aba=senha');
         }
         const aluno = result.rows[0];
         if (senha_atual !== aluno.senha) {
             req.flash('error_msg', 'Senha atual incorreta');
-            return res.redirect('/aluno/perfil');
+            return res.redirect('/aluno/config?aba=senha');
         }
         if (nova_senha.length < 6) {
             req.flash('error_msg', 'A nova senha deve ter no mínimo 6 caracteres');
-            return res.redirect('/aluno/perfil');
+            return res.redirect('/aluno/config?aba=senha');
         }
         if (nova_senha !== confirmar_senha) {
             req.flash('error_msg', 'As senhas não coincidem');
-            return res.redirect('/aluno/perfil');
+            return res.redirect('/aluno/config?aba=senha');
         }
         await db.query(
             'UPDATE alunos_login SET senha = $1 WHERE aluno_id = $2',
             [nova_senha, alunoId]
         );
         req.flash('success_msg', 'Senha alterada com sucesso!');
-        res.redirect('/aluno/perfil');
+        res.redirect('/aluno/config?aba=senha');
     } catch (err) {
         console.error('Erro ao alterar senha:', err);
         req.flash('error_msg', 'Erro ao alterar senha');
-        res.redirect('/aluno/perfil');
+        res.redirect('/aluno/config?aba=senha');
     }
 });
 
@@ -1928,6 +2057,164 @@ app.post('/api/configuracoes-notificacoes', async (req, res) => {
     } catch (err) {
         console.error('Erro ao salvar configurações:', err);
         res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/dashboard/calendario', checkAuth, async (req, res) => {
+    try {
+        const turmaFilter = req.query.turma || '';
+        const mes = req.query.mes || new Date().getMonth() + 1;
+        const ano = req.query.ano || new Date().getFullYear();
+        
+        let eventosQuery = `
+            SELECT * FROM calendario_eventos 
+            WHERE (EXTRACT(MONTH FROM data_inicio) = $1 OR EXTRACT(MONTH FROM data_fim) = $1)
+            AND EXTRACT(YEAR FROM data_inicio) = $2
+        `;
+        const params = [mes, ano];
+        
+        if (turmaFilter) {
+            eventosQuery += ` AND (turma = $3 OR turma IS NULL)`;
+            params.push(turmaFilter);
+        }
+        
+        eventosQuery += ` ORDER BY data_inicio ASC`;
+        
+        const eventosResult = await db.query(eventosQuery, params);
+        const feriadosResult = await db.query(`
+            SELECT * FROM feriados 
+            WHERE (EXTRACT(MONTH FROM data) = $1 AND EXTRACT(YEAR FROM data) = $2)
+            OR (recorrente = true AND EXTRACT(MONTH FROM data) = $1)
+            ORDER BY 
+                CASE 
+                    WHEN EXTRACT(YEAR FROM data) = $2 THEN 0 
+                    ELSE 1 
+                END,
+                data ASC
+        `, [mes, ano]);
+        
+        const tiposResult = await db.query(`
+            SELECT 
+                tipo,
+                COUNT(*) as total,
+                MIN(cor) as cor
+            FROM calendario_eventos 
+            GROUP BY tipo
+            ORDER BY total DESC
+        `);
+        
+        res.render('dashboard/calendario', {
+            user: req.session.user,
+            userCargo: req.session.userCargo,
+            eventos: eventosResult.rows,
+            feriados: feriadosResult.rows,
+            tipos: tiposResult.rows,
+            filtros: {
+                turma: turmaFilter,
+                mes: parseInt(mes),
+                ano: parseInt(ano)
+            }
+        });
+    } catch (err) {
+        console.error('Erro ao carregar calendário:', err);
+        req.flash('error_msg', 'Erro ao carregar calendário');
+        res.redirect('/dashboard');
+    }
+});
+
+app.post('/dashboard/calendario/evento', checkAuth, async (req, res) => {
+    const { titulo, descricao, tipo, data_inicio, data_fim, turma, cor } = req.body;
+    
+    if (!titulo || !data_inicio) {
+        req.flash('error_msg', 'Título e data de início são obrigatórios');
+        return res.redirect('/dashboard/calendario');
+    }
+    
+    try {
+        await db.query(
+            `INSERT INTO calendario_eventos (titulo, descricao, tipo, data_inicio, data_fim, turma, cor, criado_por) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+            [titulo, descricao, tipo || 'evento', data_inicio, data_fim || null, turma || null, cor || '#ff0101', req.session.userId]
+        );
+        
+        req.flash('success_msg', 'Evento adicionado com sucesso!');
+        res.redirect('/dashboard/calendario');
+    } catch (err) {
+        console.error('Erro ao criar evento:', err);
+        req.flash('error_msg', 'Erro ao criar evento');
+        res.redirect('/dashboard/calendario');
+    }
+});
+
+app.post('/dashboard/calendario/feriado', checkAuth, async (req, res) => {
+    const { nome, data, recorrente } = req.body;
+    
+    if (!nome || !data) {
+        req.flash('error_msg', 'Nome e data são obrigatórios');
+        return res.redirect('/dashboard/calendario');
+    }
+    
+    try {
+        await db.query(
+            `INSERT INTO feriados (nome, data, recorrente) 
+             VALUES ($1, $2, $3)
+             ON CONFLICT (data, nome) DO NOTHING`,
+            [nome, data, recorrente === 'true']
+        );
+        
+        req.flash('success_msg', 'Feriado adicionado com sucesso!');
+        res.redirect('/dashboard/calendario');
+    } catch (err) {
+        console.error('Erro ao adicionar feriado:', err);
+        req.flash('error_msg', 'Erro ao adicionar feriado');
+        res.redirect('/dashboard/calendario');
+    }
+});
+
+app.delete('/dashboard/calendario/evento/:id', checkAuth, async (req, res) => {
+    try {
+        await db.query('DELETE FROM calendario_eventos WHERE id = $1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Erro ao deletar evento:', err);
+        res.status(500).json({ success: false });
+    }
+});
+
+app.delete('/dashboard/calendario/feriado/:id', checkAuth, async (req, res) => {
+    try {
+        await db.query('DELETE FROM feriados WHERE id = $1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Erro ao deletar feriado:', err);
+        res.status(500).json({ success: false });
+    }
+});
+
+app.get('/dashboard/api/calendario/mes', checkAuth, async (req, res) => {
+    try {
+        const { mes, ano, turma } = req.query;
+        
+        const eventos = await db.query(`
+            SELECT * FROM calendario_eventos 
+            WHERE (EXTRACT(MONTH FROM data_inicio) = $1 OR EXTRACT(MONTH FROM data_fim) = $1)
+            AND EXTRACT(YEAR FROM data_inicio) = $2
+            AND (turma = $3 OR turma IS NULL)
+            ORDER BY data_inicio ASC
+        `, [mes, ano, turma || '']);
+        
+        const feriados = await db.query(
+            'SELECT * FROM feriados WHERE EXTRACT(MONTH FROM data) = $1 AND EXTRACT(YEAR FROM data) = $2',
+            [mes, ano]
+        );
+        
+        res.json({
+            eventos: eventos.rows,
+            feriados: feriados.rows
+        });
+    } catch (err) {
+        console.error('Erro ao buscar dados do calendário:', err);
+        res.status(500).json({ error: 'Erro ao buscar dados' });
     }
 });
 

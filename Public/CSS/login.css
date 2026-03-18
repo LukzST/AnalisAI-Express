@@ -35,6 +35,70 @@ body {
     animation: fadeInPage 0.5s ease-out;
 }
 
+.a {
+    background: transparent;
+    border: 1px solid #222;
+    color: white;
+    padding: 12px 25px;
+    cursor: pointer;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.a:hover a {
+    color: white;
+}
+
+.a:hover {
+    border-color: #ff0000;
+    color: var(--text-white);
+    background: rgba(115, 33, 33, 0.205);
+    transform: translateY(-3px);  
+}
+
+.a i {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.b {
+    background: transparent;
+    border: 1px solid #222;
+    color: var(--text-secondary);
+    padding: 12px 25px;
+    cursor: pointer;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.b:hover a {
+    color: white;
+}
+
+.b:hover {
+    border-color: #217346;
+    color: var(--text-white);
+    background: rgba(33, 115, 70, 0.05);
+    transform: translateY(-3px);  
+}
+
+.b i {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
 .back-button {
     position: absolute;
     top: 30px;

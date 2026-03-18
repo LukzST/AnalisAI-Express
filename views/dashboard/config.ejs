@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AnalisAI - Configurações</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/CSS/config.css">
     <link rel="stylesheet" href="/CSS/sidebar.css">
     <link rel="stylesheet" href="/CSS/dashboard.css">
-    <link rel="stylesheet" href="/CSS/config.css">
 </head>
 <body class="dash-body">
     <%- include('../Partials/sidebar') %>
@@ -21,81 +21,218 @@
         </header>
         
         <main class="dash-content">
+            
             <div id="mensagemSucesso" class="mensagem-sucesso">
                 <i class="fas fa-check-circle"></i> Configurações salvas com sucesso!
             </div>
             
-            <div class="config-container">
-                <div class="config-header">
-                    <h2><i class="fas fa-bell" style="color: #ff0101; margin-right: 10px;"></i> NOTIFICAÇÕES</h2>
-                </div>
-                
-                <form id="configForm">
-                    <div class="config-grupo">
-                        <h3>GERAL</h3>
-                        <div class="config-item">
-                            <div class="config-item-info">
-                                <h4>Ativar notificações</h4>
-                                <p>Receber notificações do sistema</p>
-                            </div>
-                            <div class="toggle-switch <%= config.notificacoes_ativas ? 'ativo' : '' %>" 
-                                 data-input="notificacoes_ativas"></div>
-                            <input type="hidden" name="notificacoes_ativas" id="notificacoes_ativas" value="<%= config.notificacoes_ativas %>">
+            <div class="perfil-grid">
+                <div class="perfil-sidebar">
+                    <div class="avatar-container">
+                        <div class="avatar">
+                            <i class="fas fa-chalkboard-teacher"></i>
                         </div>
-                        
-                        <div class="config-item">
-                            <div class="config-item-info">
-                                <h4>Notificações por e-mail</h4>
-                                <p>Receber notificações também no e-mail</p>
-                            </div>
-                            <div class="toggle-switch <%= config.notificacoes_email ? 'ativo' : '' %>" 
-                                 data-input="notificacoes_email"></div>
-                            <input type="hidden" name="notificacoes_email" id="notificacoes_email" value="<%= config.notificacoes_email %>">
+                        <div class="avatar-status"></div>
+                    </div>
+                    
+                    <h2 class="perfil-nome"><%= nome %></h2>
+                    <p class="perfil-cargo"><%= cargo %></p>
+                    
+                    <div class="perfil-stats">
+                        <div class="perfil-stat-item">
+                            <div class="perfil-stat-value"><%= stats.tarefas || 0 %></div>
+                            <div class="perfil-stat-label">TAREFAS</div>
+                        </div>
+                        <div class="perfil-stat-item">
+                            <div class="perfil-stat-value"><%= stats.alunos || 0 %></div>
+                            <div class="perfil-stat-label">ALUNOS</div>
                         </div>
                     </div>
                     
-                    <div class="config-grupo">
-                        <h3>TIPOS DE NOTIFICAÇÃO</h3>
-                        <div class="config-item">
-                            <div class="config-item-info">
-                                <h4>Tarefas</h4>
-                                <p>Nova tarefa, entrega, correção</p>
-                            </div>
-                            <div class="toggle-switch <%= config.notificacoes_tarefas ? 'ativo' : '' %>" 
-                                 data-input="notificacoes_tarefas"></div>
-                            <input type="hidden" name="notificacoes_tarefas" id="notificacoes_tarefas" value="<%= config.notificacoes_tarefas %>">
+                    <div class="info-adicional">
+                        <div class="info-adicional-title">
+                            <i class="fas fa-info-circle"></i> INFORMAÇÕES
                         </div>
-                        
-                        <div class="config-item">
-                            <div class="config-item-info">
-                                <h4>Avaliações</h4>
-                                <p>Nova avaliação, feedback</p>
+                        <div class="info-adicional-grid">
+                            <div class="info-adicional-item">
+                                <div class="info-adicional-label">STATUS</div>
+                                <div class="info-adicional-value">
+                                    <span class="badge-status">ATIVO</span>
+                                </div>
                             </div>
-                            <div class="toggle-switch <%= config.notificacoes_avaliacoes ? 'ativo' : '' %>" 
-                                 data-input="notificacoes_avaliacoes"></div>
-                            <input type="hidden" name="notificacoes_avaliacoes" id="notificacoes_avaliacoes" value="<%= config.notificacoes_avaliacoes %>">
-                        </div>
-                        
-                        <div class="config-item">
-                            <div class="config-item-info">
-                                <h4>Competências</h4>
-                                <p>Nova competência registrada</p>
+                            <div class="info-adicional-item">
+                                <div class="info-adicional-label">CADASTRO</div>
+                                <div class="info-adicional-value"><%= dataCadastro || '---' %></div>
                             </div>
-                            <div class="toggle-switch <%= config.notificacoes_competencias ? 'ativo' : '' %>" 
-                                 data-input="notificacoes_competencias"></div>
-                            <input type="hidden" name="notificacoes_competencias" id="notificacoes_competencias" value="<%= config.notificacoes_competencias %>">
+                            <div class="info-adicional-item">
+                                <div class="info-adicional-label">ÚLTIMO ACESSO</div>
+                                <div class="info-adicional-value"><%= ultimoAcesso || '---' %></div>
+                            </div>
                         </div>
                     </div>
-                </form>
+                </div>
                 
-                <button class="btn-salvar" onclick="salvarConfiguracoes()">
-                    <i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES
-                </button>
+                <div class="perfil-main">
+                    <div class="config-tabs">
+                        <button class="b <%= abaAtiva === 'dados' ? 'active' : '' %>" onclick="mudarAba('dados')">DADOS PESSOAIS</button>
+                        <button class="b <%= abaAtiva === 'notificacoes' ? 'active' : '' %>" onclick="mudarAba('notificacoes')">NOTIFICAÇÕES</button>
+                        <button class="b <%= abaAtiva === 'senha' ? 'active' : '' %>" onclick="mudarAba('senha')">ALTERAR SENHA</button>
+                    </div>
+                    
+                    <div id="abaDados" class="tab-content <%= abaAtiva === 'dados' ? 'active' : '' %>">
+                        <div class="info-grid">
+                            <div class="info-group">
+                                <div class="info-label">NOME COMPLETO</div>
+                                <div class="info-value">
+                                    <i class="fas fa-user"></i> <%= nome %>
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <div class="info-label">E-MAIL</div>
+                                <div class="info-value">
+                                    <i class="fas fa-envelope"></i> <%= email %>
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <div class="info-label">CARGO</div>
+                                <div class="info-value">
+                                    <i class="fas fa-briefcase"></i> <%= cargo %>
+                                </div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <div class="info-label">DEPARTAMENTO</div>
+                                <div class="info-value">
+                                    <i class="fas fa-building"></i> SENAI CIC
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="abaNotificacoes" class="tab-content <%= abaAtiva === 'notificacoes' ? 'active' : '' %>">
+                        <form id="configForm">
+                            <div class="config-item">
+                                <div class="config-item-info">
+                                    <h4>Ativar notificações</h4>
+                                    <p>Receber notificações do sistema</p>
+                                </div>
+                                <div class="toggle-switch <%= config.notificacoes_ativas ? 'ativo' : '' %>" 
+                                     data-input="notificacoes_ativas"></div>
+                                <input type="hidden" name="notificacoes_ativas" id="notificacoes_ativas" value="<%= config.notificacoes_ativas %>">
+                            </div>
+                            
+                            <div class="config-item">
+                                <div class="config-item-info">
+                                    <h4>Notificações por e-mail</h4>
+                                    <p>Receber notificações também no e-mail</p>
+                                </div>
+                                <div class="toggle-switch <%= config.notificacoes_email ? 'ativo' : '' %>" 
+                                    data-input="notificacoes_email"></div>
+                                <input type="hidden" name="notificacoes_email" id="notificacoes_email" value="<%= config.notificacoes_email %>">
+                            </div>
+                            
+                            <div class="config-item">
+                                <div class="config-item-info">
+                                    <h4>Notificações de tarefas</h4>
+                                    <p>Nova tarefa, entrega, correção</p>
+                                </div>
+                                <div class="toggle-switch <%= config.notificacoes_tarefas ? 'ativo' : '' %>" 
+                                    data-input="notificacoes_tarefas"></div>
+                                <input type="hidden" name="notificacoes_tarefas" id="notificacoes_tarefas" value="<%= config.notificacoes_tarefas %>">
+                            </div>
+                            
+                            <div class="config-item">
+                                <div class="config-item-info">
+                                    <h4>Notificações de avaliações</h4>
+                                    <p>Nova avaliação, feedback</p>
+                                </div>
+                                <div class="toggle-switch <%= config.notificacoes_avaliacoes ? 'ativo' : '' %>" 
+                                    data-input="notificacoes_avaliacoes"></div>
+                                    <input type="hidden" name="notificacoes_avaliacoes" id="notificacoes_avaliacoes" value="<%= config.notificacoes_avaliacoes %>">
+                                </div>
+                                
+                            <div class="config-item">
+                                <div class="config-item-info">
+                                    <h4>Notificações de competências</h4>
+                                    <p>Nova competência registrada</p>
+                                </div>
+                                <div class="toggle-switch <%= config.notificacoes_competencias ? 'ativo' : '' %>" 
+                                    data-input="notificacoes_competencias"></div>
+                                    <input type="hidden" name="notificacoes_competencias" id="notificacoes_competencias" value="<%= config.notificacoes_competencias %>">
+                                </div>
+                        </form>
+                        
+                        <button class="b" onclick="salvarConfiguracoes()" style="margin-top: 20px;">
+                            <i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES
+                        </button>
+                    </div>
+                    
+                    <div id="abaSenha" class="tab-content <%= abaAtiva === 'senha' ? 'active' : '' %>">
+                        <% if (success_msg && success_msg.length > 0) { %>
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> <%= success_msg %>
+                                <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+                            </div>
+                        <% } %>
+            
+                        <% if (error_msg && error_msg.length > 0) { %>
+                            <div class="alert alert-error">
+                                <i class="fas fa-exclamation-circle"></i> <%= error_msg %>
+                                <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+                            </div>
+                        <% } %>
+                        <form class="senha-form" action="/dashboard/alterar-senha" method="POST">
+                            <div class="form-group">
+                                <label class="form-label">SENHA ATUAL</label>
+                                <input type="password" name="senha_atual" class="form-input" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">NOVA SENHA</label>
+                                <input type="password" name="nova_senha" class="form-input" required minlength="6">
+                                <small style="color: #666; display: block; margin-top: 5px;">Mínimo de 6 caracteres</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">CONFIRMAR NOVA SENHA</label>
+                                <input type="password" name="confirmar_senha" class="form-input" required>
+                            </div>
+                            
+                            <button type="submit" class="b">
+                                <i class="fas fa-save"></i> ALTERAR SENHA
+                            </button>
+                        </form>
+                        <div style="margin-top: 30px; padding: 20px; background: #1a1a1a; border-radius: 10px;">
+                            <p style="color: #888; font-size: 0.9rem;">
+                                <i class="fas fa-shield-alt" style="color: #217346; margin-right: 10px;"></i>
+                                Sua senha é pessoal e intransferível. Não compartilhe com ninguém.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
     
     <script>
+        function mudarAba(aba) {
+            document.querySelectorAll('.b').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (aba === 'dados') {
+                document.querySelectorAll('.b')[0].classList.add('active');
+                document.getElementById('abaDados').classList.add('active');
+            } else if (aba === 'notificacoes') {
+                document.querySelectorAll('.b')[1].classList.add('active');
+                document.getElementById('abaNotificacoes').classList.add('active');
+            } else {
+                document.querySelectorAll('.b')[2].classList.add('active');
+                document.getElementById('abaSenha').classList.add('active');
+            }
+        }
+        
         document.querySelectorAll('.toggle-switch').forEach(toggle => {
             toggle.addEventListener('click', function() {
                 this.classList.toggle('ativo');
@@ -124,7 +261,7 @@
             .then(response => response.json())
             .then(data => {
                 const msg = document.getElementById('mensagemSucesso');
-                msg.style.display = 'block';
+                msg.style.display = 'flex';
                 setTimeout(() => {
                     msg.style.display = 'none';
                 }, 3000);

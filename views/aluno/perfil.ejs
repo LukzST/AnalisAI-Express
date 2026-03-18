@@ -5,98 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AnalisAI - Meu Perfil</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="/CSS/aluno.css">
     <link rel="stylesheet" href="/CSS/sidebar.css">
     <link rel="stylesheet" href="/CSS/dashboard.css">
+    <link rel="stylesheet" href="/CSS/aluno.css">
     <link rel="stylesheet" href="/CSS/perfil.css">
-    <style>
-        .config-container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        
-        .config-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #1a1a1a;
-        }
-        
-        .config-item:last-child {
-            border-bottom: none;
-        }
-        
-        .config-item-info h4 {
-            color: #fff;
-            font-size: 0.95rem;
-            margin-bottom: 5px;
-        }
-        
-        .config-item-info p {
-            color: #888;
-            font-size: 0.8rem;
-        }
-        
-        .toggle-switch {
-            position: relative;
-            width: 50px;
-            height: 24px;
-            background: #1a1a1a;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-left: 20px;
-        }
-        
-        .toggle-switch.ativo {
-            background: #217346;
-        }
-        
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-        
-        .toggle-switch.ativo::after {
-            left: 28px;
-        }
-        
-        .btn-salvar-config {
-            background: #217346;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            margin-top: 20px;
-            width: 100%;
-            transition: 0.3s;
-        }
-        
-        .btn-salvar-config:hover {
-            background: #2a8e4f;
-            transform: translateY(-2px);
-        }
-        
-        .mensagem-sucesso-config {
-            background: rgba(33, 115, 70, 0.1);
-            border: 1px solid #217346;
-            color: #217346;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-    </style>
 </head>
 <body class="dash-body">
 
@@ -118,22 +30,10 @@
 
         <main class="dash-content">
             <div class="page-header">
-                <h1 class="page-title"><i class="fas fa-user"></i> MEU PERFIL</h1>
+                <h1 class="page-title">
+                    CONFIGURAÇÕES
+                </h1>
             </div>
-
-            <% if (success_msg && success_msg.length > 0) { %>
-                <div class="mensagem-sucesso">
-                    <i class="fas fa-check-circle"></i>
-                    <%= success_msg %>
-                </div>
-            <% } %>
-            
-            <% if (error_msg && error_msg.length > 0) { %>
-                <div class="mensagem-erro">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <%= error_msg %>
-                </div>
-            <% } %>
 
             <div class="perfil-grid">
                 <div class="perfil-sidebar">
@@ -181,7 +81,7 @@
                             </div>
                             <div class="info-adicional-item">
                                 <div class="info-adicional-label">ÚLTIMO ACESSO</div>
-                                <div class="info-adicional-value"><%= aluno.ultimo_acesso || '---' %></div>
+                                <div class="info-adicional-value"><%= aluno.ultimo_acesso_formatado || '---' %></div>
                             </div>
                         </div>
                     </div>
@@ -189,12 +89,24 @@
 
                 <div class="perfil-main">
                     <div class="perfil-tabs">
-                        <button class="perfil-tab active" onclick="mudarAba('dados')">DADOS PESSOAIS</button>
-                        <button class="perfil-tab" onclick="mudarAba('senha')">ALTERAR SENHA</button>
-                        <button class="perfil-tab" onclick="mudarAba('config')">CONFIGURAÇÕES</button>
+                        <button class="b <%= abaAtiva === 'dados' ? 'active' : '' %>" onclick="mudarAba('dados')">DADOS PESSOAIS</button>
+                        <button class="b <%= abaAtiva === 'config' ? 'active' : '' %>" onclick="mudarAba('config')">NOTIFICAÇÕES</button>
+                        <button class="b <%= abaAtiva === 'senha' ? 'active' : '' %>" onclick="mudarAba('senha')">ALTERAR SENHA</button>
                     </div>
 
-                    <div id="abaDados" class="tab-content active">
+                    <div id="abaDados" class="tab-content <%= abaAtiva === 'dados' ? 'active' : '' %>">
+                        <% if (abaAtiva === 'dados' && success_msg && success_msg.length > 0) { %>
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> <%= success_msg %>
+                                <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+                            </div>
+                        <% } %>
+                        <% if (abaAtiva === 'dados' && error_msg && error_msg.length > 0) { %>
+                            <div class="alert alert-error">
+                                <i class="fas fa-exclamation-circle"></i> <%= error_msg %>
+                                <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+                            </div>
+                        <% } %>
                         <div class="info-grid">
                             <div class="info-group">
                                 <div class="info-label">NOME COMPLETO</div>
@@ -240,38 +152,19 @@
                         </div>
                     </div>
 
-                    <div id="abaSenha" class="tab-content">
-                        <form class="senha-form" action="/aluno/alterar-senha" method="POST">
-                            <div class="form-group">
-                                <label class="form-label">SENHA ATUAL</label>
-                                <input type="password" name="senha_atual" class="form-input" placeholder="Digite sua senha atual" required>
+                    <div id="abaConfig" class="tab-content <%= abaAtiva === 'config' ? 'active' : '' %>">
+                        <% if (abaAtiva === 'config' && success_msg && success_msg.length > 0) { %>
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> <%= success_msg %>
+                                <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
                             </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">NOVA SENHA</label>
-                                <input type="password" name="nova_senha" class="form-input" placeholder="Digite a nova senha" required minlength="6">
-                                <small style="color: #666; display: block; margin-top: 5px;">Mínimo de 6 caracteres</small>
+                        <% } %>
+                        <% if (abaAtiva === 'config' && error_msg && error_msg.length > 0) { %>
+                            <div class="alert alert-error">
+                                <i class="fas fa-exclamation-circle"></i> <%= error_msg %>
+                                <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
                             </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">CONFIRMAR NOVA SENHA</label>
-                                <input type="password" name="confirmar_senha" class="form-input" placeholder="Confirme a nova senha" required>
-                            </div>
-                            
-                            <button type="submit" class="b">
-                                <i class="fas fa-save"></i> ALTERAR SENHA
-                            </button>
-                        </form>
-                        
-                        <div style="margin-top: 30px; padding: 20px; background: #1a1a1a; border-radius: 10px;">
-                            <p style="color: #888; font-size: 0.9rem;">
-                                <i class="fas fa-shield-alt" style="color: #217346; margin-right: 10px;"></i>
-                                Sua senha é pessoal e intransferível. Não compartilhe com ninguém.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div id="abaConfig" class="tab-content">
+                        <% } %>
                         <div class="config-container">
                             <div id="mensagemSucessoConfig" class="mensagem-sucesso-config">
                                 <i class="fas fa-check-circle"></i> Configurações salvas com sucesso!
@@ -324,9 +217,52 @@
                                 </div>
                             </form>
                             
-                            <button class="btn-salvar-config" onclick="salvarConfiguracoes()">
+                            <button class="b" onclick="salvarConfiguracoes()">
                                 <i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES
                             </button>
+                        </div>
+                    </div>
+
+                    <div id="abaSenha" class="tab-content <%= abaAtiva === 'senha' ? 'active' : '' %>">
+                        <% if (success_msg && success_msg.length > 0) { %>
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> <%= success_msg %>
+                                <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+                            </div>
+                        <% } %>
+                        <% if (error_msg && error_msg.length > 0) { %>
+                            <div class="alert alert-error">
+                                <i class="fas fa-exclamation-circle"></i> <%= error_msg %>
+                                <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+                            </div>
+                        <% } %>
+                        <form class="senha-form" action="/aluno/alterar-senha?aba=senha" method="POST">
+                            <div class="form-group">
+                                <label class="form-label">SENHA ATUAL</label>
+                                <input type="password" name="senha_atual" class="form-input" placeholder="Digite sua senha atual" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">NOVA SENHA</label>
+                                <input type="password" name="nova_senha" class="form-input" placeholder="Digite a nova senha" required minlength="6">
+                                <small style="color: #666; display: block; margin-top: 5px;">Mínimo de 6 caracteres</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">CONFIRMAR NOVA SENHA</label>
+                                <input type="password" name="confirmar_senha" class="form-input" placeholder="Confirme a nova senha" required>
+                            </div>
+                            
+                            <button type="submit" class="b">
+                                <i class="fas fa-save"></i> ALTERAR SENHA
+                            </button>
+                        </form>
+                        
+                        <div style="margin-top: 30px; padding: 20px; background: #1a1a1a; border-radius: 10px;">
+                            <p style="color: #888; font-size: 0.9rem;">
+                                <i class="fas fa-shield-alt" style="color: #217346; margin-right: 10px;"></i>
+                                Sua senha é pessoal e intransferível. Não compartilhe com ninguém.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -347,26 +283,11 @@
     </div>
 
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const abaAtual = urlParams.get('aba') || 'dados';
+        
         function mudarAba(aba) {
-            document.querySelectorAll('.perfil-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            if (aba === 'dados') {
-                document.querySelectorAll('.perfil-tab')[0].classList.add('active');
-                document.getElementById('abaDados').classList.add('active');
-            } else if (aba === 'senha') {
-                document.querySelectorAll('.perfil-tab')[1].classList.add('active');
-                document.getElementById('abaSenha').classList.add('active');
-            } else {
-                document.querySelectorAll('.perfil-tab')[2].classList.add('active');
-                document.getElementById('abaConfig').classList.add('active');
-                carregarConfiguracoes();
-            }
+            window.location.href = `/aluno/config?aba=${aba}`;
         }
         
         document.querySelectorAll('.toggle-switch').forEach(toggle => {
@@ -426,25 +347,9 @@
             });
         }
         
-        document.addEventListener('DOMContentLoaded', function() {
-            const formSenha = document.querySelector('.senha-form');
-            if (formSenha) {
-                formSenha.addEventListener('submit', function(e) {
-                    const novaSenha = document.querySelector('input[name="nova_senha"]').value;
-                    const confirmarSenha = document.querySelector('input[name="confirmar_senha"]').value;
-                    
-                    if (novaSenha !== confirmarSenha) {
-                        e.preventDefault();
-                        alert('As senhas não coincidem!');
-                    }
-                    
-                    if (novaSenha.length < 6) {
-                        e.preventDefault();
-                        alert('A senha deve ter no mínimo 6 caracteres!');
-                    }
-                });
-            }
-        });
+        if (abaAtual === 'config') {
+            carregarConfiguracoes();
+        }
     </script>
 </body>
 </html>

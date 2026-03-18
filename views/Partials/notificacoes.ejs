@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const configLink = document.getElementById('notificacoesConfigLink');
     if (configLink) {
         const isAluno = window.location.pathname.includes('/aluno/');
-        configLink.href = isAluno ? '/aluno/perfil' : '/dashboard/config';
+        configLink.href = isAluno ? '/aluno/config?aba=config' : '/dashboard/config?aba=notificacoes';
     }
     
     carregarConfiguracoes();
