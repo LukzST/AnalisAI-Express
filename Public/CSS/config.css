@@ -1,0 +1,169 @@
+.config-container {
+    background: #0c0c0c;
+    border: 1px solid #1a1a1a;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 80%;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.config-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.config-header h2 {
+    color: #fff;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: normal;
+}
+
+.config-header i {
+    font-size: 1.4rem;
+}
+
+.config-grupo {
+    margin-bottom: 30px;
+}
+
+.config-grupo h3 {
+    color: #888;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    font-weight: normal;
+}
+
+.config-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.config-item:last-child {
+    border-bottom: none;
+}
+
+.config-item-info {
+    flex: 1;
+}
+
+.config-item-info h4 {
+    color: #fff;
+    font-size: 0.95rem;
+    margin-bottom: 5px;
+    font-weight: normal;
+}
+
+.config-item-info p {
+    color: #888;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 24px;
+    background: #1a1a1a;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-left: 20px;
+}
+
+.toggle-switch.ativo {
+    background: #ff0101;
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.toggle-switch.ativo::after {
+    left: 28px;
+}
+
+.btn-salvar {
+    background: #ff0101;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 20px;
+    width: 30%;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-salvar:hover {
+    background: #ff3333;
+}
+
+.btn-salvar:active {
+    transform: translateY(0);
+}
+
+.mensagem-sucesso {
+    background: rgba(33, 115, 70, 0.1);
+    border: 1px solid #217346;
+    color: #217346;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    animation: slideDown 0.3s ease;
+}
+
+.mensagem-sucesso i {
+    font-size: 1.2rem;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .config-container {
+        padding: 25px;
+    }
+    
+    .config-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .toggle-switch {
+        margin-left: 0;
+    }
+}

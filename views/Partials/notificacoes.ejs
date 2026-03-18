@@ -1,0 +1,370 @@
+<div class="notificacoes-container">
+    <button class="<%= notificacaoClasse || 'logout-icon' %>" id="notificacoesBtn" onclick="toggleNotificacoes()">
+        <i id="sinoIcone" class="fas fa-bell"></i>
+        <span id="notificacoesBadge" class="notificacoes-badge" style="display: none;">0</span>
+    </button>
+    
+    <div id="notificacoesPopup" class="notificacoes-popup">
+        <div class="notificacoes-header">
+            <h3>NOTIFICAÇÕES</h3>
+            <button onclick="marcarTodasLidas()" class="notificacoes-limpar" title="Marcar todas como lidas">
+                <i class="fas fa-check-double"></i>
+            </button>
+        </div>
+        <div id="notificacoesLista" class="notificacoes-lista">
+            <div class="notificacoes-loading">
+                <i class="fas fa-circle-notch fa-spin"></i> Carregando...
+            </div>
+        </div>
+        <div class="notificacoes-footer">
+            <a href="#" id="notificacoesConfigLink">
+                <i class="fas fa-cog"></i> Configurações
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.notificacoes-container {
+    position: relative;
+    display: inline-block;
+}
+
+.notificacoes-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff0101;
+    color: black;
+    font-size: 0.5rem;
+    font-weight: bold;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border: 2px solid #080808;
+}
+
+.notificacoes-popup {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 320px;
+    background: #0c0c0c;
+    border: 1px solid #1a1a1a;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 1001;
+    display: none;
+    overflow: hidden;
+}
+
+.logout-icon {
+    cursor: pointer;
+}
+
+.notificacoes-popup.mostrar {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.notificacoes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.notificacoes-header h3 {
+    color: #fff;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.notificacoes-limpar {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: 0.3s;
+}
+
+.notificacoes-limpar:hover {
+    color: #ff0101;
+}
+
+.notificacoes-lista {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.notificacao-item {
+    display: flex;
+    padding: 12px 15px;
+    border-bottom: 1px solid #1a1a1a;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.notificacao-item:hover {
+    background: #111;
+}
+
+.notificacao-item.nao-lida {
+    background: rgba(255, 1, 1, 0.05);
+}
+
+.notificacao-item.nao-lida .notificacao-titulo {
+    color: #ff0101;
+    font-weight: bold;
+}
+
+.notificacao-icone {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.notificacao-icone i {
+    font-size: 1rem;
+}
+
+.notificacao-conteudo {
+    flex: 1;
+}
+
+.notificacao-titulo {
+    color: #fff;
+    font-size: 0.85rem;
+    margin-bottom: 3px;
+}
+
+.notificacao-mensagem {
+    color: #888;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.notificacao-data {
+    color: #666;
+    font-size: 0.65rem;
+    margin-top: 5px;
+}
+
+.notificacao-acoes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notificacao-marcar {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 3px;
+}
+
+.notificacao-marcar:hover {
+    color: #ff0101;
+}
+
+.notificacoes-footer {
+    padding: 10px 15px;
+    border-top: 1px solid #1a1a1a;
+    text-align: center;
+}
+
+.notificacoes-footer a {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.75rem;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.notificacoes-footer a:hover {
+    color: #ff0101;
+}
+
+.notificacoes-loading,
+.notificacoes-vazio {
+    text-align: center;
+    padding: 30px 15px;
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.notificacoes-loading i {
+    margin-right: 5px;
+}
+
+@media (max-width: 768px) {
+    .notificacoes-popup {
+        width: 280px;
+        right: -10px;
+    }
+}
+
+</style>
+
+<script>
+let notificacoesInterval;
+
+function toggleNotificacoes() {
+    const popup = document.getElementById('notificacoesPopup');
+    popup.classList.toggle('mostrar');
+    if (popup.classList.contains('mostrar')) {
+        carregarNotificacoes();
+    }
+}
+
+function carregarConfiguracoes() {
+    fetch('/api/configuracoes-notificacoes')
+        .then(response => response.json())
+        .then(config => {
+            const icone = document.getElementById('sinoIcone');
+            if (!config.notificacoes_ativas) {
+                icone.className = 'fas fa-bell-slash';
+                document.getElementById('notificacoesBadge').style.display = 'none';
+            } else {
+                icone.className = 'fas fa-bell';
+            }
+        });
+}
+
+function carregarNotificacoes() {
+    fetch('/api/notificacoes')
+        .then(response => response.json())
+        .then(data => {
+            atualizarListaNotificacoes(data.notificacoes);
+            atualizarBadge(data.totalNaoLidas);
+        });
+}
+
+function atualizarListaNotificacoes(notificacoes) {
+    const lista = document.getElementById('notificacoesLista');
+    
+    if (notificacoes.length === 0) {
+        lista.innerHTML = '<div class="notificacoes-vazio"><i class="far fa-bell-slash"></i> Nenhuma notificação</div>';
+        return;
+    }
+    
+    let html = '';
+    notificacoes.forEach(notif => {
+        const data = new Date(notif.data_criacao).toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        html += `
+            <div class="notificacao-item ${notif.lida ? '' : 'nao-lida'}" data-id="${notif.id}">
+                <div class="notificacao-icone" style="background: ${notif.cor}20; color: ${notif.cor};">
+                    <i class="${notif.icone}"></i>
+                </div>
+                <div class="notificacao-conteudo" onclick="abrirNotificacao('${notif.link}')">
+                    <div class="notificacao-titulo">${notif.titulo}</div>
+                    <div class="notificacao-mensagem">${notif.mensagem}</div>
+                    <div class="notificacao-data">${data}</div>
+                </div>
+                ${!notif.lida ? `
+                <div class="notificacao-acoes">
+                    <button class="notificacao-marcar" onclick="marcarComoLida(${notif.id})" title="Marcar como lida">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+                ` : ''}
+            </div>
+        `;
+    });
+    
+    lista.innerHTML = html;
+}
+
+function atualizarBadge(total) {
+    const badge = document.getElementById('notificacoesBadge');
+    const icone = document.getElementById('sinoIcone');
+    
+    carregarConfiguracoes();
+    
+    if (total > 0) {
+        badge.style.display = 'flex';
+        badge.textContent = total > 9 ? '9+' : total;
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+function marcarComoLida(id) {
+    fetch(`/api/notificacoes/marcar-lida/${id}`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                carregarNotificacoes();
+            }
+        });
+}
+
+function marcarTodasLidas() {
+    fetch('/api/notificacoes/marcar-todas-lidas', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                carregarNotificacoes();
+            }
+        });
+}
+
+function abrirNotificacao(link) {
+    if (link) {
+        window.location.href = link;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const configLink = document.getElementById('notificacoesConfigLink');
+    if (configLink) {
+        const isAluno = window.location.pathname.includes('/aluno/');
+        configLink.href = isAluno ? '/aluno/perfil' : '/dashboard/config';
+    }
+    
+    carregarConfiguracoes();
+    carregarNotificacoes();
+    notificacoesInterval = setInterval(carregarNotificacoes, 30000);
+    
+    document.addEventListener('click', function(event) {
+        const container = document.querySelector('.notificacoes-container');
+        const popup = document.getElementById('notificacoesPopup');
+        
+        if (container && popup && !container.contains(event.target)) {
+            popup.classList.remove('mostrar');
+        }
+    });
+});
+
+window.addEventListener('beforeunload', function() {
+    if (notificacoesInterval) {
+        clearInterval(notificacoesInterval);
+    }
+});
+</script>

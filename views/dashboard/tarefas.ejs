@@ -532,10 +532,10 @@
                     <div style="background: #0c0c0c; border: 1px solid #1a1a1a; border-radius: 12px; padding: 18px; margin-bottom: 20px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <div>
-                                <span style="color: #fff; font-weight: bold; font-size: 1.1rem;">${aluno.nome}</span>
+                                <span style="color: #fff; font-size: 1.1rem;">${aluno.nome}</span>
                                 <span style="color: #888; font-size: 0.8rem; margin-left: 10px;">${aluno.ano_escolar}</span>
                             </div>
-                            <span style="background: ${statusBg}; color: ${statusColor}; padding: 6px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; border: 1px solid ${statusColor};">
+                            <span style="background: ${statusBg}; color: ${statusColor}; padding: 6px 15px; border-radius: 20px; font-size: 0.75rem; border: 1px solid ${statusColor};">
                                 ${statusText}
                             </span>
                         </div>
@@ -576,10 +576,10 @@
                         
                         ${aluno.status_tarefa === 'ENTREGUE' || aluno.status_tarefa === 'DEVOLVIDA' ? `
                             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                <button onclick="mostrarAvaliacao(${data.tarefa.id}, ${aluno.id}, '${aluno.nome.replace(/'/g, "\\'")}')" style="flex: 1; background: transparent; border: 2px solid #217346; color: #217346; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <button onclick="mostrarAvaliacao(${data.tarefa.id}, ${aluno.id}, '${aluno.nome.replace(/'/g, "\\'")}')" style="flex: 1; background: transparent; border: 2px solid #217346; color: #217346; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
                                     <i class="fas fa-star"></i> AVALIAR
                                 </button>
-                                <button onclick="devolverTarefa(${data.tarefa.id}, ${aluno.id}, '${aluno.nome.replace(/'/g, "\\'")}')" style="flex: 1; background: transparent; border: 2px solid #ffa500; color: #ffa500; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <button onclick="devolverTarefa(${data.tarefa.id}, ${aluno.id}, '${aluno.nome.replace(/'/g, "\\'")}')" style="flex: 1; background: transparent; border: 2px solid #ffa500; color: #ffa500; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
                                     <i class="fas fa-undo-alt"></i> DEVOLVER
                                 </button>
                             </div>
@@ -589,7 +589,7 @@
                             <h4 style="color:#fff; margin-bottom:15px; font-size:1rem;">Avaliar: ${aluno.nome}</h4>
                             <input type="number" id="nota-${aluno.id}" placeholder="Nota (0-10)" min="0" max="10" step="0.1" style="width: 100%; padding: 12px; background: #0c0c0c; border: 1px solid #333; border-radius: 6px; color: #fff; font-size: 1rem; margin-bottom: 10px;">
                             <textarea id="feedback-${aluno.id}" placeholder="Feedback para o aluno..." style="width: 100%; padding: 12px; background: #0c0c0c; border: 1px solid #333; border-radius: 6px; color: #fff; font-size: 0.9rem; min-height: 80px; margin-bottom: 10px; resize: vertical;"></textarea>
-                            <button onclick="salvarAvaliacao(${data.tarefa.id}, ${aluno.id})" style="width: 100%; background: #217346; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: all 0.3s;">
+                            <button onclick="salvarAvaliacao(${data.tarefa.id}, ${aluno.id})" style="width: 100%; background: #217346; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.3s;">
                                 <i class="fas fa-save"></i> SALVAR AVALIAÇÃO
                             </button>
                         </div>

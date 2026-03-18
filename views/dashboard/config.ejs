@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnalisAI - Configurações</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/CSS/sidebar.css">
+    <link rel="stylesheet" href="/CSS/dashboard.css">
+    <link rel="stylesheet" href="/CSS/config.css">
+</head>
+<body class="dash-body">
+    <%- include('../Partials/sidebar') %>
+    
+    <div class="main-layout">
+        <header class="dash-header">
+            <div class="logo">
+                <img src="/IMG/logo3-white.png" alt="AnalisAI">
+            </div>
+            <h2 class="page-title">CONFIGURAÇÕES</h2>
+        </header>
+        
+        <main class="dash-content">
+            <div id="mensagemSucesso" class="mensagem-sucesso">
+                <i class="fas fa-check-circle"></i> Configurações salvas com sucesso!
+            </div>
+            
+            <div class="config-container">
+                <div class="config-header">
+                    <h2><i class="fas fa-bell" style="color: #ff0101; margin-right: 10px;"></i> NOTIFICAÇÕES</h2>
+                </div>
+                
+                <form id="configForm">
+                    <div class="config-grupo">
+                        <h3>GERAL</h3>
+                        <div class="config-item">
+                            <div class="config-item-info">
+                                <h4>Ativar notificações</h4>
+                                <p>Receber notificações do sistema</p>
+                            </div>
+                            <div class="toggle-switch <%= config.notificacoes_ativas ? 'ativo' : '' %>" 
+                                 data-input="notificacoes_ativas"></div>
+                            <input type="hidden" name="notificacoes_ativas" id="notificacoes_ativas" value="<%= config.notificacoes_ativas %>">
+                        </div>
+                        
+                        <div class="config-item">
+                            <div class="config-item-info">
+                                <h4>Notificações por e-mail</h4>
+                                <p>Receber notificações também no e-mail</p>
+                            </div>
+                            <div class="toggle-switch <%= config.notificacoes_email ? 'ativo' : '' %>" 
+                                 data-input="notificacoes_email"></div>
+                            <input type="hidden" name="notificacoes_email" id="notificacoes_email" value="<%= config.notificacoes_email %>">
+                        </div>
+                    </div>
+                    
+                    <div class="config-grupo">
+                        <h3>TIPOS DE NOTIFICAÇÃO</h3>
+                        <div class="config-item">
+                            <div class="config-item-info">
+                                <h4>Tarefas</h4>
+                                <p>Nova tarefa, entrega, correção</p>
+                            </div>
+                            <div class="toggle-switch <%= config.notificacoes_tarefas ? 'ativo' : '' %>" 
+                                 data-input="notificacoes_tarefas"></div>
+                            <input type="hidden" name="notificacoes_tarefas" id="notificacoes_tarefas" value="<%= config.notificacoes_tarefas %>">
+                        </div>
+                        
+                        <div class="config-item">
+                            <div class="config-item-info">
+                                <h4>Avaliações</h4>
+                                <p>Nova avaliação, feedback</p>
+                            </div>
+                            <div class="toggle-switch <%= config.notificacoes_avaliacoes ? 'ativo' : '' %>" 
+                                 data-input="notificacoes_avaliacoes"></div>
+                            <input type="hidden" name="notificacoes_avaliacoes" id="notificacoes_avaliacoes" value="<%= config.notificacoes_avaliacoes %>">
+                        </div>
+                        
+                        <div class="config-item">
+                            <div class="config-item-info">
+                                <h4>Competências</h4>
+                                <p>Nova competência registrada</p>
+                            </div>
+                            <div class="toggle-switch <%= config.notificacoes_competencias ? 'ativo' : '' %>" 
+                                 data-input="notificacoes_competencias"></div>
+                            <input type="hidden" name="notificacoes_competencias" id="notificacoes_competencias" value="<%= config.notificacoes_competencias %>">
+                        </div>
+                    </div>
+                </form>
+                
+                <button class="btn-salvar" onclick="salvarConfiguracoes()">
+                    <i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES
+                </button>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        document.querySelectorAll('.toggle-switch').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                this.classList.toggle('ativo');
+                const inputId = this.getAttribute('data-input');
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.value = this.classList.contains('ativo');
+                }
+            });
+        });
+        
+        function salvarConfiguracoes() {
+            const config = {
+                notificacoes_ativas: document.getElementById('notificacoes_ativas').value === 'true',
+                notificacoes_email: document.getElementById('notificacoes_email').value === 'true',
+                notificacoes_tarefas: document.getElementById('notificacoes_tarefas').value === 'true',
+                notificacoes_avaliacoes: document.getElementById('notificacoes_avaliacoes').value === 'true',
+                notificacoes_competencias: document.getElementById('notificacoes_competencias').value === 'true'
+            };
+            
+            fetch('/api/configuracoes-notificacoes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(config)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const msg = document.getElementById('mensagemSucesso');
+                msg.style.display = 'block';
+                setTimeout(() => {
+                    msg.style.display = 'none';
+                }, 3000);
+            })
+            .catch(error => {
+                alert('Erro ao salvar configurações');
+            });
+        }
+    </script>
+</body>
+</html>

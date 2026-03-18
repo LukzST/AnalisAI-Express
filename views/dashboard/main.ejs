@@ -19,6 +19,7 @@
             </div>
             <div class="header-user">
                 <span>Bem-vindo, <strong><%= user %></strong></span>
+                <%- include('../Partials/notificacoes', { notificacaoClasse: 'logout-icon' }) %>
                 <a href="/logout" class="logout-icon" title="Sair">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>

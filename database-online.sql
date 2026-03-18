@@ -175,6 +175,41 @@ CREATE TABLE IF NOT EXISTS tarefas_alunos (
     data_avaliacao TIMESTAMP,
     UNIQUE(tarefa_id, aluno_id)
 );
+CREATE TABLE IF NOT EXISTS notificacoes (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+    aluno_id INTEGER REFERENCES alunos(id) ON DELETE CASCADE,
+    tipo VARCHAR(50) NOT NULL,
+    titulo VARCHAR(200) NOT NULL,
+    mensagem TEXT,
+    link VARCHAR(255),
+    icone VARCHAR(50) DEFAULT 'fas fa-bell',
+    cor VARCHAR(20) DEFAULT '#ff0101',
+    lida BOOLEAN DEFAULT FALSE,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CHECK (
+        (usuario_id IS NOT NULL AND aluno_id IS NULL) OR
+        (usuario_id IS NULL AND aluno_id IS NOT NULL)
+    )
+);
+
+CREATE TABLE IF NOT EXISTS configuracoes_notificacoes (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+    aluno_id INTEGER REFERENCES alunos(id) ON DELETE CASCADE,
+    notificacoes_ativas BOOLEAN DEFAULT TRUE,
+    notificacoes_email BOOLEAN DEFAULT FALSE,
+    notificacoes_tarefas BOOLEAN DEFAULT TRUE,
+    notificacoes_avaliacoes BOOLEAN DEFAULT TRUE,
+    notificacoes_competencias BOOLEAN DEFAULT TRUE,
+    CHECK (
+        (usuario_id IS NOT NULL AND aluno_id IS NULL) OR
+        (usuario_id IS NULL AND aluno_id IS NOT NULL)
+    )
+);
+
+CREATE INDEX IF NOT EXISTS idx_notificacoes_usuario ON notificacoes(usuario_id, lida, data_criacao DESC);
+CREATE INDEX IF NOT EXISTS idx_notificacoes_aluno ON notificacoes(aluno_id, lida, data_criacao DESC);
 
 CREATE INDEX IF NOT EXISTS idx_alunos_login_email ON alunos_login(email);
 CREATE INDEX IF NOT EXISTS idx_alunos_login_matricula ON alunos_login(matricula);
