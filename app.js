@@ -1659,11 +1659,35 @@ app.post('/aluno/alterar-senha', checkAlunoAuth, async (req, res) => {
         
         if (result.rows.length === 0) {
             req.flash('error_msg', 'Aluno não encontrado');
-            const alunoData = await db.query(
-                'SELECT * FROM alunos WHERE id = $1',
-                [alunoId]
-            );
+
+            const alunoData = await db.query(`
+                SELECT 
+                    a.*,
+                    al.email,
+                    al.matricula,
+                    al.status,
+                    TO_CHAR(al.data_criacao, 'DD/MM/YYYY') as data_cadastro,
+                    al.ultimo_acesso
+                FROM alunos a
+                JOIN alunos_login al ON a.id = al.aluno_id
+                WHERE a.id = $1
+            `, [alunoId]);
+
+
             const aluno = alunoData.rows[0];
+
+            const ultimoAcesso = aluno.ultimo_acesso ? 
+                new Date(aluno.ultimo_acesso).toLocaleString('pt-BR', { 
+                    timeZone: 'America/Sao_Paulo',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false 
+                }) : '---';
+
+            aluno.ultimo_acesso_formatado = ultimoAcesso;
             const competencias = { length: 0 };
             
             return res.render('aluno/perfil', {
@@ -1684,16 +1708,31 @@ app.post('/aluno/alterar-senha', checkAlunoAuth, async (req, res) => {
                     a.*,
                     al.email,
                     al.matricula,
-                    al.status
+                    al.status,
+                    TO_CHAR(al.data_criacao, 'DD/MM/YYYY') as data_cadastro,
+                    al.ultimo_acesso
                 FROM alunos a
                 JOIN alunos_login al ON a.id = al.aluno_id
                 WHERE a.id = $1
             `, [alunoId]);
-            const alunoInfo = alunoData.rows[0];
+            const aluno = alunoData.rows[0];
+
+            const ultimoAcesso = aluno.ultimo_acesso ? 
+                new Date(aluno.ultimo_acesso).toLocaleString('pt-BR', { 
+                    timeZone: 'America/Sao_Paulo',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false 
+                }) : '---';
+
+            aluno.ultimo_acesso_formatado = ultimoAcesso;
             const competencias = { length: 0 };
             
             return res.render('aluno/perfil', {
-                aluno: alunoInfo,
+                aluno: aluno,
                 competencias,
                 error_msg: req.flash('error_msg')[0],
                 success_msg: null,
@@ -1703,15 +1742,36 @@ app.post('/aluno/alterar-senha', checkAlunoAuth, async (req, res) => {
         
         if (nova_senha.length < 6) {
             req.flash('error_msg', 'A nova senha deve ter no mínimo 6 caracteres');
-            const alunoData = await db.query(
-                'SELECT * FROM alunos WHERE id = $1',
-                [alunoId]
-            );
-            const alunoInfo = alunoData.rows[0];
+            const alunoData = await db.query(`
+                SELECT 
+                    a.*,
+                    al.email,
+                    al.matricula,
+                    al.status,
+                    TO_CHAR(al.data_criacao, 'DD/MM/YYYY') as data_cadastro,
+                    al.ultimo_acesso
+                FROM alunos a
+                JOIN alunos_login al ON a.id = al.aluno_id
+                WHERE a.id = $1
+            `, [alunoId]);
+            const aluno = alunoData.rows[0];
+
+            const ultimoAcesso = aluno.ultimo_acesso ? 
+                new Date(aluno.ultimo_acesso).toLocaleString('pt-BR', { 
+                    timeZone: 'America/Sao_Paulo',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false 
+                }) : '---';
+
+            aluno.ultimo_acesso_formatado = ultimoAcesso;
             const competencias = { length: 0 };
             
             return res.render('aluno/perfil', {
-                aluno: alunoInfo,
+                aluno: aluno,
                 competencias,
                 error_msg: req.flash('error_msg')[0],
                 success_msg: null,
@@ -1729,7 +1789,7 @@ app.post('/aluno/alterar-senha', checkAlunoAuth, async (req, res) => {
             const competencias = { length: 0 };
             
             return res.render('aluno/perfil', {
-                aluno: alunoInfo,
+                aluno: aluno,
                 competencias,
                 error_msg: req.flash('error_msg')[0],
                 success_msg: null,
