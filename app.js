@@ -6,6 +6,7 @@ const favicon = require('serve-favicon');
 const path = require('path');
 const flash = require('connect-flash');
 const fs = require('fs')
+const crypto = require('crypto');
 const multer = require('multer');
 
 const storage = multer.diskStorage({
@@ -2215,6 +2216,213 @@ app.get('/dashboard/api/calendario/mes', checkAuth, async (req, res) => {
     } catch (err) {
         console.error('Erro ao buscar dados do calendário:', err);
         res.status(500).json({ error: 'Erro ao buscar dados' });
+    }
+});
+
+app.get('/esqueci-senha', (req, res) => {
+    res.render('esqueci-senha', {
+        error_msg: req.flash('error_msg')[0],
+        success_msg: req.flash('success_msg')[0]
+    });
+});
+
+app.post('/esqueci-senha/solicitar', async (req, res) => {
+    const { email } = req.body;
+    
+    if (!email) {
+        req.flash('error_msg', 'E-mail é obrigatório');
+        return res.render('esqueci-senha', {
+            error_msg: req.flash('error_msg')[0],
+            success_msg: null
+        });
+    }
+    
+    try {
+        const result = await db.query(
+            'SELECT id, nome FROM usuarios WHERE email = $1',
+            [email]
+        );
+        
+        if (result.rows.length === 0) {
+            req.flash('error_msg', 'E-mail não encontrado');
+            return res.render('esqueci-senha', {
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null
+            });
+        }
+        
+        const usuario = result.rows[0];
+        const token = crypto.randomBytes(32).toString('hex');
+        
+        await db.query(
+            `INSERT INTO solicitacoes_senha (usuario_id, email, token, status) 
+             VALUES ($1, $2, $3, 'PENDENTE')`,
+            [usuario.id, email, token]
+        );
+        
+        const admins = await db.query(
+            'SELECT id FROM usuarios WHERE cargo = $1',
+            ['Admin']
+        );
+        
+        for (const admin of admins.rows) {
+            await criarNotificacao(
+                'solicitacao_senha',
+                admin.id,
+                null,
+                'Solicitação de Redefinição de Senha',
+                `${usuario.nome} (${email}) solicitou redefinição de senha`,
+                `/dashboard/solicitacoes-senha`,
+                'fas fa-key',
+                '#ff0101'
+            );
+        }
+        
+        req.flash('success_msg', 'Solicitação enviada! Um administrador irá analisar.');
+        res.render('esqueci-senha', {
+            error_msg: null,
+            success_msg: req.flash('success_msg')[0]
+        });
+        
+    } catch (err) {
+        console.error('Erro ao solicitar recuperação:', err);
+        req.flash('error_msg', 'Erro ao processar solicitação');
+        return res.render('esqueci-senha', {
+            error_msg: req.flash('error_msg')[0],
+            success_msg: null
+        });
+    }
+});
+
+app.get('/dashboard/solicitacoes-senha', checkAuth, checkAdmin, async (req, res) => {
+    try {
+        const result = await db.query(`
+            SELECT 
+                s.*,
+                u.nome
+            FROM solicitacoes_senha s
+            JOIN usuarios u ON s.usuario_id = u.id
+            WHERE s.status = 'PENDENTE'
+            ORDER BY s.data_solicitacao DESC
+        `);
+        
+        res.render('dashboard/solicitacoes', {
+            solicitacoes: result.rows,
+            user: req.session.user
+        });
+    } catch (err) {
+        console.error('Erro ao carregar solicitações:', err);
+        req.flash('error_msg', 'Erro ao carregar solicitações');
+        res.redirect('/dashboard');
+    }
+});
+
+app.post('/dashboard/solicitacoes-senha/aprovar/:id', checkAuth, checkAdmin, async (req, res) => {
+    const { nova_senha } = req.body;
+    const solicitacaoId = req.params.id;
+    
+    if (!nova_senha || nova_senha.length < 6) {
+        req.flash('error_msg', 'A nova senha deve ter no mínimo 6 caracteres');
+        return res.redirect('/dashboard/solicitacoes-senha');
+    }
+    
+    const client = await db.connect();
+    
+    try {
+        await client.query('BEGIN');
+        
+        const solicitacao = await client.query(
+            'SELECT * FROM solicitacoes_senha WHERE id = $1 AND status = $2',
+            [solicitacaoId, 'PENDENTE']
+        );
+        
+        if (solicitacao.rows.length === 0) {
+            req.flash('error_msg', 'Solicitação não encontrada');
+            return res.redirect('/dashboard/solicitacoes-senha');
+        }
+        
+        const s = solicitacao.rows[0];
+        
+        await client.query(
+            'UPDATE usuarios SET senha = $1 WHERE id = $2',
+            [nova_senha, s.usuario_id]
+        );
+        
+        await criarNotificacao(
+            'senha_alterada',
+            s.usuario_id,
+            null,
+            'Senha Redefinida',
+            'Sua senha foi redefinida por um administrador',
+            `/login`,
+            'fas fa-check-circle',
+            '#217346'
+        );
+        
+        await client.query(
+            `UPDATE solicitacoes_senha 
+             SET status = 'APROVADA', data_resposta = CURRENT_TIMESTAMP, respondido_por = $1 
+             WHERE id = $2`,
+            [req.session.userId, solicitacaoId]
+        );
+        
+        await client.query('COMMIT');
+        
+        req.flash('success_msg', 'Senha redefinida com sucesso!');
+        res.redirect('/dashboard/solicitacoes-senha');
+        
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('Erro ao aprovar solicitação:', err);
+        req.flash('error_msg', 'Erro ao aprovar solicitação');
+        res.redirect('/dashboard/solicitacoes-senha');
+    } finally {
+        client.release();
+    }
+});
+
+app.post('/dashboard/solicitacoes-senha/rejeitar/:id', checkAuth, checkAdmin, async (req, res) => {
+    const { motivo } = req.body;
+    const solicitacaoId = req.params.id;
+    
+    try {
+        const solicitacao = await db.query(
+            'SELECT * FROM solicitacoes_senha WHERE id = $1 AND status = $2',
+            [solicitacaoId, 'PENDENTE']
+        );
+        
+        if (solicitacao.rows.length === 0) {
+            req.flash('error_msg', 'Solicitação não encontrada');
+            return res.redirect('/dashboard/solicitacoes-senha');
+        }
+        
+        const s = solicitacao.rows[0];
+        
+        await db.query(
+            `UPDATE solicitacoes_senha 
+             SET status = 'REJEITADA', data_resposta = CURRENT_TIMESTAMP, respondido_por = $1 
+             WHERE id = $2`,
+            [req.session.userId, solicitacaoId]
+        );
+        
+        await criarNotificacao(
+            'solicitacao_rejeitada',
+            s.usuario_id,
+            null,
+            'Solicitação de Senha Rejeitada',
+            motivo || 'Sua solicitação foi rejeitada. Contate o administrador.',
+            `/login`,
+            'fas fa-times-circle',
+            '#ff0101'
+        );
+        
+        req.flash('success_msg', 'Solicitação rejeitada');
+        res.redirect('/dashboard/solicitacoes-senha');
+        
+    } catch (err) {
+        console.error('Erro ao rejeitar solicitação:', err);
+        req.flash('error_msg', 'Erro ao rejeitar solicitação');
+        res.redirect('/dashboard/solicitacoes-senha');
     }
 });
 

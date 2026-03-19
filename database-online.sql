@@ -143,6 +143,17 @@ CREATE TABLE IF NOT EXISTS feriados (
     UNIQUE(data, nome)
 );
 
+CREATE TABLE IF NOT EXISTS solicitacoes_senha (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+    email VARCHAR(100) NOT NULL,
+    token VARCHAR(100) UNIQUE NOT NULL,
+    status VARCHAR(20) DEFAULT 'PENDENTE',
+    data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_resposta TIMESTAMP,
+    respondido_por INTEGER REFERENCES usuarios(id) ON DELETE SET NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_calendario_data ON calendario_eventos(data_inicio, data_fim);
 CREATE INDEX IF NOT EXISTS idx_calendario_turma ON calendario_eventos(turma);
 CREATE INDEX IF NOT EXISTS idx_notificacoes_usuario ON notificacoes(usuario_id, lida, data_criacao DESC);
