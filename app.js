@@ -1679,10 +1679,16 @@ app.post('/aluno/alterar-senha', checkAlunoAuth, async (req, res) => {
         
         if (senha_atual !== aluno.senha) {
             req.flash('error_msg', 'Senha atual incorreta');
-            const alunoData = await db.query(
-                'SELECT * FROM alunos WHERE id = $1',
-                [alunoId]
-            );
+            const alunoData = await db.query(`
+                SELECT 
+                    a.*,
+                    al.email,
+                    al.matricula,
+                    al.status
+                FROM alunos a
+                JOIN alunos_login al ON a.id = al.aluno_id
+                WHERE a.id = $1
+            `, [alunoId]);
             const alunoInfo = alunoData.rows[0];
             const competencias = { length: 0 };
             
