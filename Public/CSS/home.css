@@ -76,12 +76,77 @@ body {
     content: "";
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-image: url('/IMG/back-1.jpg');
+    background-image: url('/IMG/back-2.png');
     background-size: cover;
     background-position: center;
-    opacity: 0.1;
+    opacity: 0.4;
     z-index: -1;
     mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+}
+
+
+.a {
+    background: transparent;
+    border: 1px solid #222;
+    color: white;
+    padding: 12px 25px;
+    cursor: pointer;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.a:hover a {
+    color: white;
+}
+
+.a:hover {
+    border-color: #ff0000;
+    color: var(--text-white);
+    background: rgba(115, 33, 33, 0.205);
+    transform: translateY(-3px);  
+}
+
+.a i {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.b {
+    background: transparent;
+    border: 1px solid #222;
+    color: var(--text-secondary);
+    padding: 12px 25px;
+    cursor: pointer;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.b:hover a {
+    color: white;
+}
+
+.b:hover {
+    border-color: #217346;
+    color: var(--text-white);
+    background: rgba(33, 115, 70, 0.05);
+    transform: translateY(-3px);  
+}
+
+.b i {
+    font-size: 1rem;
+    opacity: 0.8;
 }
 
 .titulo-s1 img.senai_logo {
@@ -107,23 +172,33 @@ body {
 }
 
 .botao-acessar {
-    display: inline-block;
-    background-color: transparent;
+    background: transparent;
+    border: 2px solid #222;
     color: white;
     padding: 18px 60px;
     font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 12px;
     text-decoration: none;
-    text-transform: uppercase;
-    border-radius: 50px;
-    border: 2px solid var(--primary-color);
+    letter-spacing: 1px;
     transition: all 0.3s ease;
-    box-shadow: 0 0 15px rgba(255, 1, 1, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-transform: uppercase;
 }
 
 .botao-acessar:hover {
-    background-color: var(--primary-color);
-    transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(255, 1, 1, 0.4);
+    border-color: #ff0000;
+    color: white;
+    background: rgba(115, 33, 33, 0.205);
+    transform: translateY(-3px);
+}
+
+.botao-acessar i {
+    font-size: 1rem;
+    opacity: 0.8;
 }
 
 .section-2-about-senai-cic {
