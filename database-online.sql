@@ -174,6 +174,22 @@ INSERT INTO usuarios (nome, email, senha, cargo, status)
 VALUES ('Lucas Eduardo', 'lucaseduarte6@gmail.com', 'Lucas2018', 'Admin', 'ATIVO')
 ON CONFLICT (email) DO NOTHING;
 
+ALTER TABLE alunos_login 
+ADD CONSTRAINT check_nome_sem_numeros 
+CHECK (nome !~ '[0-9]');
+
+ALTER TABLE alunos_login 
+ADD CONSTRAINT check_nome_sem_especiais 
+CHECK (nome ~ '^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$');
+
+ALTER TABLE alunos 
+ADD CONSTRAINT check_nome_sem_numeros 
+CHECK (nome !~ '[0-9]');
+
+ALTER TABLE alunos 
+ADD CONSTRAINT check_nome_sem_especiais 
+CHECK (nome ~ '^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$');
+
 INSERT INTO competencias (nome, descricao, categoria) VALUES
 ('Raciocínio Lógico', 'Capacidade de resolver problemas usando lógica e pensamento estruturado', 'Cognitiva'),
 ('Comunicação', 'Habilidade de expressar ideias de forma clara e objetiva', 'Comportamental'),

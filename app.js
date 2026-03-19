@@ -1649,38 +1649,128 @@ app.get('/aluno/config', checkAlunoAuth, async (req, res) => {
 app.post('/aluno/alterar-senha', checkAlunoAuth, async (req, res) => {
     const { senha_atual, nova_senha, confirmar_senha } = req.body;
     const alunoId = req.session.aluno.id;
+    const aba = 'senha';
+    
     try {
         const result = await db.query(
             'SELECT senha FROM alunos_login WHERE aluno_id = $1',
             [alunoId]
         );
+        
         if (result.rows.length === 0) {
             req.flash('error_msg', 'Aluno não encontrado');
-            return res.redirect('/aluno/config?aba=senha');
+            const alunoData = await db.query(
+                'SELECT * FROM alunos WHERE id = $1',
+                [alunoId]
+            );
+            const aluno = alunoData.rows[0];
+            const competencias = { length: 0 };
+            
+            return res.render('aluno/perfil', {
+                aluno,
+                competencias,
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null,
+                abaAtiva: aba
+            });
         }
+        
         const aluno = result.rows[0];
+        
         if (senha_atual !== aluno.senha) {
             req.flash('error_msg', 'Senha atual incorreta');
-            return res.redirect('/aluno/config?aba=senha');
+            const alunoData = await db.query(
+                'SELECT * FROM alunos WHERE id = $1',
+                [alunoId]
+            );
+            const alunoInfo = alunoData.rows[0];
+            const competencias = { length: 0 };
+            
+            return res.render('aluno/perfil', {
+                aluno: alunoInfo,
+                competencias,
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null,
+                abaAtiva: aba
+            });
         }
+        
         if (nova_senha.length < 6) {
             req.flash('error_msg', 'A nova senha deve ter no mínimo 6 caracteres');
-            return res.redirect('/aluno/config?aba=senha');
+            const alunoData = await db.query(
+                'SELECT * FROM alunos WHERE id = $1',
+                [alunoId]
+            );
+            const alunoInfo = alunoData.rows[0];
+            const competencias = { length: 0 };
+            
+            return res.render('aluno/perfil', {
+                aluno: alunoInfo,
+                competencias,
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null,
+                abaAtiva: aba
+            });
         }
+        
         if (nova_senha !== confirmar_senha) {
             req.flash('error_msg', 'As senhas não coincidem');
-            return res.redirect('/aluno/config?aba=senha');
+            const alunoData = await db.query(
+                'SELECT * FROM alunos WHERE id = $1',
+                [alunoId]
+            );
+            const alunoInfo = alunoData.rows[0];
+            const competencias = { length: 0 };
+            
+            return res.render('aluno/perfil', {
+                aluno: alunoInfo,
+                competencias,
+                error_msg: req.flash('error_msg')[0],
+                success_msg: null,
+                abaAtiva: aba
+            });
         }
+        
         await db.query(
             'UPDATE alunos_login SET senha = $1 WHERE aluno_id = $2',
             [nova_senha, alunoId]
         );
+        
         req.flash('success_msg', 'Senha alterada com sucesso!');
-        res.redirect('/aluno/config?aba=senha');
+        
+        const alunoData = await db.query(
+            'SELECT * FROM alunos WHERE id = $1',
+            [alunoId]
+        );
+        const alunoInfo = alunoData.rows[0];
+        const competencias = { length: 0 };
+        
+        res.render('aluno/perfil', {
+            aluno: alunoInfo,
+            competencias,
+            error_msg: null,
+            success_msg: req.flash('success_msg')[0],
+            abaAtiva: aba
+        });
+        
     } catch (err) {
         console.error('Erro ao alterar senha:', err);
         req.flash('error_msg', 'Erro ao alterar senha');
-        res.redirect('/aluno/config?aba=senha');
+        
+        const alunoData = await db.query(
+            'SELECT * FROM alunos WHERE id = $1',
+            [alunoId]
+        );
+        const alunoInfo = alunoData.rows[0];
+        const competencias = { length: 0 };
+        
+        res.render('aluno/perfil', {
+            aluno: alunoInfo,
+            competencias,
+            error_msg: req.flash('error_msg')[0],
+            success_msg: null,
+            abaAtiva: 'senha'
+        });
     }
 });
 
