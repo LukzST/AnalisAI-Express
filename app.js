@@ -106,11 +106,17 @@ app.get('/termos', (req, res) => {
 });
 
 app.get('/manual-de-uso', (req, res) => {
-  res.render('/manuais/manual-de-uso');
+  res.render('manual-de-uso', {
+    userCargo: req.session.userCargo,
+    isAdmin: req.session.userCargo === 'Admin'
+  });
 });
 
 app.get('/manual-do-aluno', (req, res) => {
-  res.render('/manuais/manual-do-aluno');
+  res.render('manual-do-aluno', {
+    userCargo: req.session.userCargo,
+    isAdmin: req.session.userCargo === 'Admin'
+  });
 });
 
 app.get('/cadastro', (req, res) => {
@@ -2474,7 +2480,9 @@ app.get('/dashboard/solicitacoes-senha', checkAuth, checkAdmin, async (req, res)
         
         res.render('dashboard/solicitacoes', {
             solicitacoes: result.rows,
-            user: req.session.user
+            user: req.session.user,
+            userCargo: req.session.userCargo,
+            isAdmin: req.session.userCargo === 'Admin'
         });
     } catch (err) {
         console.error('Erro ao carregar solicitações:', err);
