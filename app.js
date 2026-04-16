@@ -106,11 +106,11 @@ app.get('/termos', (req, res) => {
 });
 
 app.get('/manual-de-uso', (req, res) => {
-  res.render('manual-de-uso');
+  res.render('/manuais/manual-de-uso');
 });
 
 app.get('/manual-do-aluno', (req, res) => {
-  res.render('manual-do-aluno');
+  res.render('/manuais/manual-do-aluno');
 });
 
 app.get('/cadastro', (req, res) => {
