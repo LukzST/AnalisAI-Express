@@ -375,7 +375,9 @@ app.get('/dashboard', checkAuth, async (req, res) => {
             alunos: alunosComNivel,
             rankingGeral: rankingGeral,
             rankingMedio: rankingMedio,
-            rankingFundamental: rankingFundamental
+            rankingFundamental: rankingFundamental,
+            userCargo: req.session.userCargo,
+            isAdmin: req.session.userCargo === 'Admin'
         });
     } catch (err) {
         console.error(err);
@@ -442,7 +444,9 @@ app.get('/dashboard/edit', checkAuth, async (req, res) => {
         res.render('dashboard/edit', { 
             alunos: result.rows,
             listaCompetencias: competenciasList.rows,
-            user: req.session.user 
+            user: req.session.user,
+            userCargo: req.session.userCargo,
+            isAdmin: req.session.userCargo === 'Admin'
         });
     } catch (err) {
         console.error("ERRO NO DASHBOARD EDIT:", err);
@@ -505,7 +509,11 @@ app.get('/dashboard/graficos', checkAuth, async (req, res) => {
             mediaMedio: countMedio > 0 ? (somaMedio / countMedio).toFixed(1) : 0,
             mediaFundamental: countFundamental > 0 ? (somaFundamental / countFundamental).toFixed(1) : 0
         };
-        res.render('dashboard/graficos', { stats });
+        res.render('dashboard/graficos', { 
+            stats ,
+            userCargo: req.session.userCargo,
+            isAdmin: req.session.userCargo === 'Admin'
+        });
     } catch (err) {
         console.error(err);
         req.flash('error_msg', 'Erro ao carregar gráficos');
@@ -525,7 +533,7 @@ app.get('/dashboard/equipe', checkAuth, (req, res) => {
   res.render('dashboard/equipe');
 });
 
-app.get('/dashboard/usuarios', checkAuth, async (req, res) => {
+app.get('/dashboard/usuarios', checkAuth, checkAdmin, async (req, res) => {
     try {
         const result = await db.query('SELECT id, nome, email, cargo, status FROM usuarios ORDER BY nome ASC');
         const isAdmin = req.session.userCargo === 'Admin';
@@ -959,7 +967,9 @@ app.get('/dashboard/config', checkAuth, async (req, res) => {
             dataCadastro: new Date(userResult.rows[0].data_criacao).toLocaleDateString('pt-BR'),
             ultimoAcesso: req.session.ultimoAcesso || '---',
             stats: statsResult.rows[0],
-            abaAtiva: aba
+            abaAtiva: aba,
+            userCargo: req.session.userCargo,
+            isAdmin: req.session.userCargo === 'Admin'
         });
     } catch (err) {
         console.error('Erro ao carregar configurações:', err);
