@@ -1,4 +1,4 @@
-<img src="./public/ICO/favicon.ico" width="100px" align="left">
+<img src="./public/IMG/gitlogo.png" width="100px" align="left">
 
 ### `SISTEMA DE ANÁLISE DE AVANÇOS`
 
