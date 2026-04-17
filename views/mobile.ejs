@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AnalisAI - Sem Suporte Mobile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .warning-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px 30px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .warning-icon {
+            font-size: 80px;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .message {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .device-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .device-info p {
+            margin: 5px 0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        .warning-box ul {
+            margin-left: 20px;
+            color: #856404;
+        }
+
+        .warning-box li {
+            margin: 8px 0;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,107,107,0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .btn-outline:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .footer-note {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        @media (max-width: 480px) {
+            .warning-container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="warning-container">
+        <div class="warning-icon">
+            ⚠️
+        </div>
+        
+        <h1>Dispositivo não suportado</h1>
+        
+        <div class="message">
+            O <strong>AnalisAI</strong> foi desenvolvido para uso em <strong>computadores desktop</strong> e <strong>notebooks</strong>.
+        </div>
+
+        <div class="device-info">
+            <p><strong>Dispositivo detectado:</strong> 
+                <% 
+                    const MobileDetect = require('mobile-detect');
+                    const md = new MobileDetect(userAgent);
+                    const device = md.mobile() || md.tablet() || 'Desconhecido';
+                %>
+                <%= device %>
+            </p>
+            <p><strong>Sistema Operacional:</strong> <%= md.os() || 'Desconhecido' %></p>
+            <p><strong>Navegador:</strong> <%= md.userAgent() %></p>
+        </div>
+
+        <div class="warning-box">
+            <strong>⚠️ Funcionalidades comprometidas em dispositivos móveis:</strong>
+            <ul>
+                <li>Visualização de gráficos e dashboards</li>
+                <li>Edição em massa de notas</li>
+                <li>Exportação de relatórios</li>
+                <li>Gerenciamento de competências</li>
+                <li>Experiência geral do usuário</li>
+            </ul>
+        </div>
+
+        <div class="buttons">
+            <form action="/ignore-mobile-warning" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-outline">
+                    Continuar mesmo assim
+                </button>
+            </form>
+            <a href="<%= originalUrl %>" class="btn btn-secondary">
+                Voltar
+            </a>
+        </div>
+
+        <div class="footer-note">
+            <strong>Recomendação:</strong> Acesse o AnalisAI em um computador para ter a melhor experiência.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,3 +1,4 @@
+const MobileDetect = require('mobile-detect');
 const express = require('express');
 const session = require('express-session');
 const db = require('./db'); 
@@ -84,6 +85,33 @@ function checkAlunoAuth(req, res, next) {
     res.redirect('/login');
   }
 }
+
+
+app.use((req, res, next) => {
+    if (req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
+        return next();
+    }
+    
+    const ignoreRoutes = ['/logout', '/api/', '/auth/'];
+    if (ignoreRoutes.some(route => req.path.startsWith(route))) {
+        return next();
+    }
+    
+    const userAgent = req.headers['user-agent'];
+    const md = new MobileDetect(userAgent);
+    
+    const isMobile = !!md.mobile();
+    const isTablet = !!md.tablet();
+    
+    if (isMobile || isTablet) {
+        if (req.path !== '/mobile-warning' && !req.session.ignoredWarning) {
+            req.session.originalUrl = req.originalUrl;
+            return res.redirect('/mobile-warning');
+        }
+    }
+    
+    next();
+});
 
 async function criarNotificacao(tipo, usuarioId, alunoId, titulo, mensagem, link, icone = 'fas fa-bell', cor = '#ff0101') {
     try {
@@ -2599,6 +2627,21 @@ app.post('/dashboard/solicitacoes-senha/rejeitar/:id', checkAuth, checkAdmin, as
         res.redirect('/dashboard/solicitacoes-senha');
     }
 });
+
+app.get('/mobile', (req, res) => {
+    res.render('mobile', {
+        user: req.session?.user,
+        userCargo: req.session?.userCargo,
+        isAdmin: req.session?.userCargo === 'Admin'
+    });
+})
+
+app.post('/ignore-mobile', (req, res) => {
+    req.session.ignoreMobile = true;
+    const redirectUrl = req.session.originalUrl || '/';
+    req.session.originalUrl = null;
+    res.redirect(redirectUrl);
+})
 
 app.use((req, res) => {
     res.status(404).render('error', {
