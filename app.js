@@ -104,9 +104,9 @@ app.use((req, res, next) => {
     const isTablet = !!md.tablet();
     
     if (isMobile || isTablet) {
-        if (req.path !== '/mobile-warning' && !req.session.ignoredWarning) {
+        if (req.path !== '/mobile' && !req.session.ignoredWarning) {
             req.session.originalUrl = req.originalUrl;
-            return res.redirect('/mobile-warning');
+            return res.redirect('/mobile');
         }
     }
     
