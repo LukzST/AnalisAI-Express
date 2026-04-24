@@ -39,9 +39,10 @@ const upload = multer({
 });
 
 app.use(favicon(path.join(__dirname, 'Public', 'favicon.ico')));
+app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static('Public'));
+app.use(express.static(path.join(__dirname, 'Public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
