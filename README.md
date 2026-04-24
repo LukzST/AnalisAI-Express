@@ -1,4 +1,4 @@
-<img src="./Public/IMG/gitlogo.png" width="100px" align="left">
+<img src="./src/Public/IMG/gitlogo.png" width="100px" align="left">
 
 ### `AnalisAI`
 
