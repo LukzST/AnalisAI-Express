@@ -17,6 +17,6 @@
 
 
 <div align="center"> 
-<sub>Built with ☕ and 🌙 by LukzST</sub>
+<sub>Built with ☕ and 🌙 by LukzST</sub><br>
 <sub>Desenvolvido para o SENAI CIC - Curitiba/PR</sub>
 </div>
