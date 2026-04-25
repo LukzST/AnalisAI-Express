@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="/CSS/tarefas-alunos.css">
 </head>
 <body class="dash-body">
-    <%- include('../partials/sidebar-aluno') %>
+    <%- include('../Partials/sidebar-aluno') %>
 
     <div class="main-layout">
         <header class="dash-header">
@@ -21,7 +21,7 @@
             </div>
             <div class="header-user">
                 <span>Bem-vindo, <strong><%= aluno.nome %></strong></span>
-                <%- include('../partials/notificacoes', { notificacaoClasse: 'logout-icon-1' }) %>
+                <%- include('../Partials/notificacoes', { notificacaoClasse: 'logout-icon-1' }) %>
                 <a href="/logout" class="logout-icon-1" title="Sair">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
