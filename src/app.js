@@ -106,14 +106,21 @@ app.get('/termos', (req, res) => {
   res.render('termos');
 });
 
-app.get('/manual-de-uso', (req, res) => {
+app.get('/manuais', (req, res) => {
+  res.render('manuais', {
+    userCargo: req.session.userCargo,
+    isAdmin: req.session.userCargo === 'Admin'
+  });
+});
+
+app.get('/manuais/manual-de-uso', (req, res) => {
   res.render('manual-de-uso', {
     userCargo: req.session.userCargo,
     isAdmin: req.session.userCargo === 'Admin'
   });
 });
 
-app.get('/manual-do-aluno', (req, res) => {
+app.get('/manuais/manual-do-aluno', (req, res) => {
   res.render('manual-do-aluno', {
     userCargo: req.session.userCargo,
     isAdmin: req.session.userCargo === 'Admin'
