@@ -50,7 +50,6 @@
 
         input[type="checkbox"]:focus {
             outline: none;
-            box-shadow: 0 0 0 2px rgba(255, 1, 1, 0.2);
         }
 
         input[type="checkbox"]:disabled {
@@ -105,7 +104,7 @@
         
         .stat-card {
             background: #080808;
-            border: 2px solid #1a1a1a;
+            border: 1px solid #1a1a1a;
             border-radius: 15px;
             padding: 20px;
             display: flex;
@@ -146,7 +145,7 @@
         
         .filtros-tarefas {
             background: #080808;
-            border: 2px solid #1a1a1a;
+            border: 1px solid #1a1a1a;
             border-radius: 15px;
             padding: 25px;
             margin-bottom: 30px;
@@ -174,7 +173,7 @@
             width: 100%;
             padding: 12px 15px;
             background: #111;
-            border: 2px solid #222;
+            border: 1px solid #222;
             border-radius: 10px;
             color: #fff;
             cursor: pointer;
@@ -194,7 +193,7 @@
         
         .tarefa-card {
             background: #080808;
-            border: 2px solid #1a1a1a;
+            border: 1px solid #1a1a1a;
             border-radius: 20px;
             padding: 25px;
             transition: 0.3s;
@@ -334,13 +333,13 @@
         .tarefa-status.ativa {
             background: rgba(33, 115, 70, 0.1);
             color: #217346;
-            border: 2px solid #217346;
+            border: 1px solid #217346;
         }
         
         .tarefa-status.concluida {
             background: rgba(33, 115, 70, 0.1);
             color: #217346;
-            border: 2px solid #217346;
+            border: 1px solid #217346;
         }
         
         .tarefa-acoes {
@@ -350,7 +349,7 @@
         
         .btn-tarefa {
             background: transparent;
-            border: 2px solid #222;
+            border: 1px solid #222;
             color: #888;
             width: 35px;
             height: 35px;
@@ -390,7 +389,7 @@
             margin-bottom: 8px;
             background: #080808;
             border-radius: 10px;
-            border: 2px solid #1a1a1a;
+            border: 1px solid #1a1a1a;
             transition: 0.3s;
         }
         
@@ -423,31 +422,31 @@
         .aluno-tarefa-status.pendente {
             background: rgba(212, 160, 23, 0.1);
             color: #d4a017;
-            border: 2px solid #d4a017;
+            border: 1px solid #d4a017;
         }
         
         .aluno-tarefa-status.concluida {
             background: rgba(33, 115, 70, 0.1);
             color: #217346;
-            border: 2px solid #217346;
+            border: 1px solid #217346;
         }
         
         .aluno-tarefa-status.atrasada {
             background: rgba(255, 1, 1, 0.1);
             color: #ff0101;
-            border: 2px solid #ff0101;
+            border: 1px solid #ff0101;
         }
         
         .aluno-tarefa-status.devolvida {
             background: rgba(255, 165, 0, 0.1);
             color: #ffa500;
-            border: 2px solid #ffa500;
+            border: 1px solid #ffa500;
         }
         
         .aluno-tarefa-status.aguardando {
             background: rgba(33, 115, 70, 0.1);
             color: #217346;
-            border: 2px solid #217346;
+            border: 1px solid #217346;
         }
         
         .aluno-tarefa-nota {
@@ -456,7 +455,7 @@
             font-size: 0.8rem;
             background: rgba(255, 1, 1, 0.1);
             color: var(--primary-red);
-            border: 2px solid var(--primary-red);
+            border: 1px solid var(--primary-red);
             min-width: 50px;
             text-align: center;
         }
@@ -468,7 +467,7 @@
         
         .btn-avaliar {
             background: transparent;
-            border: 2px solid #217346;
+            border: 1px solid #217346;
             color: #217346;
             width: 35px;
             height: 35px;
@@ -487,7 +486,7 @@
         
         .btn-devolver {
             background: transparent;
-            border: 2px solid #ffa500;
+            border: 1px solid #ffa500;
             color: #ffa500;
             width: 35px;
             height: 35px;
@@ -520,7 +519,7 @@
             width: 100%;
             padding: 12px;
             background: #080808;
-            border: 2px solid #222;
+            border: 1px solid #222;
             border-radius: 8px;
             color: #fff;
             font-size: 1rem;
@@ -536,7 +535,7 @@
             width: 100%;
             padding: 12px;
             background: #080808;
-            border: 2px solid #222;
+            border: 1px solid #222;
             border-radius: 8px;
             color: #fff;
             font-size: 0.9rem;
@@ -565,7 +564,7 @@
             text-align: center;
             padding: 60px 20px;
             background: #080808;
-            border: 2px solid #1a1a1a;
+            border: 1px solid #1a1a1a;
             border-radius: 20px;
         }
         

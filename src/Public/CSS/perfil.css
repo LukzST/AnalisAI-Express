@@ -246,7 +246,6 @@
 .btn-salvar:hover {
     background: #2a8e4f;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(33, 115, 70, 0.3);
 }
 
 .badge-status {
@@ -377,7 +376,10 @@
 }
 .config-container button {
     margin-top: 20px;
-    max-width: 260px;
+    max-width: 265px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn-salvar-config {

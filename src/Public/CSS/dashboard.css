@@ -101,7 +101,6 @@ body.dash-body {
     border: 2px solid #1a1a1a;
     border-radius: 30px;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
 .dash-card:hover {
@@ -176,12 +175,10 @@ body.dash-body {
     align-items: center;
     gap: 15px;
     transition: 0.4s;
-    box-shadow: 0 10px 20px rgba(255, 1, 1, 0.2);
 }
 
 .btn-primary-dash:hover {
     transform: scale(1.05);
-    box-shadow: 0 15px 30px rgba(255, 1, 1, 0.4);
     background: #ff1a1a;
 }
 

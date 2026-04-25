@@ -144,7 +144,6 @@ body.dash-body {
 .btn-erase-confirm:hover {
     background: #cc0000;
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(255, 1, 1, 0.3);
 }
 
 .btn-cancel {

@@ -73,7 +73,6 @@ body {
     display: flex;
     flex-direction: column;
     gap: 45px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
     transition: border-color 0.4s ease;
 }
 
@@ -157,7 +156,6 @@ body {
     color: var(--text-white);
     background: rgba(255, 1, 1, 0.05);
     transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
 @media (max-width: 650px) {
