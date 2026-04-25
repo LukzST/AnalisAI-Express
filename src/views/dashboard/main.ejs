@@ -10,7 +10,7 @@
 </head>
 <body class="dash-body">
 
-    <%- include('../Partials/sidebar') %>
+    <%- include('../partials/sidebar') %>
 
     <div class="main-layout">
         <header class="dash-header">
@@ -19,7 +19,7 @@
             </div>
             <div class="header-user">
                 <span>Bem-vindo, <strong><%= user %></strong></span>
-                <%- include('../Partials/notificacoes', { notificacaoClasse: 'logout-icon' }) %>
+                <%- include('../partials/notificacoes', { notificacaoClasse: 'logout-icon' }) %>
                 <a href="/logout" class="logout-icon" title="Sair">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
