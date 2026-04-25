@@ -80,7 +80,7 @@ body.dash-body {
     height: 55px;
     border-radius: 12px;
     background: transparent;
-    border: 1px solid #222;
+    border: 2px solid #222;
     color: #888;
     cursor: pointer;
     display: flex;
@@ -115,7 +115,7 @@ body.dash-body {
     width: 100%;
     height: 55px;
     background: #0c0c0c;
-    border: 1px solid #222;
+    border: 2px solid #222;
     border-radius: 12px;
     padding: 0 20px 0 55px;
     color: white;
@@ -133,7 +133,7 @@ body.dash-body {
 }
 
 .table-container {
-    border: 1px solid #1a1a1a;
+    border: 2px solid #1a1a1a;
     border-radius: 25px;
     background-color: #0c0c0c;
     padding: 40px;
@@ -200,13 +200,13 @@ body.dash-body {
 .status.apto {
     color: var(--success-green);
     background: rgba(33, 115, 70, 0.1);
-    border: 1px solid var(--success-green);
+    border: 2px solid var(--success-green);
 }
 
 .status.inapto {
     color: var(--primary-red);
     background: rgba(255, 1, 1, 0.1);
-    border: 1px solid var(--primary-red);
+    border: 2px solid var(--primary-red);
 }
 
 .td-actions {
@@ -258,7 +258,7 @@ body.dash-body {
 
 .modal-content {
     background-color: #050505;
-    border: 1px solid var(--primary-red);
+    border: 2px solid var(--primary-red);
     border-radius: 40px;
     padding: 50px;
     max-width: 500px;
@@ -317,7 +317,7 @@ body.dash-body {
 .filter-input {
     width: 100%;
     background: #111;
-    border: 1px solid #222;
+    border: 2px solid #222;
     border-radius: 12px;
     padding: 15px;
     color: white;
@@ -354,7 +354,7 @@ select.filter-input option {
     padding: 15px 0;
     border-radius: 12px;
     background: transparent;
-    border: 1px solid #222;
+    border: 2px solid #222;
     color: #ffffff;
     cursor: pointer;
     display: flex;
