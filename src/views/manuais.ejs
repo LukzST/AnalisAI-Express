@@ -24,12 +24,14 @@
             border-radius: 12px;
             border: 1px solid #1a1a1a;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
 
         .title {
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 1.7rem;
             margin-bottom: 10px;
         }
 
@@ -37,10 +39,16 @@
             display: inline-block;
             padding: 10px 20px;
             background-color: #ff0101;
+            max-width: 100px;
             color: #ffffff;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 800px;
             transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #080808;
+            border: 1px solid #ff0101;
         }
 
     </style>
