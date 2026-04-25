@@ -2,7 +2,7 @@
     --bg-dark: #080808;
     --primary-red: #ff0101;
     --text-white: #ffffff;
-    --card-bg: #0c0c0c;
+    --card-bg: #080808;
     --font-family: 'Inter-Medium', sans-serif;
     --border-color: #1a1a1a;
     --text-muted: #444;
@@ -100,7 +100,7 @@ body.dash-body {
 
 .dash-card {
     background: var(--card-bg);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     border-radius: 25px;
     transition: all 0.3s ease;
 }
@@ -207,7 +207,7 @@ canvas {
 
 .btn-secondary-dash {
     background: transparent;
-    border: 1px solid #222;
+    border: 2px solid #222;
     color: var(--text-secondary);
     padding: 12px 25px;
     border-radius: 12px;

@@ -19,8 +19,8 @@
         }
         
         .stat-box {
-            background: #0c0c0c;
-            border: 1px solid #1a1a1a;
+            background: #080808;
+            border: 2px solid #1a1a1a;
             border-radius: 20px;
             padding: 25px;
             text-align: center;
@@ -52,8 +52,8 @@
         }
         
         .filtros-container {
-            background: #0c0c0c;
-            border: 1px solid #1a1a1a;
+            background: #080808;
+            border: 2px solid #1a1a1a;
             border-radius: 20px;
             padding: 25px;
             display: flex;
@@ -67,7 +67,7 @@
             min-width: 200px;
             padding: 12px 15px;
             background: #111;
-            border: 1px solid #222;
+            border: 2px solid #222;
             border-radius: 10px;
             color: #fff;
             font-size: 0.9rem;
@@ -82,7 +82,7 @@
             min-width: 150px;
             padding: 12px 15px;
             background: #111;
-            border: 1px solid #222;
+            border: 2px solid #222;
             border-radius: 10px;
             color: #fff;
             cursor: pointer;
@@ -114,7 +114,7 @@
         .btn-limpar {
             padding: 12px 25px;
             background: transparent;
-            border: 1px solid #444;
+            border: 2px solid #444;
             border-radius: 10px;
             color: #888;
             cursor: pointer;
@@ -140,15 +140,15 @@
         .ordenar-select {
             padding: 8px 15px;
             background: #111;
-            border: 1px solid #222;
+            border: 2px solid #222;
             border-radius: 8px;
             color: #fff;
             cursor: pointer;
         }
         
         .competencia-card {
-            background: #0c0c0c;
-            border: 1px solid #1a1a1a;
+            background: #080808;
+            border: 2px solid #1a1a1a;
             border-radius: 20px;
             padding: 25px;
             transition: 0.3s;
@@ -178,19 +178,19 @@
         .competencia-badge.apto {
             background: rgba(33, 115, 70, 0.1);
             color: #217346;
-            border: 1px solid #217346;
+            border: 2px solid #217346;
         }
         
         .competencia-badge.desenvolvimento {
             background: rgba(212, 160, 23, 0.1);
             color: #d4a017;
-            border: 1px solid #d4a017;
+            border: 2px solid #d4a017;
         }
         
         .competencia-badge.inapto {
             background: rgba(255, 1, 1, 0.1);
             color: #ff0101;
-            border: 1px solid #ff0101;
+            border: 2px solid #ff0101;
         }
         
         .competencia-header {
@@ -275,8 +275,8 @@
         }
         
         .grafico-container {
-            background: #0c0c0c;
-            border: 1px solid #1a1a1a;
+            background: #080808;
+            border: 2px solid #1a1a1a;
             border-radius: 20px;
             padding: 25px;
             margin-bottom: 40px;
@@ -287,8 +287,8 @@
         .empty-state {
             text-align: center;
             padding: 80px 20px;
-            background: #0c0c0c;
-            border: 1px solid #1a1a1a;
+            background: #080808;
+            border: 2px solid #1a1a1a;
             border-radius: 20px;
         }
         

@@ -13,8 +13,8 @@
 }
 
 .perfil-sidebar {
-    background: #0c0c0c;
-    border: 1px solid #1a1a1a;
+    background: #080808;
+    border: 2px solid #1a1a1a;
     border-radius: 20px;
     padding: 30px;
     text-align: center;
@@ -31,7 +31,7 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+    background: #080808;
     border: 3px solid #217346;
     display: flex;
     align-items: center;
@@ -48,7 +48,7 @@
     height: 20px;
     border-radius: 50%;
     background: #217346;
-    border: 3px solid #0c0c0c;
+    border: 3px solid #080808;
 }
 
 .avatar-status.inativo {
@@ -72,7 +72,7 @@
     display: inline-block;
     padding: 5px 15px;
     background: rgba(33, 115, 70, 0.1);
-    border: 1px solid #217346;
+    border: 2px solid #217346;
     border-radius: 30px;
     color: #217346;
     font-size: 0.8rem;
@@ -105,8 +105,8 @@
 }
 
 .perfil-main {
-    background: #0c0c0c;
-    border: 1px solid #1a1a1a;
+    background: #080808;
+    border: 2px solid #1a1a1a;
     border-radius: 20px;
     padding: 30px;
 }
@@ -138,6 +138,7 @@
 
 .b.active {
     background: #217346;
+    border: 2px solid #217346;
     color: white;
 }
 
@@ -179,7 +180,7 @@
     background: #1a1a1a;
     padding: 12px 15px;
     border-radius: 10px;
-    border: 1px solid #222;
+    border: 2px solid #222;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -211,7 +212,7 @@
     width: 100%;
     padding: 12px 15px;
     background: #1a1a1a;
-    border: 1px solid #222;
+    border: 2px solid #222;
     border-radius: 10px;
     color: #fff;
     font-size: 0.95rem;
@@ -259,21 +260,21 @@
 .badge-status.ativo {
     background: rgba(33, 115, 70, 0.1);
     color: #217346;
-    border: 1px solid #217346;
+    border: 2px solid #217346;
 }
 
 .badge-status.inativo {
     background: rgba(255, 1, 1, 0.1);
     color: #ff0101;
-    border: 1px solid #ff0101;
+    border: 2px solid #ff0101;
 }
 
 .info-adicional {
     margin-top: 30px;
     padding: 20px;
-    background: #1a1a1a;
+    background: #080808;
     border-radius: 15px;
-    border: 1px solid #222;
+    border: 2px solid #222;
 }
 
 .info-adicional-title {
@@ -294,9 +295,9 @@
 
 .info-adicional-item {
     padding: 10px;
-    background: #0c0c0c;
+    background: #080808;
     border-radius: 8px;
-    border: 1px solid #222;
+    border: 2px solid #222;
 }
 
 .info-adicional-label {
@@ -398,7 +399,7 @@
 
 .mensagem-sucesso-config {
     background: rgba(33, 115, 70, 0.1);
-    border: 1px solid #217346;
+    border: 2px solid #217346;
     color: #217346;
     padding: 12px;
     border-radius: 8px;
@@ -413,7 +414,7 @@
     position: relative;
     animation: slideDown 0.4s ease;
     font-size: 0.85rem;
-    border: 1px solid transparent;
+    border: 2px solid transparent;
     display: flex;
     align-items: center;
     gap: 10px;

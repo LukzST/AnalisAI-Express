@@ -1,7 +1,7 @@
 :root {
     --primary-red: #ff0101;
     --bg-dark: #080808;
-    --card-bg: #0c0c0c;
+    --card-bg: #080808;
     --text-white: #ffffff;
     --text-muted: #888;
     --font-family: 'Inter-Medium', sans-serif;
@@ -66,7 +66,7 @@ body {
 
 .equipe-container {
     background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     border-radius: 25px;
     padding: 30px;
     width: 100%;
@@ -139,7 +139,7 @@ body {
 .btn-voltar {
     text-decoration: none;
     color: var(--text-muted);
-    border: 1px solid #222;
+    border: 2px solid #222;
     border-radius: 12px;
     padding: 14px 45px;
     font-size: 0.8rem;

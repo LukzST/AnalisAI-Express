@@ -2,7 +2,7 @@
     --bg-dark: #080808;
     --primary-red: #ff0101;
     --text-white: #ffffff;
-    --card-bg: #0c0c0c;
+    --card-bg: #080808;
     --font-family: 'Inter-Medium', sans-serif;
     --border-color: #1a1a1a;
     --text-muted: #444;
@@ -152,7 +152,7 @@ body.dash-body {
     padding: 15px;
     background: transparent;
     color: #888;
-    border: 1px solid #222;
+    border: 2px solid #222;
     border-radius: 12px;
     font-size: 0.85rem;
     letter-spacing: 1px;
@@ -172,7 +172,7 @@ body.dash-body {
     height: 55px;
     border-radius: 12px;
     background: transparent;
-    border: 1px solid #222;
+    border: 2px solid #222;
     color: #888;
     cursor: pointer;
     display: flex;
@@ -216,8 +216,8 @@ body.dash-body {
 .search-container input {
     width: 100%;
     height: 55px;
-    background: #0c0c0c;
-    border: 1px solid #222;
+    background: #080808;
+    border: 2px solid #222;
     border-radius: 12px;
     padding: 0 20px 0 55px;
     color: white;
@@ -244,9 +244,9 @@ body.dash-body {
 }
 
 .table-container {
-    border: 1px solid #1a1a1a;
+    border: 2px solid #1a1a1a;
     border-radius: 25px;
-    background-color: #0c0c0c;
+    background-color: #080808;
     padding: 40px;
     overflow-x: auto;
     margin-bottom: 40px;
@@ -295,7 +295,7 @@ body.dash-body {
 }
 
 .alunos-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 0, 0, 0.02);
 }
 
 .alunos-table tbody tr:last-child td {
@@ -377,8 +377,8 @@ body.dash-body {
 }
 
 .competencia-card {
-    background: #0c0c0c;
-    border: 1px solid #1a1a1a;
+    background: #080808;
+    border: 2px solid #1a1a1a;
     border-radius: 25px;
     padding: 30px;
     transition: 0.4s;
@@ -412,7 +412,7 @@ body.dash-body {
     background: #111;
     padding: 5px 12px;
     border-radius: 20px;
-    border: 1px solid #222;
+    border: 2px solid #222;
 }
 
 .competencia-list {
@@ -449,7 +449,7 @@ body.dash-body {
     padding: 12px;
     background: #111;
     border-radius: 15px;
-    border: 1px solid #1a1a1a;
+    border: 2px solid #1a1a1a;
 }
 
 .competencia-info {
@@ -486,19 +486,19 @@ body.dash-body {
 .competencia-nota.apto {
     background: rgba(33, 115, 70, 0.1);
     color: var(--success-green);
-    border: 1px solid var(--success-green);
+    border: 2px solid var(--success-green);
 }
 
 .competencia-nota.desenvolvimento {
     background: rgba(212, 160, 23, 0.1);
     color: var(--warning-yellow);
-    border: 1px solid var(--warning-yellow);
+    border: 2px solid var(--warning-yellow);
 }
 
 .competencia-nota.inapto {
     background: rgba(255, 1, 1, 0.1);
     color: var(--primary-red);
-    border: 1px solid var(--primary-red);
+    border: 2px solid var(--primary-red);
 }
 
 .evolution-container {
@@ -522,10 +522,10 @@ body.dash-body {
 }
 
 .chart-card {
-    background: #0c0c0c;
+    background: #080808;
     padding: 40px;
     border-radius: 25px;
-    border: 1px solid #1a1a1a;
+    border: 2px solid #1a1a1a;
 }
 
 .chart-card h3 {
@@ -562,7 +562,7 @@ body.dash-body {
 
 .modal-content {
     background-color: #050505;
-    border: 1px solid var(--primary-red);
+    border: 2px solid var(--primary-red);
     border-radius: 40px;
     padding: 60px;
     max-width: 550px;
@@ -654,7 +654,7 @@ body.dash-body {
     padding: 10px;
     background: #080808;
     border-radius: 20px;
-    border: 1px solid #1a1a1a;
+    border: 2px solid #1a1a1a;
 }
 
 .competencias-list-edit::-webkit-scrollbar {
@@ -677,9 +677,9 @@ body.dash-body {
     align-items: center;
     padding: 15px;
     margin-bottom: 8px;
-    background: #0c0c0c;
+    background: #080808;
     border-radius: 15px;
-    border: 1px solid #1a1a1a;
+    border: 2px solid #1a1a1a;
     border-left: 4px solid var(--primary-red);
 }
 
@@ -712,19 +712,19 @@ body.dash-body {
 .competencia-edit-nota.apto {
     background: rgba(33, 115, 70, 0.1);
     color: var(--success-green);
-    border: 1px solid var(--success-green);
+    border: 2px solid var(--success-green);
 }
 
 .competencia-edit-nota.desenvolvimento {
     background: rgba(212, 160, 23, 0.1);
     color: var(--warning-yellow);
-    border: 1px solid var(--warning-yellow);
+    border: 2px solid var(--warning-yellow);
 }
 
 .competencia-edit-nota.inapto {
     background: rgba(255, 1, 1, 0.1);
     color: var(--primary-red);
-    border: 1px solid var(--primary-red);
+    border: 2px solid var(--primary-red);
 }
 
 .btn-delete-comp {
@@ -760,7 +760,7 @@ body.dash-body {
 .filter-input {
     width: 100%;
     background: #111;
-    border: 1px solid #222;
+    border: 2px solid #222;
     border-radius: 12px;
     padding: 15px;
     color: white;
@@ -802,7 +802,7 @@ select.filter-input option {
     height: 55px;
     border-radius: 12px;
     background: transparent;
-    border: 1px solid #222;
+    border: 2px solid #222;
     color: #ffffff;
     cursor: pointer;
     display: flex;
@@ -826,7 +826,7 @@ select.filter-input option {
     text-align: center;
     border-radius: 12px;
     background: transparent;
-    border: 1px solid #222;
+    border: 2px solid #222;
     color: #ffffff;
     cursor: pointer;
     display: flex;
@@ -850,7 +850,7 @@ select.filter-input option {
     height: 55px;
     background: transparent;
     color: white;
-    border: 1px solid var(--success-green);
+    border: 2px solid var(--success-green);
     border-radius: 12px;
     font-size: 0.85rem;
     letter-spacing: 2px;
@@ -865,7 +865,7 @@ select.filter-input option {
 
 .btn-secondary-dash {
     background: transparent;
-    border: 1px solid #222;
+    border: 2px solid #222;
     color: #888;
     padding: 15px 30px;
     border-radius: 12px;
@@ -893,7 +893,7 @@ select.filter-input option {
     position: relative;
     animation: slideDown 0.4s ease;
     font-size: 0.85rem;
-    border: 1px solid transparent;
+    border: 2px solid transparent;
 }
 
 .alert-success {
@@ -1009,7 +1009,7 @@ select.filter-input option {
 
 .btn-icon-2 {
     background: transparent;
-    border: 1px solid #222;
+    border: 2px solid #222;
     color: #888;
     padding: 0 25px;
     border-radius: 12px;
@@ -1041,7 +1041,7 @@ select.filter-input option {
 
 .btn-action-3 {
     background: transparent;
-    border: 1px solid #222;
+    border: 2px solid #222;
     color: #888;
     padding: 0 25px;
     border-radius: 12px;
@@ -1247,7 +1247,7 @@ select.filter-input option {
     width: 100%;
     background: transparent;
     color: #666;
-    border: 1px solid #333;
+    border: 2px solid #333;
     border-radius: 12px;
     padding: 15px;
     font-size: 0.85rem;

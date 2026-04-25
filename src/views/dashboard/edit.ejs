@@ -14,7 +14,7 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body class="dash-body">
-    <%- include('../Partials/sidebar') %>
+    <%- include('../partials/sidebar') %>
 
     <div class="main-layout">
         <header class="dash-header">
@@ -57,7 +57,7 @@
 
                 <% if (userCargo === 'Admin') { %>
                 <button class="btn-icon btn-erase" onclick="openEraseModal()" title="Apagar Todos os Dados">
-                    <i class="fas fa-trash-alt"></i>
+                    <i class="fa-solid fa-trash"></i>
                 </button>
                 <% } %>
             </div>
@@ -129,7 +129,7 @@
                     <p style="color: #fff; font-size: 1.1rem; margin: 10px 0;" id="previewCount"></p>
                 </div>
 
-                <div style="background: #0c0c0c; border: 1px solid #217346; border-radius: 12px; padding: 15px; margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
+                <div style="background: #080808; border: 2px solid #217346; border-radius: 12px; padding: 15px; margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr style="border-bottom: 1px solid #333;">
@@ -207,10 +207,10 @@
                                     <td class="status <%= nivelClass %>"><%= nivelReal %></td>
                                     <td class="td-actions">
                                         <button type="button" class="btn-table-edit" onclick="openEditModal('<%= aluno.id %>', '<%= aluno.nome %>', '<%= aluno.presenca %>')" title="Editar Aluno">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="fa-solid fa-pen"></i>
                                         </button>
                                         <a href="javascript:void(0)" onclick="confirmDelete('<%= aluno.id %>', '<%= aluno.nome %>')" class="delete-link" title="Excluir Aluno">
-                                            <i class="fas fa-trash-alt"></i>
+                                            <i class="fa-solid fa-trash"></i>
                                         </a>
                                     </td>
                                 </tr>

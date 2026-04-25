@@ -12,7 +12,7 @@
 </head>
 <body class="dash-body">
 
-    <%- include('Partials/sidebar') %>
+    <%- include('partials/sidebar') %>
 
     <div class="main-layout">
         <header class="dash-header">
@@ -38,7 +38,7 @@
                 </p>
                 
                 <% if (erroDetalhe) { %>
-                    <div style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-bottom: 30px; text-align: left; border: 1px solid #333;">
+                    <div style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-bottom: 30px; text-align: left; border: 2px solid #333;">
                         <p style="color: #ff0101; font-size: 0.85rem; margin-bottom: 5px;">Detalhes:</p>
                         <p style="color: #888; font-size: 0.8rem; font-family: monospace;"><%= erroDetalhe %></p>
                     </div>

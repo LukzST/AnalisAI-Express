@@ -12,7 +12,7 @@
 </head>
 <body class="dash-body">
 
-    <%- include('../Partials/sidebar') %>
+    <%- include('../partials/sidebar') %>
 
     <div class="main-layout">
         <header class="dash-header">
@@ -78,7 +78,7 @@
                                     </td>
                                     <td class="td-actions">
                                         <button class="btn-table-add" onclick="editUser('<%= user.id %>', '<%= user.nome %>', '<%= user.email %>', '<%= user.cargo %>', '<%= user.status %>')" title="Editar">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="fa-solid fa-pen"></i>
                                         </button>
                                         <% if (user.id !== userId) { %>
                                             <a href="javascript:void(0)" onclick="confirmDeleteUser('<%= user.id %>', '<%= user.nome %>')" class="delete-link">

@@ -10,7 +10,7 @@
 </head>
 <body class="dash-body">
 
-    <%- include('../Partials/sidebar') %>
+    <%- include('../partials/sidebar') %>
 
     <div class="main-layout">
         <header class="dash-header">
@@ -19,7 +19,7 @@
             </div>
             <div class="header-user">
                 <span>Bem-vindo, <strong><%= user %></strong></span>
-                <%- include('../Partials/notificacoes', { notificacaoClasse: 'logout-icon' }) %>
+                <%- include('../partials/notificacoes', { notificacaoClasse: 'logout-icon' }) %>
                 <a href="/logout" class="logout-icon" title="Sair">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
@@ -32,10 +32,9 @@
                 <div class="dash-grid">
                     <div class="stats-card">
                         <div class="stats-info">
-                            <h3>TOTAL ALUNOS</h3>
+                            <h3>TOTAL DE ALUNOS</h3>
                             <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('MÉDIO')).length %></p>
                         </div>
-                        <i class="fas fa-users icon-bg"></i>
                     </div>
                     
                     <div class="stats-card apto">
@@ -43,7 +42,6 @@
                             <h3>APTOS</h3>
                             <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('MÉDIO') && a.nivel === 'APTO').length %></p>
                         </div>
-                        <i class="fas fa-check-circle icon-bg"></i>
                     </div>
 
                     <div class="stats-card inapto">
@@ -51,7 +49,6 @@
                             <h3>INAPTOS</h3>
                             <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('MÉDIO') && a.nivel === 'INAPTO').length %></p>
                         </div>
-                        <i class="fas fa-times-circle icon-bg"></i>
                     </div>
 
                     <div class="stats-card desenvolvimento">
@@ -59,7 +56,6 @@
                             <h3>EM DESENVOLVIMENTO</h3>
                             <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('MÉDIO') && a.nivel === 'EM DESENVOLVIMENTO').length %></p>
                         </div>
-                        <i class="fas fa-chart-line icon-bg"></i>
                     </div>
                 </div>
             </section>
@@ -69,10 +65,9 @@
                 <div class="dash-grid">
                     <div class="stats-card">
                         <div class="stats-info">
-                            <h3>TOTAL ALUNOS</h3>
+                            <h3>TOTAL DE ALUNOS</h3>
                             <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL')).length %></p>
                         </div>
-                        <i class="fas fa-users icon-bg"></i>
                     </div>
 
                     <div class="stats-card apto">
@@ -80,7 +75,6 @@
                             <h3>APTOS</h3>
                             <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL') && a.nivel === 'APTO').length %></p>
                         </div>
-                        <i class="fas fa-check-circle icon-bg"></i>
                     </div>
 
                     <div class="stats-card inapto">
@@ -88,7 +82,6 @@
                             <h3>INAPTOS</h3>
                             <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL') && a.nivel === 'INAPTO').length %></p>
                         </div>
-                        <i class="fas fa-times-circle icon-bg"></i>
                     </div>
 
                     <div class="stats-card desenvolvimento">
@@ -96,7 +89,6 @@
                             <h3>EM DESENVOLVIMENTO</h3>
                             <p class="stats-number"><%= alunos.filter(a => a.ano_escolar.includes('FUNDAMENTAL') && a.nivel === 'EM DESENVOLVIMENTO').length %></p>
                         </div>
-                        <i class="fas fa-chart-line icon-bg"></i>
                     </div>
                 </div>
             </section>
